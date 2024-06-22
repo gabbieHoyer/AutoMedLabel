@@ -29,19 +29,11 @@ from ultralytics import __version__
 RANK = int(os.getenv("RANK", -1))
 LOCAL_RANK = int(os.getenv("LOCAL_RANK", -1))  # https://pytorch.org/docs/stable/elastic/run.html
 
-# # Other Constants
-# FILE = Path(__file__).resolve()
-# ROOT = FILE.parents[1]  # YOLO
-# ASSETS = ROOT / "assets"  # default images
-# DEFAULT_CFG_PATH = ROOT / "cfg/default.yaml"
-
 # Other Constants
 FILE = Path(__file__).resolve()
-ROOT = FILE.parents[3]  # Adjust to reflect the new hierarchy
-ASSETS = ROOT / "src/obj_detection/ultralytics/assets"  # default images
-DEFAULT_CFG_PATH = ROOT / "src/obj_detection/ultralytics/cfg/default.yaml"
-
-
+ROOT = FILE.parents[1]  # YOLO
+ASSETS = ROOT / "assets"  # default images
+DEFAULT_CFG_PATH = ROOT / "cfg/default.yaml"
 NUM_THREADS = min(8, max(1, os.cpu_count() - 1))  # number of YOLOv5 multiprocessing threads
 AUTOINSTALL = str(os.getenv("YOLO_AUTOINSTALL", True)).lower() == "true"  # global auto-install mode
 VERBOSE = str(os.getenv("YOLO_VERBOSE", True)).lower() == "true"  # global verbose mode
@@ -938,14 +930,9 @@ class SettingsManager(dict):
         self.version = version
         self.defaults = {
             "settings_version": version,
-
-            # "datasets_dir": str(datasets_root / "datasets"),
-            # "weights_dir": str(root / "weights"),
-            # "runs_dir": str(root / "runs"),
-            "datasets_dir": str(ROOT / "config/obj_detection/datasets"),
-            "weights_dir": str(ROOT / "work_dir/model_weights"),
-            "runs_dir": str(ROOT / "work_dir/obj_detection"),
-
+            "datasets_dir": str(datasets_root / "datasets"),
+            "weights_dir": str(root / "weights"),
+            "runs_dir": str(root / "runs"),
             "uuid": hashlib.sha256(str(uuid.getnode()).encode()).hexdigest(),
             "sync": True,
             "api_key": "",
@@ -1026,11 +1013,9 @@ def url2file(url):
 # Check first-install steps
 PREFIX = colorstr("Ultralytics: ")
 SETTINGS = SettingsManager()  # initialize settings
-
 DATASETS_DIR = Path(SETTINGS["datasets_dir"])  # global datasets directory
 WEIGHTS_DIR = Path(SETTINGS["weights_dir"])  # global weights directory
 RUNS_DIR = Path(SETTINGS["runs_dir"])  # global runs directory
-
 ENVIRONMENT = (
     "Colab"
     if is_colab()
