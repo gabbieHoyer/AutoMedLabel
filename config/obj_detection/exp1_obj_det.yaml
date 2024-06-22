@@ -1,0 +1,17 @@
+model: yolov8n.pt
+model_type: YOLO
+
+data_yaml: ../../datasets/air_data.yaml
+imgsz: [480, 640]
+epochs: 300
+batch: 16
+rect: true
+
+best_weights: runs/detect/train/weights/best.pt
+
+data: datasets/intubation_videos/20201012-150355.avi
+
+
+# train folder 1
+# val folder 1
+# has prediction folders: 1-4

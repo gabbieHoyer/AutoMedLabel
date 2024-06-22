@@ -1,0 +1,13 @@
+augmentation_pipeline:
+  train:
+    - transform: HorizontalFlip
+      args:
+        p: 0.5
+    - transform: VerticalFlip
+      args:
+        p: 0.5
+    - transform: RandomBrightnessContrast
+      args:
+        brightness_limit: 0.2
+        contrast_limit: 0.2
+        p: 0.5

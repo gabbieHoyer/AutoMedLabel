@@ -1,0 +1,47 @@
+
+
+# ------------------------ Evaluation ------------------------ #
+evaluation:
+  name: "OAI-T1-Thigh"
+  description: "Evaluating Finetuned models on thigh muscle MRI datasets."
+
+SEED: 42
+distributed: False 
+
+dataset:
+  OAI-thigh:
+    config: OAI_T1_Thigh.yaml
+
+datamodule:
+  max_subject_set: 5
+  bbox_shift: 0
+  batch_size: 1  
+  num_workers: 1
+  metric:
+    tissues: [3, 4, 5, 6, 7, 8, 9]
+
+module:
+  work_dir: "work_dir/evaluation"
+  task_name: Thigh-Evaluation
+  use_wandb: False #True
+  visualize: False #True
+
+base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+models:
+  - model_path: 'work_dir/model_weights/Finetuned/OAI_Thigh/rand_single_instance/20240515-2234_finetuned_model_best.pth'
+    model_weights: 'OAI_T1_Thigh_rand_single_instance'  # preliminary strategy for finetuning with thigh multi-instance
+    model_type: vit_b
+    model_details: [False, "full"]
+    trainable:
+      prompt_encoder: False   
+      image_encoder: True    
+      mask_decoder: True  
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${evaluation.name}_data_summary.csv
+  logging_level: INFO 
+  # group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
+

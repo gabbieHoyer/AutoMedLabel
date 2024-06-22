@@ -1,0 +1,25 @@
+# Byte-compiles / optimized / DLL files
+__pycache__/
+**/__pycache__/*
+
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/*
+
+# Log files directory
+/logs/
+*.log
+
+# save checkpoints / working directory
+/work_dir/
+/wandb/
+
+notebooks/
+notebooks/*.ipynb
+
+/src/data_processing/sam_prep_neg.py
+
+/src/prompt_eng/infer_3D_plus_viz_neg.py
+
+/src/finetuning/instance_development/
+
+

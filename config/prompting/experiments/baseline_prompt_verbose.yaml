@@ -1,0 +1,88 @@
+## Verbose Descriptive Baseline Prompting Experimentation Config
+## Params for zero_shot_prediction.py:
+##     1. Model info
+##     2. Input image & prompt info
+##     3. Preprocessing info
+##     4. Output dir info
+##     5. Visualization info
+##     6. Metric info
+##     7. Image Embedding info
+
+# -------------- Zero-Shot / Prompting -------------- #
+experiment:
+  name: ${Dataset.name}_${metadata_cfg.anatomy}
+  description: "Prompt Inference for comparison of SAM and MedSAM weights; full image preprocessing."
+
+input_cfg:
+  image_path: ${nifti_image_dir}                 
+  gt_path: ${nifti_mask_dir}                     
+  path_ext: '.nii.gz'
+  ml_metadata_file: ${ml_metadata_file}
+  split: 'test' #Optional
+
+preprocessing_cfg:
+  image_size: ${preprocessing_cfg.image_size}
+  voxel_num_thre2d: ${preprocessing_cfg.voxel_num_thre2d}
+  voxel_num_thre3d: ${preprocessing_cfg.voxel_num_thre3d}
+  remove_label_ids: ${preprocessing_cfg.remove_label_ids}
+  target_label_id: ${preprocessing_cfg.target_label_id}
+  crop_non_zero_slices_flag: False
+  bbox_shift: 20
+  infer_method: '3D_stepwise' # Options: '3D_stepwise' or '3D_one_step'
+
+device: cuda:0
+
+models:
+  - model_path: 'work_dir/model_weights/SAM/sam_vit_b_01ec64.pth'
+    model_weights: 'SAM'
+    model_type: vit_b
+  - model_path: 'work_dir/model_weights/MedSAM/medsam_vit_b.pth'
+    model_weights: 'medSAM'
+    model_type: vit_b
+  
+# design: # mskscratch/mskSAM/(exp_name: SOTA_Comparison/miniKnee)/(weights_name: SAM/MedSAM/miniTBrecon)/(dataset_name: TBrecon)/(figs/bbox_figs/preds)
+base_output_dir: ${project_output_dir}/${experiment.name}/${models.model_weights}/DATASET.name
+# NOTE: model weight names added dynamically in .py scripts for all output paths
+
+# Dynamic functionality -> "DATASET.__"" indicates a field value to dynamically replace
+
+# --- OUTPUT (OVERRIDE DEFAULT): Location to output (gt, prediction) .npz files
+inference_dir: preds
+
+output_configuration:
+  save_path: work_dir/prompting/${experiment.name}/Prompt_Summaries
+  logging_level: DEBUG 
+
+# # ------------------ VISUALIZE NPY ------------------ #
+mask_labels: ${mask_labels} # Optional defined or default in config/datasets/config_fname.yaml
+
+gt_pred_npz_fig_cfg:
+  fig_type: ['2D_overlay', 'gif'] # Options: '2D_overlay', 'gif', ['2D_overlay', 'gif']
+  num_figs: 5  # Number of files to randomly select and process
+  slice_selection: 'with_segmentation' # 'with_segmentation' or 'any'
+# --- OUTPUT (OVERRIDE DEFAULT): location to save figures
+  fig_path: figs
+
+bbox_prompt_npz_fig_cfg:
+  fig_type: ['2D_overlay', 'gif'] # Options: '2D_overlay', 'gif', ['2D_overlay', 'gif']
+  num_figs: 5  # Number of files to randomly select and process
+  slice_selection: 'with_segmentation' # 'with_segmentation' or 'any'
+# --- OUTPUT (OVERRIDE DEFAULT): location to save figures
+  fig_path: bbox_prompt_figs
+
+# ----------------------- Metrics for Statistics --------------- #
+metric_cfg:
+  save_path: metrics
+  metric_list: [dice, hausdorff, IoU]  # Options: [dice, hausdorff, IoU, sensitivity_specificity]
+  compute_average: False
+
+# ----------------------- Image Embeddings ----------------------- #
+embedding_cfg:
+  save_path: embeddings
+  high_res: True 
+
+
+
+
+
+

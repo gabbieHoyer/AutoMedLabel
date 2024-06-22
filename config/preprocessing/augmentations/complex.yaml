@@ -1,0 +1,38 @@
+augmentation_pipeline:
+  train:
+    - transform: OneOf
+      args:
+        transforms:
+          - transform: RandomBrightnessContrast
+            args:
+              brightness_limit: 0.2  # Range for changing brightness (-0.2, 0.2)
+              contrast_limit: 0.2  # Range for changing contrast (-0.2, 0.2)
+              p: 0.5
+          - transform: RandomGamma
+            args:
+              gamma_limit: (80, 120)  # Gamma range, where 100 is no change
+              p: 0.5
+        p: 0.3
+    - transform: OneOf
+      args:
+        transforms:
+          - transform: ElasticTransform
+            args:
+              alpha: 1
+              sigma: 50
+              alpha_affine: 50
+              p: 0.5
+          - transform: GridDistortion
+            args:
+              num_steps: 5  # Number of grid distortions
+              distort_limit: 0.3  # Distortion limit
+              p: 0.5
+          - transform: OpticalDistortion
+            args:
+              distort_limit: 0.2
+              shift_limit: 0.2
+              p: 0.5
+        p: 0.3
+    - transform: HorizontalFlip
+      args:
+        p: 0.5
