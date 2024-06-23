@@ -103,15 +103,23 @@ class BaseTrainer:
         self.plots = {}
         init_seeds(self.args.seed + 1 + RANK, deterministic=self.args.deterministic)
 
+        # import pdb; pdb.set_trace()
+
         # Dirs
         self.save_dir = get_save_dir(self.args)
+        
         self.args.name = self.save_dir.name  # update name for loggers
+        
         self.wdir = self.save_dir / "weights"  # weights dir
+        
         if RANK in (-1, 0):
             self.wdir.mkdir(parents=True, exist_ok=True)  # make dir
+            
             self.args.save_dir = str(self.save_dir)
+
             yaml_save(self.save_dir / "args.yaml", vars(self.args))  # save run args
         self.last, self.best = self.wdir / "last.pt", self.wdir / "best.pt"  # checkpoint paths
+
         self.save_period = self.args.save_period
 
         self.batch_size = self.args.batch
@@ -129,14 +137,22 @@ class BaseTrainer:
         try:
             if self.args.task == "classify":
                 self.data = check_cls_dataset(self.args.data)
+
             elif self.args.data.split(".")[-1] in ("yaml", "yml") or self.args.task in ("detect", "segment", "pose"):
+                
+                # import pdb; pdb.set_trace()
+
                 self.data = check_det_dataset(self.args.data)
+
+                # import pdb; pdb.set_trace()
+                
                 if "yaml_file" in self.data:
                     self.args.data = self.data["yaml_file"]  # for validating 'yolo train data=url.zip' usage
         except Exception as e:
             raise RuntimeError(emojis(f"Dataset '{clean_url(self.args.data)}' error ❌ {e}")) from e
 
         self.trainset, self.testset = self.get_dataset(self.data)
+
         self.ema = None
 
         # Optimization utils init

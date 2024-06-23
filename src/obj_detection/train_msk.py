@@ -39,12 +39,8 @@ def main(config):
     # Load a model based on configuration
     ModelClass = load_model(config)
 
-    # import pdb; pdb.set_trace()
-
     # passes cleanly
     model = ModelClass(config["model"])
-
-    # import pdb; pdb.set_trace()
 
     # Train the model using parameters from the config
     model.train(data=config['data_yaml'], epochs=config['epochs'], imgsz=config['imgsz'], rect=config['rect'], batch=config['batch'], plots=True)
@@ -63,38 +59,4 @@ if __name__ == "__main__":
 
 
 # how to use: python train.py exp1_obj_det
-
-
-# # **************************************************** #
-# this worked
-# # Load a model
-# # model = YOLO("yolov8n.yaml")  # build a new model from scratch
-# model = YOLO("yolov8n.pt")  # load a pretrained model (recommended for training)
-
-# # Train the model
-# DATA_YAML = "../../datasets/air_data.yaml"
-# model.train(data=DATA_YAML, epochs=300, imgsz=[480, 640], rect=True, batch=16)  # train the model
-
-# # **************************************************** #
-
-
-
-
-# path = model.export(format="onnx")  # export the model to ONNX format
-
-# results for train can be interpreted as seen here:
-# https://medium.com/the-modern-scientist/yolov8-training-on-custom-data-3460f922ce86
-
-
-# object detection
-# model = YOLO('yolov8n.pt')  # load a pretrained model (recommended for training)
-
-# segmentation
-# model = YOLO('yolov8n-seg.pt')  # load a pretrained model (recommended for training)
-
-# classification
-# model = YOLO('yolov8n-cls.pt')  # load a pretrained model (recommended for training)
-
-# Oriented object detection (OBB)
-# model = YOLO('yolov8n-obb.pt')  # load a pretrained model (recommended for training)
 

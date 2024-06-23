@@ -21,8 +21,8 @@ CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/air
 
 # Path to your config file
 
-CONFIG_NAME="exp2_obj_det"
-
+CONFIG_NAME="exp1_obj_det"
+# CONFIG_NAME="exp2_obj_det"
 
 # CONFIG_NAME="exp1_obb"
 # CONFIG_NAME="exp1_seg"  # Update this with your actual config name without the extension

@@ -263,7 +263,6 @@ def check_det_dataset(dataset, autodownload=True):
     Returns:
         (dict): Parsed dataset information and paths.
     """
-
     file = check_file(dataset)
 
     # Download (optional)

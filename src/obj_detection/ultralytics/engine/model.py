@@ -126,8 +126,13 @@ class Model(nn.Module):
             self.task = task
             return
 
+        # import pdb; pdb.set_trace()
+
         # Load or create new YOLO model
         model = checks.check_model_file_from_stem(model)  # add suffix, i.e. yolov8n -> yolov8n.pt
+        
+        # import pdb; pdb.set_trace()
+
         if Path(model).suffix in (".yaml", ".yml"):
             self._new(model, task=task, verbose=verbose)
         else:
@@ -397,8 +402,10 @@ class Model(nn.Module):
         if not self.predictor:
             self.predictor = predictor or self._smart_load("predictor")(overrides=args, _callbacks=self.callbacks)
             self.predictor.setup_model(model=self.model, verbose=is_cli)
+
         else:  # only update args if predictor is already setup
             self.predictor.args = get_cfg(self.predictor.args, args)
+            
             if "project" in args or "name" in args:
                 self.predictor.save_dir = get_save_dir(self.predictor.args)
         if prompts and hasattr(self.predictor, "set_prompts"):  # for SAM-type models
@@ -565,6 +572,8 @@ class Model(nn.Module):
             PermissionError: If there is a permission issue with the HUB session.
             ModuleNotFoundError: If the HUB SDK is not installed.
         """
+        # import pdb; pdb.set_trace()
+
         self._check_is_pytorch_model()
         if hasattr(self.session, "model") and self.session.model.id:  # Ultralytics HUB session with loaded model
             if any(kwargs):
@@ -573,15 +582,28 @@ class Model(nn.Module):
 
         checks.check_pip_update_available()
 
+        # import pdb; pdb.set_trace()
+
         overrides = yaml_load(checks.check_yaml(kwargs["cfg"])) if kwargs.get("cfg") else self.overrides
+        
+        # import pdb; pdb.set_trace()
+
         custom = {"data": DEFAULT_CFG_DICT["data"] or TASK2DATA[self.task]}  # method defaults
+        
+        # import pdb; pdb.set_trace()
+
         args = {**overrides, **custom, **kwargs, "mode": "train"}  # highest priority args on the right
         if args.get("resume"):
             args["resume"] = self.ckpt_path
 
         self.trainer = (trainer or self._smart_load("trainer"))(overrides=args, _callbacks=self.callbacks)
+        
         if not args.get("resume"):  # manually set model only if not resuming
+            
+            # import pdb; pdb.set_trace()
             self.trainer.model = self.trainer.get_model(weights=self.model if self.ckpt else None, cfg=self.model.yaml)
+            
+            # import pdb; pdb.set_trace()
             self.model = self.trainer.model
 
             if SETTINGS["hub"] is True and not self.session:

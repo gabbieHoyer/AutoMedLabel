@@ -6,7 +6,8 @@ from ultralytics import RTDETR
 
 
 def load_config(config_file_name, base_dir):
-    config_path = os.path.join(base_dir, "configs", config_file_name)
+    # config_path = os.path.join(base_dir, "configs", config_file_name)
+    config_path = os.path.join(base_dir, "config/obj_detection/experiments", config_file_name)
 
     with open(config_path, 'r') as config_file:
         config = yaml.safe_load(config_file) or {}

@@ -36,8 +36,16 @@ LOCAL_RANK = int(os.getenv("LOCAL_RANK", -1))  # https://pytorch.org/docs/stable
 # DEFAULT_CFG_PATH = ROOT / "cfg/default.yaml"
 
 # Other Constants
+# import pdb; pdb.set_trace()
 FILE = Path(__file__).resolve()
-ROOT = FILE.parents[3]  # Adjust to reflect the new hierarchy
+
+# ROOT = FILE.parents[3]  # Adjust to reflect the new hierarchy
+# ASSETS = ROOT / "src/obj_detection/ultralytics/assets"  # default images
+# DEFAULT_CFG_PATH = ROOT / "obj_detection/ultralytics/cfg/default.yaml"
+
+# DEFAULT_CFG_PATH = ROOT / "src/obj_detection/ultralytics/cfg/default.yaml"
+
+ROOT = FILE.parents[4]  # Adjust to reflect the new hierarchy
 ASSETS = ROOT / "src/obj_detection/ultralytics/assets"  # default images
 DEFAULT_CFG_PATH = ROOT / "src/obj_detection/ultralytics/cfg/default.yaml"
 
@@ -398,10 +406,13 @@ def yaml_print(yaml_file: Union[str, Path, dict]) -> None:
 
 # Default configuration
 DEFAULT_CFG_DICT = yaml_load(DEFAULT_CFG_PATH)
+
 for k, v in DEFAULT_CFG_DICT.items():
     if isinstance(v, str) and v.lower() == "none":
         DEFAULT_CFG_DICT[k] = None
+
 DEFAULT_CFG_KEYS = DEFAULT_CFG_DICT.keys()
+
 DEFAULT_CFG = IterableSimpleNamespace(**DEFAULT_CFG_DICT)
 
 
@@ -652,10 +663,9 @@ def get_user_config_dir(sub_dir="Ultralytics"):
 
     return path
 
-
 USER_CONFIG_DIR = Path(os.getenv("YOLO_CONFIG_DIR") or get_user_config_dir())  # Ultralytics settings dir
-SETTINGS_YAML = USER_CONFIG_DIR / "settings.yaml"
 
+SETTINGS_YAML = USER_CONFIG_DIR / "settings.yaml"
 
 def colorstr(*input):
     """
@@ -931,7 +941,9 @@ class SettingsManager(dict):
         from ultralytics.utils.torch_utils import torch_distributed_zero_first
 
         git_dir = get_git_dir()
+
         root = git_dir or Path()
+
         datasets_root = (root.parent if git_dir and is_dir_writeable(root.parent) else root).resolve()
 
         self.file = Path(file)
@@ -942,9 +954,10 @@ class SettingsManager(dict):
             # "datasets_dir": str(datasets_root / "datasets"),
             # "weights_dir": str(root / "weights"),
             # "runs_dir": str(root / "runs"),
+
             "datasets_dir": str(ROOT / "config/obj_detection/datasets"),
             "weights_dir": str(ROOT / "work_dir/model_weights"),
-            "runs_dir": str(ROOT / "work_dir/obj_detection"),
+            "runs_dir": str(ROOT / "work_dir/obj_detection/runs"),
 
             "uuid": hashlib.sha256(str(uuid.getnode()).encode()).hexdigest(),
             "sync": True,
@@ -1029,6 +1042,9 @@ SETTINGS = SettingsManager()  # initialize settings
 
 DATASETS_DIR = Path(SETTINGS["datasets_dir"])  # global datasets directory
 WEIGHTS_DIR = Path(SETTINGS["weights_dir"])  # global weights directory
+
+# import pdb; pdb.set_trace()
+
 RUNS_DIR = Path(SETTINGS["runs_dir"])  # global runs directory
 
 ENVIRONMENT = (

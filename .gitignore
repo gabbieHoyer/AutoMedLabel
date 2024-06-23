@@ -20,6 +20,6 @@ notebooks/*.ipynb
 
 /src/prompt_eng/infer_3D_plus_viz_neg.py
 
-/src/finetuning/instance_development/
+/standardized_data/
 
 
