@@ -117,6 +117,7 @@ class BasePredictor:
         Args:
             im (torch.Tensor | List(np.ndarray)): BCHW for tensor, [(HWC) x B] for list.
         """
+        # HERE: maybe npy addon
         not_tensor = not isinstance(im, torch.Tensor)
         if not_tensor:
             im = np.stack(self.pre_transform(im))
@@ -215,6 +216,7 @@ class BasePredictor:
 
     def setup_source(self, source):
         """Sets up source and inference mode."""
+        # HERE
         self.imgsz = check_imgsz(self.args.imgsz, stride=self.model.stride, min_dim=2)  # check image size
         self.transforms = (
             getattr(
@@ -365,6 +367,20 @@ class BasePredictor:
     def save_preds(self, vid_cap, idx, save_path):
         """Save video predictions as mp4 at specified path."""
         im0 = self.plotted_img
+        
+        
+        # --------------------------------------
+        # Check if the image is from a .npy file and adjust the save path
+        if save_path.endswith('.npy'):
+            save_path = save_path.replace('.npy', '.png')
+
+        # Ensure save_path has a valid image extension
+        valid_extensions = ['.jpg', '.png', '.bmp']
+        if not any(save_path.lower().endswith(ext) for ext in valid_extensions):
+            save_path = f"{save_path}.png"  # Default to PNG if no valid extension is found
+
+        # ---------------------------------------
+        
         # Save imgs
         if self.dataset.mode == "image":
             cv2.imwrite(save_path, im0)

@@ -343,27 +343,10 @@ class LoadImages:
         else:
             # Read image
             self.count += 1
-            if path.endswith(".npy"):
-                im0 = np.load(path)  # Load .npy file
-
-                if im0.ndim == 2:
-                        im0 = np.expand_dims(im0, axis=-1)
-                        im0 = cv2.cvtColor(im0, cv2.COLOR_GRAY2BGR)  # Convert grayscale to BGR
-                elif im0.shape[2] == 1:
-                        im0 = cv2.cvtColor(im0, cv2.COLOR_GRAY2BGR)  # Convert single-channel to BGR
-                # If already 3 channels, no need to convert
-
-            else:
-                im0 = cv2.imread(path)  # BGR
-                if im0 is None:
-                    raise FileNotFoundError(f"Image Not Found {path}")
-                
+            im0 = cv2.imread(path)  # BGR
+            if im0 is None:
+                raise FileNotFoundError(f"Image Not Found {path}")
             s = f"image {self.count}/{self.nf} {path}: "
-
-            # im0 = cv2.imread(path)  # BGR
-            # if im0 is None:
-            #     raise FileNotFoundError(f"Image Not Found {path}")
-            # s = f"image {self.count}/{self.nf} {path}: "
 
         return [path], [im0], self.cap, s
 

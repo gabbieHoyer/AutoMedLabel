@@ -157,6 +157,7 @@ class Model(nn.Module):
         Returns:
             (List[ultralytics.engine.results.Results]): A list of prediction results, encapsulated in the Results class.
         """
+        # HERE:
         return self.predict(source, stream, **kwargs)
 
     @staticmethod
@@ -387,6 +388,8 @@ class Model(nn.Module):
         Raises:
             AttributeError: If the predictor is not properly set up.
         """
+
+        # HERE: 
         if source is None:
             source = ASSETS
             LOGGER.warning(f"WARNING ⚠️ 'source' is missing. Using 'source={source}'.")

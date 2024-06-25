@@ -154,9 +154,14 @@ class YOLODataset(BaseDataset):
         if self.augment:
             hyp.mosaic = hyp.mosaic if self.augment and not self.rect else 0.0
             hyp.mixup = hyp.mixup if self.augment and not self.rect else 0.0
+            
+            # HERE: 
             transforms = v8_transforms(self, self.imgsz, hyp)
+            # transforms = v8_transforms(self, self.imgsz, hyp)
+
         else:
             transforms = Compose([LetterBox(new_shape=(self.imgsz, self.imgsz), scaleup=False)])
+        # HERE:
         transforms.append(
             Format(
                 bbox_format="xywh",
@@ -203,6 +208,7 @@ class YOLODataset(BaseDataset):
         label["instances"] = Instances(bboxes, segments, keypoints, bbox_format=bbox_format, normalized=normalized)
         return label
 
+
     @staticmethod
     def collate_fn(batch):
         """Collates data samples into batches."""
@@ -221,6 +227,31 @@ class YOLODataset(BaseDataset):
             new_batch["batch_idx"][i] += i  # add target image index for build_targets()
         new_batch["batch_idx"] = torch.cat(new_batch["batch_idx"], 0)
         return new_batch
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Classification dataloaders -------------------------------------------------------------------------------------------

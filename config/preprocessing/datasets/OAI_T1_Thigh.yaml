@@ -71,8 +71,14 @@ mask_labels:
   10: nv
 
 # --- OUTPUT (OVERRIDE DEFAULT): location to Output/locate nifti files for MRI images and masks
-nifti_image_dir: ${general_data_dir}/nifti/imgs
-nifti_mask_dir: ${general_data_dir}/nifti/masks
+# nifti_image_dir: ${general_data_dir}/nifti/imgs
+# nifti_mask_dir: ${general_data_dir}/nifti/masks
+
+# nifti_image_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_nifti/sample/images
+# nifti_mask_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_nifti/sample/masks
+
+nifti_image_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_nifti/sample_val/images
+nifti_mask_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_nifti/sample_val/masks
 
 # ------------------ VISUALIZE NIFTI ------------------
 nifti_fig_cfg:
@@ -81,6 +87,26 @@ nifti_fig_cfg:
   slice_selection: 'with_segmentation' # 'any' 'with_segmentation'
 # --- OUTPUT (OVERRIDE DEFAULT): location to save figures
   fig_path: ${general_data_dir}/nifti/figs
+
+
+# ------------------ INFO FOR YOLO PREP ------------------
+## YOLO compatible npy data standardization, txt label creation
+# Values for image preprocessing script
+yolo_preprocessing_cfg:
+  image_size: [512, 256]
+  voxel_num_thre2d: 100
+  voxel_num_thre3d: 200
+  remove_label_ids: []  # No labels to remove in this configuration 
+  target_label_id: null  # No specific label targeted for instance segmentation
+  instance_bbox: True
+
+# output YOLO
+# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy/sample
+# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy3/train
+# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy3/test
+
+# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy3_instance/train
+yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy3_instance/test
 
 # ------------------ INFO FOR SAM PREP ------------------
 ## SAM compatible npy data standardization and slice-level metadata creation
@@ -141,15 +167,12 @@ metadata_cfg:
     instanceNumber: InstanceNumber
     slice_location: SliceLocation
     image_position_patient: ImagePositionPatient
-    slice_thickness: SliceThickness       #  redundancy lol
-    pixel_spacing: PixelSpacing           #  redundancy lol
 
 
 # Operation A (Optional) 
 # Path to a table/dataframe for demographic or other info desired for metadata:
 extra_metadata_cfg:
   csv_file_path: /data/mskdata/notebooks/OAI/thigh/T1_ax/oai_demos.csv
-  # # /data/TBrecon3/Users/ghoyer/SAM_data/new_design_Thigh_OAI/T1/oai_demos.csv
   subject_id_col: 'subject_id'
   column_mapping: # Standardized: Actual
     Age: 'age'  

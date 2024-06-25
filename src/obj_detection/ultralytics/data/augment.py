@@ -609,8 +609,16 @@ class RandomHSV:
         The modified image replaces the original image in the input 'labels' dict.
         """
         img = labels["img"]
+        
+        # Check if the image is grayscale (single channel)
+        if len(img.shape) == 2 or img.shape[2] == 1:
+            # Skip HSV transformation for grayscale images
+            return labels
+        
         if self.hgain or self.sgain or self.vgain:
             r = np.random.uniform(-1, 1, 3) * [self.hgain, self.sgain, self.vgain] + 1  # random gains
+
+            # Convert image to HSV color space
             hue, sat, val = cv2.split(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))
             dtype = img.dtype  # uint8
 
@@ -621,7 +629,54 @@ class RandomHSV:
 
             im_hsv = cv2.merge((cv2.LUT(hue, lut_hue), cv2.LUT(sat, lut_sat), cv2.LUT(val, lut_val)))
             cv2.cvtColor(im_hsv, cv2.COLOR_HSV2BGR, dst=img)  # no return needed
+        
         return labels
+
+
+# class RandomHSV:
+#     """
+#     This class is responsible for performing random adjustments to the Hue, Saturation, and Value (HSV) channels of an
+#     image.
+
+#     The adjustments are random but within limits set by hgain, sgain, and vgain.
+#     """
+
+#     def __init__(self, hgain=0.5, sgain=0.5, vgain=0.5) -> None:
+#         """
+#         Initialize RandomHSV class with gains for each HSV channel.
+
+#         Args:
+#             hgain (float, optional): Maximum variation for hue. Default is 0.5.
+#             sgain (float, optional): Maximum variation for saturation. Default is 0.5.
+#             vgain (float, optional): Maximum variation for value. Default is 0.5.
+#         """
+#         self.hgain = hgain
+#         self.sgain = sgain
+#         self.vgain = vgain
+
+#     def __call__(self, labels):
+#         """
+#         Applies random HSV augmentation to an image within the predefined limits.
+
+#         The modified image replaces the original image in the input 'labels' dict.
+#         """
+#         img = labels["img"]
+#         if self.hgain or self.sgain or self.vgain:
+#             r = np.random.uniform(-1, 1, 3) * [self.hgain, self.sgain, self.vgain] + 1  # random gains
+
+#             # HERE
+#             # problem with mri black and white - maybe try with 3 channel npy
+#             hue, sat, val = cv2.split(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))
+#             dtype = img.dtype  # uint8
+
+#             x = np.arange(0, 256, dtype=r.dtype)
+#             lut_hue = ((x * r[0]) % 180).astype(dtype)
+#             lut_sat = np.clip(x * r[1], 0, 255).astype(dtype)
+#             lut_val = np.clip(x * r[2], 0, 255).astype(dtype)
+
+#             im_hsv = cv2.merge((cv2.LUT(hue, lut_hue), cv2.LUT(sat, lut_sat), cv2.LUT(val, lut_val)))
+#             cv2.cvtColor(im_hsv, cv2.COLOR_HSV2BGR, dst=img)  # no return needed
+#         return labels
 
 
 class RandomFlip:
@@ -835,6 +890,7 @@ class Albumentations:
 
             check_version(A.__version__, "1.0.3", hard=True)  # version requirement
 
+            # HERE
             # Transforms
             T = [
                 A.Blur(p=0.01),
@@ -930,7 +986,10 @@ class Format:
             labels["masks"] = masks
         if self.normalize:
             instances.normalize(w, h)
+
+        # HERE:
         labels["img"] = self._format_img(img)
+
         labels["cls"] = torch.from_numpy(cls) if nl else torch.zeros(nl)
         labels["bboxes"] = torch.from_numpy(instances.bboxes) if nl else torch.zeros((nl, 4))
         if self.return_keypoint:
@@ -949,6 +1008,13 @@ class Format:
         if len(img.shape) < 3:
             img = np.expand_dims(img, -1)
         img = np.ascontiguousarray(img.transpose(2, 0, 1)[::-1])
+
+        # HERE:
+        # img = torch.from_numpy(img)
+
+        # Ensure the array is contiguous
+        img = img.copy()
+        
         img = torch.from_numpy(img)
         return img
 
@@ -991,6 +1057,7 @@ def v8_transforms(dataset, imgsz, hyp, stretch=False):
         elif flip_idx and (len(flip_idx) != kpt_shape[0]):
             raise ValueError(f"data.yaml flip_idx={flip_idx} length must be equal to kpt_shape[0]={kpt_shape[0]}")
 
+    # HERE: 
     return Compose(
         [
             pre_transform,
