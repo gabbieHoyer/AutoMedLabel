@@ -7,10 +7,52 @@ batch: 16
 rect: true
 
 # best_weights: runs/detect/train/weights/best.pt
-best_weights: work_dir/obj_detection/runs/detect/train17/weights/best.pt
+# yolo_weights: work_dir/model_weights/finetuned/thighYOLO/temp.pt
+# sam_weights: work_dir/model_weights/finetuned/muscleSAM/20240530-0438_finetuned_model_best.pth
+models:
+  obj_det: 
+    model_path: 'work_dir/model_weights/finetuned/thighYOLO/temp.pt'
+    model_weights: 'thighYOLO8'
+    model_type: YOLO
+  segmentation:
+    model_path: 'work_dir/model_weights/finetuned/muscleSAM/20240530-0438_finetuned_model_best.pth'
+    model_weights: 'muscleSAM'
+    model_type: vit_b
+
+dicom_data: standardized_data/challenging_cases/dicom_image_sample/00m/9015402
+nifti_data: standardized_data/challenging_cases/nifti_image_sample/00m/OAI_9015402.nii.gz
+
+preprocessing_cfg:
+  image_size: [1024, 512]  # should probably just be 1024
+  voxel_num_thre2d: 100
+  voxel_num_thre3d: 200
+  remove_label_ids: []  # No labels to remove in this configuration 
+  target_label_id: null  # No specific label targeted for instance segmentation
+  instance_bbox: True
+  
+  crop_non_zero_slices_flag: False
+  bbox_shift: 20
+  infer_method: '3D_stepwise' # Options: '3D_stepwise' or '3D_one_step'
+
+device: cuda:0
+
+
+base_output_dir: standardized_data/thigh_inference
+
+# --- OUTPUT (OVERRIDE DEFAULT): Location to output labels .txt files
+inference_dir: annotations
+
+# --- OUTPUT (OVERRIDE DEFAULT): Location to output (gt, prediction) .npz files
+inference_dir: preds
+
+output_configuration:
+  save_path: work_dir/prompting/${experiment.name}/Prompt_Summaries
+  logging_level: DEBUG 
+
 
 # data: standardized_data/thigh_npy3_instance/test/images/OAI_9437407-003.npy
-data: standardized_data/full_thigh_npy/test/images
+# data: standardized_data/full_thigh_npy/test/images
+
 
 # source: # (str, optional) source directory for images or videos
 # vid_stride: 1 # (int) video frame-rate stride

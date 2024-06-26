@@ -74,11 +74,15 @@ mask_labels:
 # nifti_image_dir: ${general_data_dir}/nifti/imgs
 # nifti_mask_dir: ${general_data_dir}/nifti/masks
 
-# nifti_image_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_nifti/sample/images
-# nifti_mask_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_nifti/sample/masks
+# individual paths for splits only used for yolo format which requires indiv folders for each split lol
+# nifti_image_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_nifti/train/images
+# nifti_mask_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_nifti/train/masks
 
-nifti_image_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_nifti/sample_val/images
-nifti_mask_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_nifti/sample_val/masks
+# nifti_image_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_nifti/val/images
+# nifti_mask_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_nifti/val/masks
+
+nifti_image_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_nifti/test/images
+nifti_mask_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_nifti/test/masks
 
 # ------------------ VISUALIZE NIFTI ------------------
 nifti_fig_cfg:
@@ -93,7 +97,7 @@ nifti_fig_cfg:
 ## YOLO compatible npy data standardization, txt label creation
 # Values for image preprocessing script
 yolo_preprocessing_cfg:
-  image_size: [512, 256]
+  image_size: [1024, 512]
   voxel_num_thre2d: 100
   voxel_num_thre3d: 200
   remove_label_ids: []  # No labels to remove in this configuration 
@@ -101,12 +105,10 @@ yolo_preprocessing_cfg:
   instance_bbox: True
 
 # output YOLO
-# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy/sample
-# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy3/train
-# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy3/test
 
-# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy3_instance/train
-yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_npy3_instance/test
+# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/train
+# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/val
+yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/test
 
 # ------------------ INFO FOR SAM PREP ------------------
 ## SAM compatible npy data standardization and slice-level metadata creation

@@ -77,39 +77,6 @@ def predict_segmentation(infer_method, predictor, selected_files, dataImagePrep,
             file_name_no_ext = file_without_extension_from_path(os.path.basename(image_path))
             save_prediction(mask_orig_size, gt_prep_orig_size, inference_output_path, file_name_no_ext)
 
-    # --- for debug ---
-    elif infer_method == '3D_debug':
-        from src.utils.visualizers import plot_segmentation_overlay
-        for image_path, mask_path in tqdm(selected_files):
-            img_3D_unprocessed = load_data(image_path)
-            gt_3D_unprocessed = load_data(mask_path) 
-            mask_orig_size, gt_prep_orig_size, img_3D, mask_3D_model_size_debug = infer_3D_debug(predictor, img_3D_unprocessed, gt_3D_unprocessed, dataImagePrep, dataMaskPrep, bbox_shift, instance_bboxes_flag)
-            # Derive the base filename for saving processed files without their original extension
-            file_name_no_ext = file_without_extension_from_path(os.path.basename(image_path))
-            save_prediction(mask_orig_size, gt_prep_orig_size, inference_output_path, file_name_no_ext)
-
-            # Assuming file_name is already the base filename without the extension
-            save_dir = inference_output_path.replace('preds','figs_debug_no_postproc')
-            # Ensure the updated paths exist
-            os.makedirs(save_dir, exist_ok=True)
-            debug_plot_savepath = os.path.join(save_dir, f"{file_name_no_ext}_debug.png")
-            
-            # find non-zero slices
-            z_index, _, _ = np.where(mask_3D_model_size_debug > 0)
-            possible_inds = np.unique(z_index)
-            num_slices = len(possible_inds)
-            step_ = max(1, int(np.ceil(num_slices / 18)))
-            start = (num_slices % 18) // 2 if num_slices > 18 else 0
-            slices = possible_inds[range(start, num_slices, step_)]
-            
-            plot_segmentation_overlay(vol= img_3D[slices,:,:], 
-                                    seg= mask_3D_model_size_debug[slices,:,:], 
-                                    seg_clim = [np.min(mask_3D_model_size_debug), np.max(mask_3D_model_size_debug)],
-                                    save_path=debug_plot_savepath, 
-                                    cmap='rainbow', 
-                                    title=file_name_no_ext, 
-                                    ) 
-    # --- end debug ---
 
 def prompt_prediction(cfg):
     """
