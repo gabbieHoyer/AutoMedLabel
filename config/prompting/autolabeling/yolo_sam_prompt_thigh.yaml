@@ -34,7 +34,7 @@ device: cuda:0
 
 models:
   obj_det: 
-    model_path: 'work_dir/model_weights/finetuned/thighYOLO/temp.pt'
+    model_path: 'work_dir/model_weights/finetuned/thighYOLO/best.pt'
     model_weights: 'thighYOLO8'
     model_type: YOLO
   segmentation:

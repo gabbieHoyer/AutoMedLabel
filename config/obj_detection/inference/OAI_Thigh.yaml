@@ -9,21 +9,30 @@ rect: true
 # best_weights: runs/detect/train/weights/best.pt
 # yolo_weights: work_dir/model_weights/finetuned/thighYOLO/temp.pt
 # sam_weights: work_dir/model_weights/finetuned/muscleSAM/20240530-0438_finetuned_model_best.pth
+
+base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
 models:
   obj_det: 
-    model_path: 'work_dir/model_weights/finetuned/thighYOLO/temp.pt'
+    model_path: 'work_dir/model_weights/finetuned/thighYOLO/best.pt'
     model_weights: 'thighYOLO8'
     model_type: YOLO
   segmentation:
     model_path: 'work_dir/model_weights/finetuned/muscleSAM/20240530-0438_finetuned_model_best.pth'
     model_weights: 'muscleSAM'
     model_type: vit_b
+    
+    # trainable:
+    #   prompt_encoder: false
+    #   image_encoder: false
+    #   mask_decoder: true
 
 dicom_data: standardized_data/challenging_cases/dicom_image_sample/00m/9015402
-nifti_data: standardized_data/challenging_cases/nifti_image_sample/00m/OAI_9015402.nii.gz
+# nifti_data: standardized_data/challenging_cases/nifti_image_sample/00m/OAI_9015402.nii.gz
+nifti_data: standardized_data/full_thigh_nifti/train/images/OAI_9437407.nii.gz  # should work; it ran through train looools - use as backup
 
 preprocessing_cfg:
-  image_size: [1024, 512]  # should probably just be 1024
+  image_size: 1024  # should probably just be 1024
   voxel_num_thre2d: 100
   voxel_num_thre3d: 200
   remove_label_ids: []  # No labels to remove in this configuration 

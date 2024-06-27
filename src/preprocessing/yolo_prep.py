@@ -307,34 +307,34 @@ class ImagePrep():
             normed_images = np.array(normed_images)
         return normed_images
 
-    # def resize_images(self, image_data: np.ndarray, image_size_tuple:tuple[int, int]=None, n_channels:int=0) -> np.ndarray:
-    #     """Resize image data using cubic spline interpolation."""
-    #     def resize_image_2D(img_slice, image_size_tuple:(int,int)):
-    #         # Resize the normalized image slice
-    #         resized_img = transform.resize(
-    #             img_slice,
-    #             image_size_tuple,
-    #             order=3,  # cubic spline interpolation
-    #             preserve_range=True,
-    #             mode='constant',
-    #             anti_aliasing=True
-    #         )
-    #         return resized_img
+    def resize_images(self, image_data: np.ndarray, image_size_tuple:tuple[int, int]=None, n_channels:int=0) -> np.ndarray:
+        """Resize image data using cubic spline interpolation."""
+        def resize_image_2D(img_slice, image_size_tuple:(int,int)):
+            # Resize the normalized image slice
+            resized_img = transform.resize(
+                img_slice,
+                image_size_tuple,
+                order=3,  # cubic spline interpolation
+                preserve_range=True,
+                mode='constant',
+                anti_aliasing=True
+            )
+            return resized_img
         
-    #     if image_size_tuple is None:
-    #         image_size_tuple = self.image_size_tuple
+        if image_size_tuple is None:
+            image_size_tuple = self.image_size_tuple
 
-    #     dims = len(np.shape(image_data))
-    #     if (dims==2 and n_channels==0) or (dims==3 and n_channels>0):   
-    #         resized_images = resize_image_2D(image_data, image_size_tuple)
-    #     elif (dims==3 and n_channels==0) or (dims==4 and n_channels>0):
-    #         resized_images = []
-    #         for img_slice in image_data:
-    #             resized_img = resize_image_2D(img_slice, image_size_tuple)
-    #             resized_images.append(resized_img)
-    #         resized_images = np.array(resized_images)
+        dims = len(np.shape(image_data))
+        if (dims==2 and n_channels==0) or (dims==3 and n_channels>0):   
+            resized_images = resize_image_2D(image_data, image_size_tuple)
+        elif (dims==3 and n_channels==0) or (dims==4 and n_channels>0):
+            resized_images = []
+            for img_slice in image_data:
+                resized_img = resize_image_2D(img_slice, image_size_tuple)
+                resized_images.append(resized_img)
+            resized_images = np.array(resized_images)
         
-    #     return resized_images
+        return resized_images
     
     # -------------------- DATA TRANSFORMATION FUNCTIONS --------------------
 
@@ -358,17 +358,16 @@ class ImagePrep():
         
         return normalized_data
     
-    # def prep_image_sam_specific_step2(self, normalized_data: np.ndarray) -> np.ndarray:
-    #     '''
-    #     Apply preprocessing steps that are specific to sam to the image data.
-    #     Params:
-    #     - image_data: Supports 2D [H x W] and 3D [Slice x H x W] image data.
-    #     '''
-    #     # Resize and normalize the cropped image and mask data before saving
-    #     resized_data = self.resize_images(normalized_data)
-    #     # Removed on 4/9/2024 - resized_normalized_data = self.normalize_image_data_by_slice(resized_data)
-    #     resized_normalized_data = self.normalize_image_data_by_slice(resized_data)
-    #     return resized_normalized_data
+    def prep_image_sam_specific_step2(self, normalized_data: np.ndarray) -> np.ndarray:
+        '''
+        Apply preprocessing steps that are specific to sam to the image data.
+        Params:
+        - image_data: Supports 2D [H x W] and 3D [Slice x H x W] image data.
+        '''
+        # Resize and normalize the cropped image and mask data before saving
+        resized_data = self.resize_images(normalized_data)
+        resized_normalized_data = self.normalize_image_data_by_slice(resized_data)
+        return resized_normalized_data
     
     def preprocess_image(self, image_data: np.ndarray, z_indices:list[int] = []) -> np.ndarray:
         '''

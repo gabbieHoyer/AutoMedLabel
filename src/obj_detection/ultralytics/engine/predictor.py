@@ -110,6 +110,30 @@ class BasePredictor:
         self._lock = threading.Lock()  # for automatic thread-safe inference
         callbacks.add_integration_callbacks(self)
 
+    # def preprocess(self, im):
+    #     """
+    #     Prepares input image before inference.
+
+    #     Args:
+    #         im (torch.Tensor | List(np.ndarray)): BCHW for tensor, [(HWC) x B] for list.
+    #     """
+    #     # HERE: maybe npy addon - actually needed for numpy slice from 3D volume
+    #     not_tensor = not isinstance(im, torch.Tensor)
+
+    #     if not_tensor:
+    #         im = np.stack(self.pre_transform(im)) # for thigh: (1, 1024, 1024, 3)
+    #         im = im[..., ::-1].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW, (n, 3, h, w); (1, 3, 1024, 1024)
+    #         im = np.ascontiguousarray(im)  # contiguous
+    #         im = torch.from_numpy(im) # torch.Size([1, 3, 1024, 1024])
+
+    #     im = im.to(self.device)
+    #     im = im.half() if self.model.fp16 else im.float()  # uint8 to fp16/32 - works for my npy files processed in sam/yolo pipeline
+    #     # im becomes torch.float32, when was originally uint8 (from npy input perspective)
+        
+    #     if not_tensor:
+    #         im /= 255  # 0 - 255 to 0.0 - 1.0
+    #     return im
+
     def preprocess(self, im):
         """
         Prepares input image before inference.
@@ -117,19 +141,34 @@ class BasePredictor:
         Args:
             im (torch.Tensor | List(np.ndarray)): BCHW for tensor, [(HWC) x B] for list.
         """
-        # HERE: maybe npy addon
+        # Determine if the input is a tensor
         not_tensor = not isinstance(im, torch.Tensor)
-        if not_tensor:
-            im = np.stack(self.pre_transform(im))
-            im = im[..., ::-1].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW, (n, 3, h, w)
-            im = np.ascontiguousarray(im)  # contiguous
-            im = torch.from_numpy(im)
 
-        im = im.to(self.device)
-        im = im.half() if self.model.fp16 else im.float()  # uint8 to fp16/32
         if not_tensor:
-            im /= 255  # 0 - 255 to 0.0 - 1.0
+            # Stack and transpose if input is a list of numpy arrays
+            im = np.stack(self.pre_transform(im))  # for thigh: (1, 1024, 1024, 3)
+            im = im[..., ::-1].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW, (n, 3, h, w); (1, 3, 1024, 1024)
+            im = np.ascontiguousarray(im)  # make array contiguous
+            im = torch.from_numpy(im)  # convert to torch tensor
+
+        # Move to device
+        im = im.to(self.device)
+        # Convert to float16 if model uses fp16, otherwise float32
+        im = im.half() if self.model.fp16 else im.float()
+
+        # Ensure normalization is only applied if needed
+        if not_tensor:
+            if im.dtype == torch.uint8:
+                im /= 255  # Normalize if original dtype was uint8 (0 - 255 to 0.0 - 1.0)
+            elif im.dtype == torch.float64 or im.dtype == torch.float32:
+                # Assuming the image is already in the range [0, 1] for float64 or float32
+                # This check can be customized based on actual data ranges
+                pass
+            else:
+                raise ValueError(f"Unexpected dtype {im.dtype} for image data.")
+
         return im
+
 
     def inference(self, im, *args, **kwargs):
         """Runs inference on a given image using the specified model and arguments."""
@@ -138,6 +177,7 @@ class BasePredictor:
             if self.args.visualize and (not self.source_type.tensor)
             else False
         )
+        # import pdb; pdb.set_trace()
         return self.model(im, augment=self.args.augment, visualize=visualize, embed=self.args.embed, *args, **kwargs)
 
     def pre_transform(self, im):
@@ -198,6 +238,8 @@ class BasePredictor:
 
     def __call__(self, source=None, model=None, stream=False, *args, **kwargs):
         """Performs inference on an image or stream."""
+        # import pdb; pdb.set_trace()
+
         self.stream = stream
         if stream:
             return self.stream_inference(source, model, *args, **kwargs)
@@ -279,6 +321,15 @@ class BasePredictor:
                 # Preprocess
                 with profilers[0]:
                     im = self.preprocess(im0s)
+
+                # ------ Temp ------ #
+                # from src.obj_detection.infer_helper import visualize_input
+
+                # out_dir = '/data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_inference/QC/preprocessing_check'
+                # image_name = f"thigh_slice_after_yolo_preprocessing"
+
+                # visualize_input(im[0].cpu().numpy(), image_name, out_dir)
+                # ------------------- #
 
                 # Inference
                 with profilers[1]:
