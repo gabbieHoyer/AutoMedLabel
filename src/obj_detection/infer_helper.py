@@ -9,10 +9,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+import cv2
 import torch
 from segment_anything import sam_model_registry, SamPredictor
 from pathlib import Path
 import nibabel as nib
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+from matplotlib.colors import Normalize, ListedColormap
+from matplotlib.cm import ScalarMappable
 
 from ultralytics import YOLO, RTDETR
 
@@ -32,7 +38,7 @@ from src.finetuning.engine.models.sam import finetunedSAM
 
 def map_labels_to_colors(pred_mask, mask_labels):
     # Define a colormap that can provide a distinct color for each class
-    color_map = plt.get_cmap('rainbow', len(mask_labels))  # 'tab20' has 20 distinct colors
+    color_map = plt.get_cmap('rainbow', len(mask_labels) - 1)  # Exclude background
 
     # Create an empty RGBA image
     colored_mask = np.zeros((*pred_mask.shape, 4), dtype=np.float32)  # Initialize with zeros
@@ -42,11 +48,31 @@ def map_labels_to_colors(pred_mask, mask_labels):
         if label_value == 0:  # Skip the background
             continue
         mask = (pred_mask == label_value)
-        color = color_map(label_value / len(mask_labels))  # Get consistent RGBA color
+        color = color_map((label_value - 1) / (len(mask_labels) - 1))  # Get consistent RGBA color
         colored_mask[mask] = color  # Apply color where the label matches
 
     return colored_mask
 
+def add_colorbar(fig, ax, mask_labels):
+    # Get unique labels excluding background
+    unique_labels = [label for label in mask_labels if label != 0]
+
+    # Create a colormap based on unique labels
+    base_cmap = plt.get_cmap('rainbow', len(unique_labels))
+    colors = base_cmap(np.linspace(0, 1, len(unique_labels)))
+    new_cmap = ListedColormap(colors)
+
+    # Normalize according to the number of unique labels
+    norm = Normalize(vmin=min(unique_labels), vmax=max(unique_labels))
+
+    # Create a scalar mappable for colormap and normalization
+    sm = ScalarMappable(cmap=new_cmap, norm=norm)
+    sm.set_array([])  # dummy array
+
+    # Add colorbar to the figure
+    cbar = fig.colorbar(sm, ax=ax.ravel().tolist(), orientation='vertical', aspect=10)
+    cbar.set_ticks(unique_labels)
+    cbar.set_ticklabels([mask_labels[label] for label in unique_labels])
 
 def visualize_full_pred(image, pred_mask, mask_labels, image_name, model_save_path):  
     if image.shape[0] == 3:
@@ -62,9 +88,12 @@ def visualize_full_pred(image, pred_mask, mask_labels, image_name, model_save_pa
     # Prediction overlay
     ax[1].imshow(image, cmap='gray')  # Original image
     colored_pred_mask = map_labels_to_colors(pred_mask, mask_labels)
-    ax[1].imshow(colored_pred_mask, alpha=0.5)  # Overlay the colored mask
-    ax[1].set_title('Binary Prediction Overlay')
+    im = ax[1].imshow(colored_pred_mask, alpha=0.5)  # Overlay the colored mask
+    ax[1].set_title('Prediction Overlay')
     ax[1].axis('off')
+
+    # Add colorbar
+    add_colorbar(fig, ax, mask_labels)
 
     figure_file_path = os.path.join(model_save_path, "QC", f"{image_name}_full_pred.png")
     os.makedirs(os.path.dirname(figure_file_path), exist_ok=True)
@@ -131,7 +160,7 @@ def visualize_pred(image, pred_mask, binary_pred, boxes, image_name, model_save_
         rect = patches.Rectangle((box[0], box[1]), box[2] - box[0], box[3] - box[1], linewidth=1, edgecolor='r', facecolor='none')
         ax[0].add_patch(rect)
         
-    figure_file_path = os.path.join(model_save_path, "QC", f"{image_name}_pred.png")
+    figure_file_path = os.path.join(model_save_path, "label_QC", f"{image_name}_pred.png")
     os.makedirs(os.path.dirname(figure_file_path), exist_ok=True)
 
     plt.savefig(figure_file_path)  # Save the plot to a file
@@ -156,16 +185,6 @@ def save_prediction(seg_3D, save_dir, filename, output_ext):
         new_nii = nib.Nifti1Image(seg_3D, np.eye(4))
         nib.save(new_nii, nifti_output_path)
     return
-
-# def save_prediction(seg_3D, save_dir, file_name_no_ext):
-#     """Save prediction as .npz file with keys 'seg' and 'gt'."""
-#     # Ensure the updated paths exist
-#     os.makedirs(save_dir, exist_ok=True)
-
-#     # Assuming file_name is already the base filename without the extension
-#     npz_output_path = os.path.join(save_dir, f"{file_name_no_ext}.npz")
-#     np.savez_compressed(npz_output_path, seg=seg_3D) 
-#     return
 
 # -------------------- MODEL FUNCTIONS -------------------- #
 def make_predictor(model_type:str, comp_cfg, initial_weights:str, finetuned_weights:str=None, device:str="cpu"):
@@ -217,12 +236,28 @@ def postprocess_resize(mask, image_size_tuple:tuple[int,int]):
                                             image_size_tuple = image_size_tuple)
     return resized_mask
 
-def postprocess_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int):
+def resize_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int):
     """Convert SAM prediction into segmentation mask with original image dims and label ids."""
     sam_mask_resized = postprocess_resize(sam_pred, image_size_tuple)
     sam_mask = np.zeros_like(sam_mask_resized, dtype=np.uint8)
     sam_mask[sam_mask_resized > 0] = label_id
     return sam_mask
+
+def postprocess_prediction(sam_pred):
+    # Ensure sam_pred is in the range [0, 255] and of type np.uint8
+    sam_pred = sam_pred.astype(np.uint8) * 255  # Convert binary 0/1 to grayscale 0/255
+    
+    # Apply Gaussian blur
+    smooth_mask = cv2.GaussianBlur(sam_pred, (5, 5), 0)
+    
+    # Apply binary thresholding to convert back to binary mask
+    # _, processed_mask = cv2.threshold(smooth_mask, 127, 255, cv2.THRESH_BINARY)
+    _, processed_mask = cv2.threshold(smooth_mask, 127, 1, cv2.THRESH_BINARY)
+    
+    # Convert to np.uint8 if necessary
+    processed_mask = processed_mask.astype(np.uint8)
+    
+    return processed_mask
 
 # --------------------------------------------------------------------------
 
@@ -302,103 +337,3 @@ def determine_run_directory(base_dir, task_name, group_name=None):
     return full_run_path
 
 # ----------------------------------------------------------------------------------- #
-
-# def visualize_full_pred(image, binary_pred, image_name, model_save_path):  # pred_mask_bin, label_id,
-#     if image.shape[0] == 3:
-#         image = np.transpose(image, (1, 2, 0))  # Convert from [C, H, W] to [H, W, C]
-
-#     fig, ax = plt.subplots(1, 2, figsize=(10, 5))  # Create a figure with three subplots
-
-#     # Original image
-#     # Assuming image is in [C, H, W] format and is an RGB image
-#     ax[0].imshow(image, cmap='gray')  # Assuming image is in [C, H, W] format
-#     ax[0].set_title('Original Image')
-#     ax[0].axis('off')
-
-#     # Prediction overlay
-#     ax[1].imshow(image, cmap='gray')  # Original image
-#     ax[1].imshow(binary_pred, alpha=0.5)  # Overlay the colored mask
-#     ax[1].set_title('Binary Prediction Overlay')
-#     ax[1].axis('off')
-
-#     figure_file_path = os.path.join(model_save_path, 'qual_check', f"{image_name}_full_slice_pred_viz.png")
-#     os.makedirs(os.path.dirname(figure_file_path), exist_ok=True)
-
-#     plt.savefig(figure_file_path)  # Save the plot to a file
-#     plt.close(fig)  # Close the figure to free memory
-
-
-
-# def make_predictor(model_type:str, initial_weights:str, finetuned_weights:str=None, device:str="cpu"):
-
-#     sam_model = sam_model_registry[model_type](checkpoint=initial_weights).to(device)
-
-#     # Check if a checkpoint exists to resume training
-#     if finetuned_weights and os.path.isfile(finetuned_weights):
-#         try:
-#             checkpoint = torch.load(finetuned_weights, map_location=device)
-#             sam_model.load_state_dict(checkpoint["model"])
-
-#         except Exception as e:
-#             # Decide whether to continue with training from scratch or to abort
-#             raise e
-        
-#     # predictor = SamPredictor(sam_model)
-#     return sam_model
-
-
-# def make_prediction(predictor, img_slice, bbox):
-#     """Predict segmentation for image (2D) from bounding box prompt"""
-#     img_3c = np.repeat(img_slice[:, :, None], 3, axis=-1)
-
-#     predictor.set_image(img_3c.astype(np.uint8))
-
-#     sam_mask, _, _ = predictor.predict(point_coords=None, 
-#                                        point_labels=None, 
-#                                        box=bbox[None, :], 
-#                                        multimask_output=False)
-#     return sam_mask
-
-
-# def make_predictor(sam_model_type:str, sam_ckpt_path:str, device_:str=None):
-#     """Return SAM predictor."""
-
-#     import pdb; pdb.set_trace()
-
-#     SAM_MODEL_TYPE = sam_model_type
-#     SAM_CKPT_PATH = sam_ckpt_path
-
-#     if not device_:
-#         device_ = "cuda" if torch.cuda.is_available() else "cpu"
-#     device = torch.device(device_)
-
-#     sam_model = sam_model_registry[SAM_MODEL_TYPE](checkpoint=SAM_CKPT_PATH)
-    
-    
-#     sam_model.to(device)
-#     predictor = SamPredictor(sam_model)
-#     return predictor
-
-    # # Model finetuning setup
-    # finetuned_model = finetunedSAM(
-    #     image_encoder=sam_model.image_encoder,
-    #     mask_decoder=sam_model.mask_decoder,
-    #     prompt_encoder=sam_model.prompt_encoder,
-    #     config=comp_cfg
-    # ).to(device)
-
-    # # Check if finetuned_weights are the same as initial_weights
-    # if finetuned_weights == initial_weights:
-    #     return finetuned_model
-
-    # # Check if a checkpoint exists to resume training
-    # if finetuned_weights and os.path.isfile(finetuned_weights):
-    #     try:
-    #         checkpoint = torch.load(finetuned_weights, map_location=device)
-    #         start_epoch = checkpoint["epoch"] + 1
-    #         finetuned_model.load_state_dict(checkpoint["model"])
-    #     except Exception as e:
-    #         # Decide whether to continue with training from scratch or to abort
-    #         raise e
-
-    # return finetuned_model
