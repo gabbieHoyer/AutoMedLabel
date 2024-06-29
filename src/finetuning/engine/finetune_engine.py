@@ -181,6 +181,8 @@ class Trainer:
         else:
             with torch.no_grad():
                 predictions = self.model(image, boxes)
+
+                # lols just saw this; why???
                 loss = self.calculate_loss(predictions, gt2D)
                 
                 # Convert logits to binary predictions

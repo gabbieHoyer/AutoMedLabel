@@ -1,14 +1,34 @@
-model: YOLO8/yolov8n.pt
-model_type: YOLO
+model: NAS/yolo_nas_s.pt
+model_type: NAS
 data_yaml: thigh_data.yaml
 imgsz: [1024, 512]  # technically this is variable :/ three different variations exist in thigh oai dataset
 epochs: 1 #300
 batch: 16
-rect: true
+rect: True
+# multi_scale: True
 
-best_weights: runs/detect/train/weights/best.pt
+# currently not functional b/c pycocotools onnx build failed via pip
+# need to reconcile to install module 'super_gradients'
 
-data: datasets/intubation_videos/20201012-150355.avi
+# best_weights: runs/detect/train/weights/best.pt
+# best_weights: work_dir/obj_detection/runs/detect/train17/weights/best.pt
+best_weights: work_dir/obj_detection/runs/detect/train18/weights/best.pt
+
+data: standardized_data/dpr/thigh_npy3_instance/test/images/OAI_9437407-003.npy
+# data: standardized_data/full_thigh_npy/test/images
+
+# source: # (str, optional) source directory for images or videos
+# vid_stride: 1 # (int) video frame-rate stride
+# stream_buffer: False # (bool) buffer all streaming frames (True) or return the most recent frame (False)
+# visualize: False # (bool) visualize model features
+# augment: False # (bool) apply image augmentation to prediction sources
+# agnostic_nms: False # (bool) class-agnostic NMS
+# classes: # (int | list[int], optional) filter results by class, i.e. classes=0, or classes=[0,2,3]
+# retina_masks: False # (bool) use high-resolution segmentation masks
+# embed: # (list[int], optional) return feature vectors/embeddings from given layers
+
+
+# see if prediction can take place on folder in images??
 
 
 

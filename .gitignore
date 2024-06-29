@@ -22,4 +22,7 @@ notebooks/*.ipynb
 
 /standardized_data/
 
+/src/obj_detection/dev_work/
+/src/obj_detection/air/
+
 

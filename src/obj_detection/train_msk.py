@@ -2,8 +2,7 @@ import os
 import yaml
 import argparse
 from string import Template
-from ultralytics import YOLO
-from ultralytics import RTDETR
+from ultralytics import YOLO, RTDETR, NAS
 
 
 def load_config(config_file_name, base_dir):
@@ -29,6 +28,8 @@ def load_model(config):
         model_class = YOLO
     elif model_type == 'RTDETR':
         model_class = RTDETR
+    elif model_type == 'NAS':
+        model_class = NAS
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
     

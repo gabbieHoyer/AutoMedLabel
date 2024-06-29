@@ -1,18 +1,9 @@
+import os
+import argparse
 import numpy as np
 import torch
-from segment_anything import sam_model_registry, SamPredictor
-
-from pathlib import Path
-
-from ultralytics import YOLO
-
-import os
-import random
-import numpy as np
 from tqdm import tqdm
-
-import argparse
-
+from segment_anything import sam_model_registry, SamPredictor
 
 import pyrootutils
 root = pyrootutils.setup_root(
@@ -22,166 +13,112 @@ root = pyrootutils.setup_root(
     dotenv=True,
 )
 
-from src.utils.bbox import identify_bbox_from_volume, identify_bbox_from_slice, adjust_bbox_to_new_img_size, \
-                            identify_instance_bbox_from_volume, identify_instance_bbox_from_slice
-
-
-from src.preprocessing.yolo_prep import MaskPrep, ImagePrep
-from src.utils.file_management.config_handler import load_prompting_experiment, summarize_config, update_cfg_for_dataset
-from src.utils.file_management.file_handler import load_json
-from src.utils.file_management.path_info import pair_files_in_split, pair_files, file_without_extension_from_path
-
+from src.preprocessing.yolo_prep import ImagePrep
 from src.utils.file_management.file_handler import load_data
-import argparse
-import os
-import yaml
-from ultralytics import YOLO
-from ultralytics import RTDETR
+from src.utils.file_management.config_handler import load_experiment, summarize_config
+
+from ultralytics import YOLO, RTDETR
 from infer_helper import *
 
-def infer_3D_stepwise_prep(det_model, sam_model, img_3D_unprocessed:np.array, dataImagePrep, device='cpu'):
+        # ----------- #
+        # image_name = f"{img_name}_{slice_idx}""
+        # visualize_input(img_2D_3c, image_name, run_dir)
+        # ----------- #
 
-    #Note image processing is in 2 steps. Step 2 is performed on a per slice basis
+def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name, mask_labels, conf=0.5, visualize=False, run_dir=None, device='cpu'):
+
+    # Note image processing is in 2 steps. Step 2 is performed on a per slice basis
     img_3D = dataImagePrep.prep_image_study_specific_step1(img_3D_unprocessed)
-
-    mask_3D_orig_size = np.zeros_like(img_3D_unprocessed, dtype=np.uint8)
+    mask_3D_orig_size = np.zeros_like(img_3D_unprocessed, dtype=np.uint8)  # mask_3D_orig_size.shape -> (27, 640, 1024)
     orig_img_with_bbox_size = (img_3D_unprocessed.shape[1], img_3D_unprocessed.shape[2])
 
+    sam_model = sam_model.to(device)
+    
     for slice_idx in range(img_3D.shape[0]):
+        img_2D = dataImagePrep.prep_image_sam_specific_step2(img_3D[slice_idx,:,:])  
+        img_2D_3c = np.repeat(img_2D[:, :, None], 3, axis=-1)  # would happen in the sam finetuning dataset class  (1024, 1024, 3)
 
-        img_2D = dataImagePrep.prep_image_sam_specific_step2(img_3D[slice_idx,:,:])  # img_3D[slice_idx,:,:] for thigh is (256, 512)
-        # img_2D.shape -> (1024, 1024)
-        # img_2D.dtype -> dtype('float64')
-
-        img_2D_3c = np.repeat(img_2D[:, :, None], 3, axis=-1)
-        # img_2D_3c.dtype -> dtype('float64')
-
-        # import pdb; pdb.set_trace()
-
-        # img_2D_3c = np.uint8(img_2D_3c)
-
-        out_dir = '/data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_inference/QC/initial_load/'
-        image_name = f"thigh_slice_{slice_idx}"
-
-        visualize_input(img_2D_3c, image_name, out_dir)
-        # import pdb; pdb.set_trace()
-
-        # img_2D_3c.shape -> (1024, 1024, 3)
-        # img_2D_3c.dtype -> dtype('float64')
-
-        # needed for YOLO prediction function - Prepares input image before inference.
-        # im (torch.Tensor | List(np.ndarray)): BCHW for tensor, [(HWC) x B] for list.
-        
-        # ----------------------------------------------------- #
-        # add yolo inference per numpy array slice 
-        # det_results = det_model(img_2D_3c, stream=True, device=device)
-
-        det_results = det_model(source=img_2D_3c, conf=0.5, device=device)
-
-        # det_results = det_model(source=img_2D_3c, conf=0.5, device=device)
-        # what I do in predict_msk and it works fine
-        # model(source=config['data'], conf=config.get('conf', 0.5), save=True, save_txt=True)
-
-        # import pdb; pdb.set_trace()
+        det_results = det_model(source=img_2D_3c, conf=conf, device=device)  # conf=0.5
 
         # Convert the shape to (3, H, W)
-        # img_1024 = np.transpose(img_1024, (2, 0, 1))  # (3, 1024, 1024)
-        img_2D_3c = np.transpose(img_2D_3c, (2, 0, 1)) # (3, 1024, 1024)
+        img_2D_3c = np.transpose(img_2D_3c, (2, 0, 1)) # would happen in the sam finetuning dataset class (3, 1024, 1024)
+        img_2D_3c = torch.tensor(img_2D_3c).float()  # happens in sam dataset when batching
+        img_2D_3c = img_2D_3c.to(device)
+
+        combined_mask = torch.zeros((img_3D_unprocessed.shape[1], img_3D_unprocessed.shape[2]), dtype=torch.float32).to(device)
 
         for result in det_results:
-
-            # boxes is empty :,D
             class_ids = result.boxes.cls.int().tolist()  # noqa
-
-            # import pdb; pdb.set_trace()
-
             if len(class_ids):
                 boxes = result.boxes.xyxy  # Boxes object for bbox outputs
-        # ----------------------------------------------------- #
-                # import pdb; pdb.set_trace()
-                
+        # ----------------------------------------------------- #               
                 for label_id, bbox in zip(class_ids, boxes):
+                    bbox = bbox.to(device)
 
-                    import pdb; pdb.set_trace()
+                    sam_pred = sam_model(img_2D_3c.unsqueeze(0), bbox.unsqueeze(0)) # sam_pred.shape -> torch.Size([1, 1, 1024, 1024])
+                    pred_binary = torch.sigmoid(sam_pred) > 0.5 # Convert logits to binary predictions
 
-                    # sam_pred = make_prediction(predictor, img_2D_3c, bbox)
-                            # prediction = self.model(images[img_idx].unsqueeze(0), box.unsqueeze(0))   
+                    # ----------- #
+                    # if visualize: 
+                    #     visualize_pred(image=img_2D_3c.detach().cpu(),
+                    #                 pred_mask=sam_pred.squeeze().detach().cpu(),
+                    #                 binary_pred=pred_binary.squeeze().detach().cpu(),
+                    #                 boxes=bbox.detach().cpu().numpy(), 
+                    #                 image_name=f"{img_name}_{slice_idx}_labelID_{label_id}",
+                    #                 model_save_path=run_dir)
+                    # ----------- #
 
-                    # numpy.ndarray has no attribute 'to'
+                    sam_mask = postprocess_prediction(pred_binary.squeeze().detach().cpu().numpy(), orig_img_with_bbox_size, label_id)
+                    sam_mask = torch.tensor(sam_mask).to(device)
 
-                    img_2D_3c_2 = torch.tensor(img_2D_3c).float()
-                    img_2D_3c_3 = img_2D_3c_2.to(device)
-                    # bbox_2 = bbox.to(device) # this is a tensor already
+                    # Update combined_mask only where sam_mask indicates presence and no earlier label exists
+                    mask_indices = (sam_mask > 0) & (combined_mask == 0)
+                    combined_mask[mask_indices] = label_id
 
-                    # thing = sam_model(img_2D_3c_2, bbox)
+        # Convert combined_mask to the final integer mask
+        mask_3D_orig_size[slice_idx] = combined_mask.cpu().numpy().astype(np.uint8)
+        
+        # -----------------------------------
+        if visualize: 
+            visualize_full_pred(image=img_3D_unprocessed[slice_idx,...],
+                            pred_mask=mask_3D_orig_size[slice_idx,...],
+                            mask_labels=mask_labels,
+                            image_name=f"{img_name}_{slice_idx}",
+                            model_save_path=run_dir)
+        # -----------------------------------
 
-                    # thing2 = sam_model(img_2D_3c_3, bbox)
-                    # .unsqueeze(0), box.unsqueeze(0)
-                    # thing3 = sam_model2(img_2D_3c_3.unsqueeze(0), bbox.unsqueeze(0))
-                    sam_model2 = sam_model.to(device)
-
-                    sam_pred = sam_model(img_2D_3c, bbox)
-
-                    out_dir2 = '/data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/thigh_inference/QC/initial_load/'
-                    image_name = f"thigh_slice_{slice_idx}_labelID_{label_id}"
-                    visualize_pred(img_2D_3c, image_name, out_dir2)
-
-                    import pdb; pdb.set_trace()
-
-                    sam_mask = postprocess_prediction(sam_pred[0], orig_img_with_bbox_size, label_id)
-
-                    import pdb; pdb.set_trace()
-
-                    mask_3D_orig_size[slice_idx, sam_mask > 0] = label_id 
-    
-    import pdb; pdb.set_trace()
-    
     return mask_3D_orig_size
 
-
-def predict_segmentation(infer_method, det_model, sam_model, input_files, dataImagePrep, inference_output_path, device):
-    # Predict Segmentations
-    if infer_method == '3D_stepwise':
-
-        for image_path in tqdm(input_files):  # unsupported file format: s
-            img_3D_unprocessed = load_data(image_path)
-
-            # thigh volume is (15, 256, 512)
-            mask_orig_size = infer_3D_stepwise_prep(det_model, sam_model, img_3D_unprocessed, dataImagePrep, device)
-                                                  
-            import pdb; pdb.set_trace()
-            file_name_no_ext = file_without_extension_from_path(os.path.basename(image_path))
-
-            import pdb; pdb.set_trace()
-            save_prediction(mask_orig_size, inference_output_path, file_name_no_ext)
-
-
-def prompt_prediction(cfg):
-    # -------------------- DEFINE PARAMS -------------------- #   
-    seg_model_path = os.path.join(root, cfg.get('models').get('segmentation').get('model_path'))
-    det_model_path = os.path.join(root, cfg.get('models').get('obj_det').get('model_path'))
+def setup_system(data_cfg, preprocessing_cfg, detection_cfg, segmentation_cfg, output_cfg, run_dir, device):
     
-    sam_model = make_predictor(model_type=cfg.get('models').get('segmentation').get('model_type'), 
-                               initial_weights=cfg.get('base_model'), 
-                               finetuned_weights=seg_model_path, 
-                               device=cfg.get('device', 'cuda:0')
-                               )
+    med_files = locate_files(data_cfg['data_dir'])
+    dataImagePrep = ImagePrep(image_size_tuple=(preprocessing_cfg.get('image_size', 1024),
+                                                preprocessing_cfg.get('image_size', 1024)),  
+                                            )
     
-    det_model = YOLO(det_model_path)
+    det_model = YOLO(os.path.join(root, detection_cfg.get('model_path')))
     
-    input_files = get_all_files(cfg.get('nifti_data'))
-        
-    dataImagePrep = ImagePrep(
-        image_size_tuple=(cfg.get('preprocessing_cfg').get('image_size', 1024),
-                        cfg.get('preprocessing_cfg').get('image_size', 1024)),  
-        )
+    sam_model = make_predictor(model_type=segmentation_cfg.get('model_type'), 
+                               comp_cfg=segmentation_cfg.get('trainable'),
+                               initial_weights=segmentation_cfg.get('base_model'), 
+                               finetuned_weights=os.path.join(root, segmentation_cfg.get('model_path')), 
+                               device=device
+                            )
+    
+    num_iterations = len(med_files)
+    visualize_enabled = output_cfg['visualize']
 
-    infer_method = cfg.get('preprocessing_cfg').get('infer_method')
-    inference_output_path = os.path.join(cfg.get('base_output_dir'), cfg.get('inference_dir'))
+    for i, image_path in enumerate(tqdm(med_files)): 
+        img_3D_unprocessed = load_data(image_path)
+        img_name = extract_filename(image_path)
 
-    predict_segmentation(infer_method, det_model, sam_model, input_files, dataImagePrep, inference_output_path, device= cfg.get('device', 'cuda:0'))
+        pred_volume = autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name, data_cfg['mask_labels'], detection_cfg['conf'], visualize_enabled, run_dir, device)
+        # pred_volume, pred_annotations =                                     
+        save_prediction(pred_volume, run_dir, filename=img_name, output_ext=output_cfg['output_ext'])
 
-    return
+        # Check condition after the third iteration
+        if i == 2 and visualize_enabled:
+            visualize_enabled = False  # Disable visualization from this point onwards
 
 
 if __name__ == "__main__":
@@ -191,10 +128,59 @@ if __name__ == "__main__":
 
     base_dir = os.getcwd()  # Assumes the script is run from the project root
     config_name = args.config_name + '.yaml'
-    config = load_config(config_name, base_dir)
+    cfg = load_config(config_name, base_dir)
 
-    # predict(config)
-    prompt_prediction(config)
+    run_dir = determine_run_directory(cfg.get('output_cfg').get('base_output_dir'), cfg.get('output_cfg').get('task_name'))
+
+    summarize_config(cfg, path=os.path.join(root, run_dir, 'Run_Summaries'))
+
+    setup_system(
+            data_cfg=cfg.get('data'), 
+            preprocessing_cfg=cfg.get('preprocessing_cfg'), 
+            detection_cfg=cfg.get('models').get('obj_det'),
+            segmentation_cfg=cfg.get('models').get('segmentation'),
+            output_cfg=cfg.get('output_cfg'),
+            run_dir=run_dir,
+            device=cfg.get('device')
+            )
+
+
+
+    # predict_segmentation(det_model, sam_model, input_files, dataImagePrep, inference_output_path, mask_labels=mask_labels, device=cfg.get('device', 'cuda:0'))
+
+
+    # mask_labels = cfg.get('data').get('mask_labels')
+    # input_files = get_all_files(cfg.get('data').get('data_dir'))
+    # inference_output_path = os.path.join(cfg.get('base_output_dir'), cfg.get('inference_dir'))
+
+
+        # then in the collation function for a batch:
+        # images = [item['image'] for item in batch]
+        # images = torch.stack(images)
+
+        # then in engine class:
+        # img_name = batch['img_name']
+        # images = images.to(self.device)
+
+        # then for eval class - even though batch is one:
+        # prediction = self.model(images[img_idx].unsqueeze(0), box.unsqueeze(0))  
+        # and for trainer class, with more than one image to a batch:
+        # predictions = self.model(image, boxes)
+
+
+                    # sam_pred = make_prediction(predictor, img_2D_3c, bbox)
+                            # prediction = self.model(images[img_idx].unsqueeze(0), box.unsqueeze(0))   
+
+                    # numpy.ndarray has no attribute 'to'
+
+
+                    # bbox_2 = bbox.to(device) # this is a tensor already
+
+                    # thing = sam_model(img_2D_3c_2, bbox)
+
+                    # thing2 = sam_model(img_2D_3c_3, bbox)
+                    # .unsqueeze(0), box.unsqueeze(0)
+                    # thing3 = sam_model2(img_2D_3c_3.unsqueeze(0), bbox.unsqueeze(0))
 
 
 

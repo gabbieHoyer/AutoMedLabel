@@ -1,8 +1,7 @@
 import argparse
 import os
 import yaml
-from ultralytics import YOLO
-from ultralytics import RTDETR
+from ultralytics import YOLO, RTDETR, NAS
 
 # https://www.kaggle.com/code/nicolaasregnier/yolov8-pred-on-grapes
 
@@ -22,6 +21,8 @@ def load_model(config):
         model_class = YOLO
     elif model_type == 'RTDETR':
         model_class = RTDETR
+    elif model_type == 'NAS':
+        model_class = NAS
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
     

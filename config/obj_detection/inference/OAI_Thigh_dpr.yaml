@@ -1,22 +1,21 @@
 # ------------- AutoLabeling the OAI Thigh Muscle Dataset -------------- #
 
 data:
-  data_dir: standardized_data/challenging_cases/rand_sample/images
-  # data_dir: standardized_data/full_thigh_nifti/train/images/OAI_9437407.nii.gz 
+  data_dir: standardized_data/full_thigh_nifti/train/images/OAI_9437407.nii.gz 
   # data_dir: standardized_data/challenging_cases/dicom_image_sample/00m/9015402    # dicom folder
   # data_dir: standardized_data/challenging_cases/nifti_image_sample/00m/OAI_9015402.nii.gz  # nifti file
   mask_labels:
-    0: background  
-    1: sc_fat
-    2: fascia      
-    3: extensors
-    4: hamstrings
-    5: fem_cortex
-    6: fem_bm
-    7: adductors
-    8: sartorius
-    9: gracilis
-    10: nv
+  0: background  
+  1: sc_fat
+  2: fascia      
+  3: extensors
+  4: hamstrings
+  5: fem_cortex
+  6: fem_bm
+  7: adductors
+  8: sartorius
+  9: gracilis
+  10: nv
 
 preprocessing_cfg:
   image_size: 1024 
@@ -35,7 +34,7 @@ models:
     model_path: 'work_dir/model_weights/finetuned/thighYOLO/best.pt'
     model_weights: 'thighYOLO8_100epoch'
     model_type: YOLO
-    conf: 0.6 # 0.5
+    conf_int: 0.5
   segmentation:
     base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
     model_path: 'work_dir/model_weights/finetuned/multiclass_Thigh_SAM/20240522-1945_finetuned_model_best.pth'
@@ -46,9 +45,10 @@ models:
       image_encoder: true
       mask_decoder: true
 
-output_cfg:
+output_configuration:
   base_output_dir: work_dir/inference
-  task_name: OAI_Thigh
+  labels_dir: annotations  # Location to output labels .txt files
+  pred_dir: preds   # Location to output (gt, prediction) .npz files
   output_ext: 'nii.gz'  # [.nii.gz, .npz]
   visualize: True
   logging_level: DEBUG  # not implemented yet
