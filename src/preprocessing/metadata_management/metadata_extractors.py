@@ -125,6 +125,34 @@ def extract_header_info(dcm_file_path:str, dicom_values:dict, volume_csv_config:
     
     return metadata, demographics  # Return demographics as a separate dictionary
 
+
+# ------------------------------------------------------------------------------------------
+
+# def extract_dicom_data(file_path):
+#     ds = pydicom.dcmread(file_path)
+#     return ds
+
+def summarize_unique_dicom_data(dicom_metadata):
+    summary_dicom_metadata = {}
+    for col_name in dicom_metadata.columns:
+        if col_name in ['PID', 'SOPInstanceUID', 'StudyInstanceUID', 'SeriesInstanceUID']:
+            continue
+        print(col_name)
+        try:
+            unique_vals_counts = dicom_metadata.loc[:,col_name].value_counts().to_dict()
+        except:
+            unique_vals_counts = dicom_metadata.loc[:,col_name].apply(tuple).value_counts().to_dict()
+        print(unique_vals_counts)
+        unique_vals = dicom_metadata.loc[:,col_name].drop_duplicates().tolist()
+        try:
+            print('min - max')
+            print(min(unique_vals), max(unique_vals))
+            print()
+        except:
+            pass
+        summary_dicom_metadata['unique_'+col_name] = unique_vals_counts
+    return summary_dicom_metadata
+
 # ------------------------------------------------------------------------------------------
 
 def generate_subject_metadata(dataset_info:dict, subject_info:dict, additional_metadata):

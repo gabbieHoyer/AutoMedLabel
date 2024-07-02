@@ -83,20 +83,40 @@ echo "MASTER_PORT=$MASTER_PORT"
 echo "DIST_URL=$DIST_URL"
 
 # Activate conda environment
-export PATH=/netopt/rhel7/bin:$PATH
-eval "$('/netopt/rhel7/versions/python/Anaconda3-edge/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
+# export PATH=/netopt/rhel7/bin:$PATH
+# eval "$('/netopt/rhel7/versions/python/Anaconda3-edge/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
+export MODULEPATH=$MODULEPATH:/home/ghoyer/Modules/modulefiles
+module load use.own
+
+if [ -d "/home/ghoyer/miniconda3" ]; then
+    # Load Conda module for RHEL9
+    module load conda_base/1.0
+    if [ $? -ne 0 ]; then
+        echo "Failed to load Miniconda module for RHEL9. Check module name and path."
+    else
+        # Assuming conda init is already run and managed
+        echo "Conda is initialized for RHEL9."
+    fi
+else
+    echo "Miniconda3 directory not found on RHEL9."
+fi
+
+eval "$('/home/ghoyer/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
 
 # Your Conda environment name: 'myenv'
-CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/medsam
+# CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/medsam
+
+if [ -d /data/VirtualAging ] ;
+then
+  dVA="VirtualAging"
+else
+  dVA="virtualaging"
+fi
+
+CONDA_ENV_NAME=/data/$dVA/users/ghoyer/conda/envs/autolabel
 
 # Path to your config file  
-# CONFIG_NAME="OAI_T1_Thigh"
-# CONFIG_NAME="DHAL2"
-CONFIG_NAME="Spine2"
-# CONFIG_NAME="TBrecon3"
-# CONFIG_NAME="Spine_t1sag"
-# CONFIG_NAME="OAI_Knee"
-# CONFIG_NAME="Spine_t1ax"
+CONFIG_NAME="OAI_T1_Thigh_plus"
 
 echo "config $CONFIG_NAME chosen for finetuning pipeline"
 
@@ -113,7 +133,7 @@ torchrun --nproc_per_node=$GPUS_PER_NODE \
          --node_rank=$RANK \
          --master_addr=$MASTER_ADDR \
          --master_port=$MASTER_PORT \
-         src/finetuning/finetune_main2.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=5
+         src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=5
 
 [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
 
@@ -123,7 +143,7 @@ torchrun --nproc_per_node=$GPUS_PER_NODE \
          --node_rank=$RANK \
          --master_addr=$MASTER_ADDR \
          --master_port=$MASTER_PORT \
-         src/finetuning/finetune_main2.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=10
+         src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=10
 
 [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
 
@@ -133,7 +153,7 @@ torchrun --nproc_per_node=$GPUS_PER_NODE \
          --node_rank=$RANK \
          --master_addr=$MASTER_ADDR \
          --master_port=$MASTER_PORT \
-         src/finetuning/finetune_main2.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=20
+         src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=20
 
 [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
 
@@ -144,7 +164,7 @@ torchrun --nproc_per_node=$GPUS_PER_NODE \
          --node_rank=$RANK \
          --master_addr=$MASTER_ADDR \
          --master_port=$MASTER_PORT \
-         src/finetuning/finetune_main2.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=40
+         src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=40
 
 [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
 
@@ -154,69 +174,8 @@ torchrun --nproc_per_node=$GPUS_PER_NODE \
          --node_rank=$RANK \
          --master_addr=$MASTER_ADDR \
          --master_port=$MASTER_PORT \
-         src/finetuning/finetune_main2.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=full
+         src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=full
 
 [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
-
-# echo "Running distributed training 1 with torchrun"
-# torchrun --nproc_per_node=$GPUS_PER_NODE \
-#          --nnodes=$NNODES \
-#          --node_rank=$RANK \
-#          --master_addr=$MASTER_ADDR \
-#          --master_port=$MASTER_PORT \
-#          src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=5
-#         #  src/finetuning/finetune_main_rand_single_instance_gt_matched.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=5
-
-
-# [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
-
-# echo "Running distributed training 2 with torchrun"
-# torchrun --nproc_per_node=$GPUS_PER_NODE \
-#          --nnodes=$NNODES \
-#          --node_rank=$RANK \
-#          --master_addr=$MASTER_ADDR \
-#          --master_port=$MASTER_PORT \
-#          src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=10
-#         #  src/finetuning/finetune_main_rand_single_instance_gt_matched.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=10
-
-
-# [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
-
-# echo "Running distributed training 3 with torchrun"
-# torchrun --nproc_per_node=$GPUS_PER_NODE \
-#          --nnodes=$NNODES \
-#          --node_rank=$RANK \
-#          --master_addr=$MASTER_ADDR \
-#          --master_port=$MASTER_PORT \
-#          src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=20
-#         #  src/finetuning/finetune_main_rand_single_instance_gt_matched.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=20
-
-
-# [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
-
-
-# echo "Running distributed training 4 with torchrun"
-# torchrun --nproc_per_node=$GPUS_PER_NODE \
-#          --nnodes=$NNODES \
-#          --node_rank=$RANK \
-#          --master_addr=$MASTER_ADDR \
-#          --master_port=$MASTER_PORT \
-#          src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=40
-#         #  src/finetuning/finetune_main_rand_single_instance_gt_matched.py ${CONFIG_NAME} --kwargs datamodule.max_subject_set=40
-
-# [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
-
-
-# echo "Running distributed training 5 with torchrun"
-# torchrun --nproc_per_node=$GPUS_PER_NODE \
-#          --nnodes=$NNODES \
-#          --node_rank=$RANK \
-#          --master_addr=$MASTER_ADDR \
-#          --master_port=$MASTER_PORT \
-#          src/finetuning/finetune_main.py ${CONFIG_NAME} --kwargs "datamodule.max_subject_set=full"
-#         #  src/finetuning/finetune_main_rand_single_instance_gt_matched.py ${CONFIG_NAME} --kwargs "datamodule.max_subject_set=full"
-
-# [[ -n "$JOB_ID" ]] && qstat -j "$JOB_ID"
-
 
 echo "All processes completed successfully."

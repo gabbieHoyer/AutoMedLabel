@@ -1,10 +1,9 @@
 
-from typing import Union #, Tuple, List
-import numpy as np
-
-from scipy.ndimage import center_of_mass
 import cc3d
+import numpy as np
+from typing import Union #, Tuple, List
 from skimage import transform
+from scipy.ndimage import center_of_mass
 
 # ---------------------- UTILITY FUNCTIONS ----------------------
 
@@ -276,7 +275,6 @@ class ImagePrep():
     def __init__(self, image_size_tuple:tuple[int, int] = []):
         self.image_size_tuple = image_size_tuple
     
-    
     # -------------------- UTILITY FUNCTIONS --------------------
 
     def clip_image_data(self, image_data: np.ndarray, valid_pixels) -> np.ndarray:
@@ -379,6 +377,7 @@ class ImagePrep():
         normalized_data = self.prep_image_study_specific_step1(image_data, z_indices)
         
         # resized_normalized_data = self.prep_image_sam_specific_step2(normalized_data)
+        
         return normalized_data  #resized_normalized_data
     
     # def check_valid_pixels(self, image_data: np.ndarray,) -> np.ndarray:

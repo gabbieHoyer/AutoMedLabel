@@ -41,10 +41,10 @@ def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, z_indices, 
     
     for i, (img_slice, mask_slice) in enumerate(zip(image_data, mask_data)):
         
-        #img_slice_3c = np.repeat(img_slice[:, :, None], 3, axis=-1) #note - the only difference between our pipeline and medSAM - when compared to non-1c version, looks solid :D
+        img_slice_3c = np.repeat(img_slice[:, :, None], 3, axis=-1) 
 
         image_file_name = f"{base_name}-{str(z_indices[i]).zfill(3)}.npy"
-        np.save(os.path.join(images_dir, image_file_name), img_slice)
+        np.save(os.path.join(images_dir, image_file_name), img_slice_3c)
         np.save(os.path.join(masks_dir, image_file_name), mask_slice)
 
         sys.stdout.flush()  # Ensure output is flushed immediately

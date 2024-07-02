@@ -1,3 +1,6 @@
+
+""" Doesn't currently work in this directory, but does work in obj_det dir """
+
 import os
 import argparse
 import numpy as np
@@ -14,10 +17,11 @@ root = pyrootutils.setup_root(
 
 from src.preprocessing.yolo_prep import ImagePrep
 from src.utils.file_management.file_handler import load_data
-from src.utils.file_management.config_handler import load_experiment, summarize_config
+from src.utils.file_management.config_handler import load_autolabel_prompt, summarize_config
 
-from ultralytics import YOLO, RTDETR
-from infer_helper import *
+from src.obj_detection.ultralytics.models import YOLO, RTDETR
+
+from src.prompting.infer_helper import *
 
 def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name, mask_labels, remove_label_ids=[], conf=0.5, visualize=False, run_dir=None, device='cpu'):
 
@@ -32,7 +36,15 @@ def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name,
         img_2D = dataImagePrep.prep_image_sam_specific_step2(img_3D[slice_idx,:,:])  
         img_2D_3c = np.repeat(img_2D[:, :, None], 3, axis=-1)  # would happen in the sam finetuning dataset class  (1024, 1024, 3)
 
+        # # ----------- #
+        # image_name = f"{img_name}_{slice_idx}"
+        # visualize_input(img_2D_3c, image_name, run_dir)
+        # # ----------- #
+
+        import pdb; pdb.set_trace()
+
         det_results = det_model(source=img_2D_3c, conf=conf, device=device)  # conf=0.5
+        import pdb; pdb.set_trace()
 
         # Convert the shape to (3, H, W)
         img_2D_3c = np.transpose(img_2D_3c, (2, 0, 1)) # would happen in the sam finetuning dataset class (3, 1024, 1024)
@@ -78,7 +90,7 @@ def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name,
         # Convert combined_mask to the final integer mask
         mask_3D_orig_size[slice_idx] = combined_mask.cpu().numpy().astype(np.uint8)
         
-        if visualize: 
+        if visualize and slice_idx % 3 == 0:
             visualize_full_pred(image=img_3D_unprocessed[slice_idx,...],
                             pred_mask=mask_3D_orig_size[slice_idx,...],
                             mask_labels=mask_labels,
@@ -89,13 +101,13 @@ def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name,
 
 def setup_system(data_cfg, preprocessing_cfg, detection_cfg, segmentation_cfg, output_cfg, run_dir, device):
     
-    med_files = locate_files(data_cfg['data_dir'])
     dataImagePrep = ImagePrep(image_size_tuple=(preprocessing_cfg.get('image_size', 1024),
                                                 preprocessing_cfg.get('image_size', 1024)),  
                                             )
     
-    det_model = YOLO(os.path.join(root, detection_cfg.get('model_path')))  # results = model(source=config['data'], conf=config.get('conf', 0.5), save=True, save_txt=True)
-    
+    det_model = YOLO(os.path.join(root, detection_cfg.get('model_path'))) 
+    import pdb; pdb.set_trace()
+
     sam_model = make_predictor(model_type=segmentation_cfg.get('model_type'), 
                                comp_cfg=segmentation_cfg.get('trainable'),
                                initial_weights=segmentation_cfg.get('base_model'), 
@@ -105,16 +117,24 @@ def setup_system(data_cfg, preprocessing_cfg, detection_cfg, segmentation_cfg, o
     
     visualize_enabled = output_cfg['visualize']
 
+    med_files = locate_files(data_cfg['data_dir'])
+
     for i, image_path in enumerate(tqdm(med_files)): 
-        img_3D_unprocessed = load_data(image_path)
+
+        if os.path.isdir(image_path):
+            img_3D_unprocessed = load_dcm(image_path)
+        else:
+            img_3D_unprocessed = load_data(image_path)
+
         img_name = extract_filename(image_path)
 
         pred_volume = autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name, data_cfg['mask_labels'], preprocessing_cfg['remove_label_ids'], detection_cfg['conf'], visualize_enabled, run_dir, device)
-        # pred_volume, pred_annotations =                                     
+        # pred_volume, pred_annotations =         
+                                    
         # save_prediction(pred_volume, run_dir, filename=img_name, output_ext=output_cfg['output_ext'])
 
         # Check condition after the third iteration
-        if i == 5 and visualize_enabled:
+        if i == 2 and visualize_enabled:
             visualize_enabled = False  # Disable visualization from this point onwards
 
 
@@ -125,7 +145,10 @@ if __name__ == "__main__":
 
     base_dir = os.getcwd()  # Assumes the script is run from the project root
     config_name = args.config_name + '.yaml'
-    cfg = load_config(config_name, base_dir)
+
+    # cfg = load_config(config_name, base_dir)
+
+    cfg = load_autolabel_prompt(config_name, base_dir)
 
     run_dir = determine_run_directory(cfg.get('output_cfg').get('base_output_dir'), cfg.get('output_cfg').get('task_name'))
 

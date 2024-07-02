@@ -10,7 +10,8 @@ distributed: False
 
 dataset:
   OAI-thigh:
-    config: OAI_T1_Thigh.yaml       
+    config: OAI_T1_Thigh_plus.yaml  
+    # config: OAI_T1_Thigh.yaml     
     project: multiclass_Thigh-Evaluation
     # project: singleclass_Thigh-Evaluation
 
@@ -19,33 +20,48 @@ datamodule:
   bbox_shift: 0
   batch_size: 1  
   num_workers: 1
+  # ---------------- Custom Metric Implementation ----------------- #
   metric:
     func:
       tissuevolume: true
     tissues: [3, 4, 5, 6, 7, 8, 9]
     dicom_fields: ['pixel_spacing', 'slice_thickness', 'rows', 'columns']
     representative_slice: False
+  # --------------------------------------------------------------- #
 
 module:
   work_dir: "work_dir/evaluation"
   task_name: Thigh-Evaluation
-  use_wandb: False #True
+  use_wandb: False 
   visualize: True
 
 base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
 
 models:
-  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/OAI_Thigh/aug_bbox_shift_20/multi_class_model/img_enc_False/early_stop_patience_10/subject_5
-    model_weights: Thigh_multiclass_noFascia-balanced_False-subject_set_5-bbox_shift_20
+  # Example:
+  - finetuned_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    model_weights: 'SAM'
     model_type: vit_b
     model_details:
       balanced: false
-      subject: '5'
-      bbox_shift: 20
+      subject: full
+      bbox_shift: 20  
     trainable:
-      prompt_encoder: false
-      image_encoder: false
-      mask_decoder: true
+      prompt_encoder: False   
+      image_encoder: True    
+      mask_decoder: True  
+
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/OAI_Thigh/aug_bbox_shift_20/multi_class_model/img_enc_False/early_stop_patience_10/subject_5
+  #   model_weights: Thigh_multiclass_noFascia-balanced_False-subject_set_5-bbox_shift_20
+  #   model_type: vit_b
+  #   model_details:
+  #     balanced: false
+  #     subject: '5'
+  #     bbox_shift: 20
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: false
+  #     mask_decoder: true
 
   # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/OAI_Thigh/aug_bbox_shift_20/multi_class_model/img_enc_False/early_stop_patience_10/subject_10
   #   model_weights: Thigh_multiclass_noFascia-balanced_False-subject_set_10-bbox_shift_20
@@ -58,96 +74,6 @@ models:
   #     prompt_encoder: false
   #     image_encoder: false
   #     mask_decoder: true
-
-  # - model_path: 'work_dir/model_weights/Finetuned/OAI_Thigh/rand_single_instance/20240515-2234_finetuned_model_best.pth'
-  #   model_weights: 'OAI_T1_Thigh_rand_single_instance'  # preliminary strategy for finetuning with thigh multi-instance
-  #   model_type: vit_b
-  #   model_details: [False, "full"]
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True  
-
-  # - model_path: 'work_dir/model_weights/Finetuned/OAI_Thigh/rand_single_instance_gt_matched/20240516-0055_finetuned_model_best.pth'
-  #   model_weights: 'OAI_T1_Thigh_rand_single_instance_gt_matched' # the standard now lols
-  #   model_type: vit_b
-  #   model_details: [False, "full"]
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True  
-
-  # - model_path: 'work_dir/model_weights/Finetuned/OAI_Thigh/20240423-2120_finetuned_model_best.pth'
-  #   model_weights: 'OAI_T1_Thigh'
-  #   model_type: vit_b
-  #   model_details: [False, "full"]
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True  
-
-  # - model_path: 'work_dir/model_weights/Finetuned/Challenging_Anatomy/20240427-0459_finetuned_model_best.pth'
-  #   model_weights: 'Challenging_Axial'
-  #   model_type: vit_b
-  #   model_details: [False, "full"]
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True  
-
-  # - model_path: 'work_dir/model_weights/MedSAM/medsam_vit_b.pth'
-  #   model_weights: 'Muscle'
-  #   model_type: vit_b
-  #   model_details: [False, 40]
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True  
-
-  # - model_path: 'work_dir/model_weights/MedSAM/medsam_vit_b.pth'
-  #   model_weights: 'mskSAM'
-  #   model_type: vit_b
-  #   model_details: [False, 40]
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True  
-
-  # - model_path: 'work_dir/model_weights/Finetuned/Spine_UH2/20240427-0452_finetuned_model_best.pth'
-  #   model_weights: 'Spine_UH2'
-  #   model_type: vit_b
-  #   model_details: [False, 40]
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True   
-
-  # - finetuned_model: 'work_dir/model_weights/Finetuned/TBrecon_OAI_P50_AFACL_Knee/20240423-2211_finetuned_model_best.pth'
-  #   model_weights: 'Knee-OAI-TBrecon-P50-AFACL'
-  #   model_type: vit_b
-  #   model_details: [True, 40]
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True  
-
-  # - finetuned_model: 'work_dir/model_weights/SAM/sam_vit_b_01ec64.pth'
-  #   model_weights: 'SAM'
-  #   model_type: vit_b
-  #   model_details: [False, 'full']   
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True  
-
-  # - finetuned_model: 'work_dir/model_weights/MedSAM/medsam_vit_b.pth'
-  #   model_weights: 'MedSAM'
-  #   model_type: vit_b
-  #   model_details: [False, 'full']  
-  #   trainable:
-  #     prompt_encoder: False   
-  #     image_encoder: True    
-  #     mask_decoder: True  
 
 
 output_configuration:

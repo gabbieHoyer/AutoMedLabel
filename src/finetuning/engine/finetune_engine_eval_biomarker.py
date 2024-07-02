@@ -27,7 +27,6 @@ root = pyrootutils.setup_root(
 import src.finetuning.utils.gpu_setup as GPUSetup #is_distributed
 from src.finetuning.utils.logging import main_process_only, log_info, wandb_log
 from src.finetuning.utils.fig_QC import quality_check, visualize_input, visualize_predictions
-from src.finetuning.engine.metrics.t1rho_t2_maps import T1rhoMetric 
 from src.finetuning.utils.metric_utils import load_meta, parse_image_name, extract_meta
 from src.finetuning.engine.metrics.metric_factory import load_metrics
 

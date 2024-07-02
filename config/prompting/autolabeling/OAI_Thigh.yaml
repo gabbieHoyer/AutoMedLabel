@@ -1,28 +1,22 @@
+experiment:
+  name: OAI_Thigh
+  pretrained_weights: YOLO8 + SAM
+  description: "Autolabeling OAI axial T1 thigh muscle dataset with YOLO8 + SAM."
+
+dataset:
+  OAI-thigh:
+    config: OAI_T1_Thigh.yaml
+
 data:
-  data_dir: standardized_data/challenging_cases/rand_sample/images # works with locate_files, load_data
+  # data_dir: standardized_data/challenging_cases/rand_sample/images # works with locate_files, load_data
   # data_dir: standardized_data/full_thigh_nifti/train/images/OAI_9437407.nii.gz  # works with locate_files, load_data
   # data_dir: standardized_data/challenging_cases/dicom_image_sample/00m/9015402    # dicom folder   # works
-  # data_dir: standardized_data/challenging_cases/nifti_image_sample/00m/OAI_9015402.nii.gz  
+  data_dir: standardized_data/challenging_cases/nifti_image_sample/00m/OAI_9015402.nii.gz  
   # data_dir: standardized_data/challenging_cases/dicom_image_sample/00m   # works with locate_files, load_data/load_dcm
-  mask_labels:
-    0: background
-    1: sc_fat
-    2: fascia
-    3: extensors
-    4: hamstrings
-    5: fem_cortex
-    6: fem_bm
-    7: adductors
-    8: sartorius
-    9: gracilis
-    10: nv
 
 preprocessing_cfg:
-  image_size: 1024
-  voxel_num_thre2d: 100
-  voxel_num_thre3d: 200
   remove_label_ids: [2]
-  instance_bbox: True
+  # other related fields added from dataset yaml
 
 device: cuda:0
 models:

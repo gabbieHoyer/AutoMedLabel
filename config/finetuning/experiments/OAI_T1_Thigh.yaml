@@ -8,7 +8,8 @@ experiment:
 
 dataset:
   OAI-thigh:
-    config: OAI_T1_Thigh.yaml
+    config: OAI_T1_Thigh_plus.yaml
+    # config: OAI_T1_Thigh.yaml  # without the additional 49 subjects
 
 SEED: 42
 distributed: True 
@@ -36,10 +37,10 @@ module:
   task_name: OAI-Thigh
   group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
   model_type: vit_b
-  use_wandb: True
+  use_wandb: False 
   visualize: True
 
-  num_epochs: 500
+  num_epochs: 1 #500
 
   optimizer:
     weight_decay: 0.01

@@ -14,7 +14,7 @@ root = pyrootutils.setup_root(
 
 from src.preprocessing.yolo_prep import ImagePrep
 from src.utils.file_management.file_handler import load_data
-from src.utils.file_management.config_handler import load_experiment, summarize_config
+from src.utils.file_management.config_handler import summarize_config
 
 from ultralytics import YOLO, RTDETR
 from infer_helper import *
@@ -78,7 +78,7 @@ def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name,
         # Convert combined_mask to the final integer mask
         mask_3D_orig_size[slice_idx] = combined_mask.cpu().numpy().astype(np.uint8)
         
-        if visualize: 
+        if visualize and slice_idx % 3 == 0:
             visualize_full_pred(image=img_3D_unprocessed[slice_idx,...],
                             pred_mask=mask_3D_orig_size[slice_idx,...],
                             mask_labels=mask_labels,
@@ -89,11 +89,10 @@ def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name,
 
 def setup_system(data_cfg, preprocessing_cfg, detection_cfg, segmentation_cfg, output_cfg, run_dir, device):
     
-    med_files = locate_files(data_cfg['data_dir'])
     dataImagePrep = ImagePrep(image_size_tuple=(preprocessing_cfg.get('image_size', 1024),
                                                 preprocessing_cfg.get('image_size', 1024)),  
                                             )
-    
+
     det_model = YOLO(os.path.join(root, detection_cfg.get('model_path')))  # results = model(source=config['data'], conf=config.get('conf', 0.5), save=True, save_txt=True)
     
     sam_model = make_predictor(model_type=segmentation_cfg.get('model_type'), 
@@ -105,8 +104,15 @@ def setup_system(data_cfg, preprocessing_cfg, detection_cfg, segmentation_cfg, o
     
     visualize_enabled = output_cfg['visualize']
 
+    med_files = locate_files(data_cfg['data_dir'])
+
     for i, image_path in enumerate(tqdm(med_files)): 
-        img_3D_unprocessed = load_data(image_path)
+
+        if os.path.isdir(image_path):
+            img_3D_unprocessed = load_dcm(image_path)
+        else:
+            img_3D_unprocessed = load_data(image_path)
+
         img_name = extract_filename(image_path)
 
         pred_volume = autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name, data_cfg['mask_labels'], preprocessing_cfg['remove_label_ids'], detection_cfg['conf'], visualize_enabled, run_dir, device)
@@ -114,7 +120,7 @@ def setup_system(data_cfg, preprocessing_cfg, detection_cfg, segmentation_cfg, o
         # save_prediction(pred_volume, run_dir, filename=img_name, output_ext=output_cfg['output_ext'])
 
         # Check condition after the third iteration
-        if i == 5 and visualize_enabled:
+        if i == 2 and visualize_enabled:
             visualize_enabled = False  # Disable visualization from this point onwards
 
 

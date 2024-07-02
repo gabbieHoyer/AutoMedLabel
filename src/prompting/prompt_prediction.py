@@ -48,7 +48,7 @@ def save_prediction(seg_3D, gts, save_dir, file_name_no_ext):
     # Assuming file_name is already the base filename without the extension
     npz_output_path = os.path.join(save_dir, f"{file_name_no_ext}.npz")
     np.savez_compressed(npz_output_path, seg=seg_3D, gt=gts) 
-    #print(f"Inference results saved to {npz_output_path}")
+
     return
 
 # -------------------- MAIN PIPELINE FUNCTIONS -------------------- #

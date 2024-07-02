@@ -31,6 +31,8 @@ def load_and_merge_config_section(main_config, section_path, config_path_manager
         print(f"No valid 'config' found for section {'/'.join(section_path)}. Proceeding without it.")
     return main_config
 
+
+
 def load_and_merge_visualization_configs(main_config, config_path_manager, sub_dir):
     """
     Specifically handles loading and merging visualization configurations.
@@ -40,16 +42,23 @@ def load_and_merge_visualization_configs(main_config, config_path_manager, sub_d
     for key, value in visualization_configs.items():
         config_name = value.get('config', None)
         if isinstance(config_name, str):
-            additional_config_path = config_path_manager.extract_config_path(file_name=config_name, sub_dir=sub_dir)
-            additional_config = config_path_manager.load_config_yaml_path(additional_config_path)
-            # Merge this config back under its unique key within `visualizations`
-            # Assuming each config file starts with a `visualizations` key
-            if 'visualizations' in additional_config:
-                main_config['visualizations'][key] = additional_config['visualizations']
+            # Construct the full path and check if it exists
+            additional_config_path = os.path.join(config_path_manager.base_dir, sub_dir, config_name)
+            
+            if os.path.exists(additional_config_path):
+                additional_config_path = config_path_manager.extract_config_path(file_name=config_name, sub_dir=sub_dir)
+                additional_config = config_path_manager.load_config_yaml_path(additional_config_path)
+                # Merge this config back under its unique key within `visualizations`
+                # Assuming each config file starts with a `visualizations` key
+                if 'visualizations' in additional_config:
+                    main_config['visualizations'][key] = additional_config['visualizations']
+                else:
+                    print(f"Warning: No 'visualizations' key found in {config_name}. Skipping.")
             else:
-                print(f"Warning: No 'visualizations' key found in {config_name}. Skipping.")
+                print(f"Warning: Visualization config file {additional_config_path} not found. Skipping.")
 
     return main_config
+
 
 def load_and_merge_dataset_config(main_config, dataset_name, config_path_manager, sub_dir, new_fields_to_add, default_fields_to_add):
     """
@@ -142,6 +151,44 @@ def load_prompting_experiment(config_file_name, base_dir, prompt_type='zeroshot'
     return main_config
 
 
+# ------------------------------------------------------------------
+
+def load_autolabel_prompt(config_file_name, base_dir):
+    configPathManager = ConfigPathManager(base_dir=base_dir)
+
+    # Extract path to config and make sure yaml file exists
+    config_path = configPathManager.extract_config_path(file_name=config_file_name, 
+                                                        sub_dir=os.path.join('prompting','autolabeling'))
+    main_config = configPathManager.load_config_yaml_path(config_path)
+
+    # # Process each dataset configuration
+    for dataset_name in main_config.get('dataset', {}).keys():
+
+        new_fields_to_add = [
+            ['data', 'mask_labels'],  # only works if the field is empty in my current config
+            ['preprocessing_cfg', 'image_size'],
+            ['preprocessing_cfg', 'voxel_num_thre2d'],
+            ['preprocessing_cfg', 'voxel_num_thre3d'],
+            ['preprocessing_cfg', 'instance_bbox'],
+            ['data', 'ml_metadata_file'],
+            ['data', 'slice_info_parquet_dir'],
+        ]
+        default_fields_to_add = [
+            ['mask_labels'],
+            ['preprocessing_cfg', 'image_size'],
+            ['preprocessing_cfg', 'voxel_num_thre2d'],
+            ['preprocessing_cfg', 'voxel_num_thre3d'],
+            ['preprocessing_cfg', 'instance_bbox'],
+            ['ml_metadata_file'],
+            ['slice_info_parquet_dir'],
+        ]
+
+        main_config = load_and_merge_dataset_config(main_config, dataset_name, configPathManager, 'preprocessing/datasets', new_fields_to_add, default_fields_to_add)
+
+    return main_config
+
+# ------------------------------------------------------------------
+
 def load_experiment(config_file_name, base_dir, kwargs=None):
     configPathManager = ConfigPathManager(base_dir=base_dir)
 
@@ -190,14 +237,11 @@ def load_experiment(config_file_name, base_dir, kwargs=None):
     # if kwargs !=None:
     #     apply_overrides2(main_config, kwargs, dataset)
 
-    # import pdb; pdb.set_trace()
 
     return main_config
 
 
 def load_evaluation(config_file_name, base_dir, kwargs=None):
-
-    # import pdb; pdb.set_trace()
 
     configPathManager = ConfigPathManager(base_dir=base_dir)
 
@@ -205,8 +249,6 @@ def load_evaluation(config_file_name, base_dir, kwargs=None):
     config_path = configPathManager.extract_config_path(file_name=config_file_name, 
                                                         sub_dir=os.path.join('finetuning','evaluation'))
     main_config = configPathManager.load_config_yaml_path(config_path)
-
-    # import pdb; pdb.set_trace()
 
     # Apply terminal argument updates
     if kwargs !=None:
@@ -241,9 +283,6 @@ def load_evaluation(config_file_name, base_dir, kwargs=None):
     return main_config
 
     
-
-
-
 # ---------------- SUMMARIZE CONFIG FILE ------------------ #
 def summarize_config(config, path):
     def _summarize(current_config, indent_level=0):
@@ -331,6 +370,23 @@ def update_cfg_for_dataset(cfg, model_cfg):
 
 
 
+# def load_autolabel_prompt(config_file_name, base_dir, prompt_type='autolabeling'):
+#     configPathManager = ConfigPathManager(base_dir=base_dir)
+
+#     base_config_path = configPathManager.extract_config_path(
+#         file_name=config_file_name, 
+#         sub_dir=os.path.join('preprocessing', 'datasets')
+#     )
+#     base_config = configPathManager.load_config_yaml_path(base_config_path)
+
+#     if isinstance(config_file_name, str):
+#         prompt_experiment_config_path = configPathManager.extract_config_path(file_name=config_file_name, 
+#                                                                        sub_dir=os.path.join('prompting','autolabeling'))
+
+#     prompt_experiment_config = configPathManager.load_config_yaml_path(prompt_experiment_config_path)
+#     main_config = configPathManager.merge_missing_config_values(prompt_experiment_config, base_config, fields_to_merge='all')  
+
+#     return main_config
 
 # def load_prompting_experiment(config_file_name, base_dir, prompt_type='zeroshot'):
 #     configPathManager = ConfigPathManager(base_dir=base_dir)

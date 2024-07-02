@@ -19,7 +19,7 @@ export PATH=/netopt/rhel7/bin:$PATH
 eval "$('/netopt/rhel7/versions/python/Anaconda3-edge/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
 
 # Your Conda environment name: 'myenv'
-CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/medsam
+# CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/medsam
 
 # ----------------- CONFIG OPTIONS -----------------
 # Knee

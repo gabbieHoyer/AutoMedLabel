@@ -4,57 +4,8 @@ import torch
 import numpy as np
 from abc import ABC
 from torch.nn import Module
-from torchmetrics import Metric
-from monai.metrics import Metric
-from monai.utils import MetricReduction
-from monai.metrics.utils import do_metric_reduction
-
 from skimage import transform
-from src.preprocessing.sam_prep import MaskPrep #, ImagePrep
 
-# -------------------- DATA POST-PROCESS FUNCTIONS -------------------- #
-
-# monai post-processing functions: 
-# https://github.com/Project-MONAI/MONAI/blob/dev/monai/transforms/post/array.py#L132
-# fill in holes, keep largest connected components, asDiscrete
-
-# __all__ = [
-#     "Activations",
-#     "AsDiscrete",
-#     "FillHoles",
-#     "KeepLargestConnectedComponent",
-#     "RemoveSmallObjects",
-#     "LabelFilter",
-#     "LabelToContour",
-#     "MeanEnsemble",
-#     "ProbNMS",
-#     "SobelGradients",
-#     "VoteEnsemble",
-#     "Invert",
-#     "DistanceTransformEDT",
-# ]
-
-# ----------------------------------------------------------------------- #
-  
-
-# def postprocess_resize(mask, image_size_tuple:tuple[int,int]):
-#     """Resize mask to new dimensions."""
-#     predMaskPrep = MaskPrep()
-#     resized_mask = predMaskPrep.resize_mask(mask_data = mask.astype(np.uint8),
-#                                             image_size_tuple = image_size_tuple)
-#     return resized_mask
-
-# or example of using the post-processing resize for a slice:
-# gt_2D_prep_orig_size = postprocess_resize(gt_2D, (gt_2D_unprocessed.shape[0], gt_2D_unprocessed.shape[1]))
-
-# def postprocess_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int):
-#     """Convert SAM prediction into segmentation mask with original image dims and label ids."""
-#     sam_mask_resized = postprocess_resize(sam_pred, image_size_tuple)
-#     sam_mask = np.zeros_like(sam_mask_resized, dtype=np.uint8)
-#     sam_mask[sam_mask_resized > 0] = label_id
-#     return sam_mask
-
-# ----------------------------------------------------------------------------------- #
 
 class TissueVolumeMetric(Module):
     def __init__(self, reduction='mean_batch', class_names=None, tissue_labels=None):
@@ -172,6 +123,52 @@ class TissueVolumeMetric(Module):
     def forward(self, *args, **kwargs):
         # Implement the forward method as a placeholder
         pass
+
+
+
+# -------------------- DATA POST-PROCESS FUNCTIONS -------------------- #
+
+# monai post-processing functions: 
+# https://github.com/Project-MONAI/MONAI/blob/dev/monai/transforms/post/array.py#L132
+# fill in holes, keep largest connected components, asDiscrete
+
+# __all__ = [
+#     "Activations",
+#     "AsDiscrete",
+#     "FillHoles",
+#     "KeepLargestConnectedComponent",
+#     "RemoveSmallObjects",
+#     "LabelFilter",
+#     "LabelToContour",
+#     "MeanEnsemble",
+#     "ProbNMS",
+#     "SobelGradients",
+#     "VoteEnsemble",
+#     "Invert",
+#     "DistanceTransformEDT",
+# ]
+
+# ----------------------------------------------------------------------- #
+  
+
+# def postprocess_resize(mask, image_size_tuple:tuple[int,int]):
+#     """Resize mask to new dimensions."""
+#     predMaskPrep = MaskPrep()
+#     resized_mask = predMaskPrep.resize_mask(mask_data = mask.astype(np.uint8),
+#                                             image_size_tuple = image_size_tuple)
+#     return resized_mask
+
+# or example of using the post-processing resize for a slice:
+# gt_2D_prep_orig_size = postprocess_resize(gt_2D, (gt_2D_unprocessed.shape[0], gt_2D_unprocessed.shape[1]))
+
+# def postprocess_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int):
+#     """Convert SAM prediction into segmentation mask with original image dims and label ids."""
+#     sam_mask_resized = postprocess_resize(sam_pred, image_size_tuple)
+#     sam_mask = np.zeros_like(sam_mask_resized, dtype=np.uint8)
+#     sam_mask[sam_mask_resized > 0] = label_id
+#     return sam_mask
+
+# ----------------------------------------------------------------------------------- #
 
 
 # ----------------------------------

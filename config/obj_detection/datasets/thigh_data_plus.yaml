@@ -1,0 +1,36 @@
+# might need to include background as an option, loools b/c masks include this unique val, else out of bounds index eventually
+
+names:
+- background
+- sc_fat
+- fascia
+- extensors
+- hamstrings
+- fem_cortex
+- fem_bm
+- adductors
+- sartorius
+- gracilis
+- nv
+
+nc: 11
+
+path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy
+
+# temp test func
+train: train/images
+val: train/images
+test: test/labels
+
+
+meta_path: /data/bigbone3/ghoyer/standardized/OAI/thigh/T1_ax/metadata/volume_metadata_for_ml_thigh_plus.json 
+
+
+# BTW *.npy files are only generated if you use cache=disk during training. By default these are not generated.
+
+# suggestions for how to approach custom npy dataset for YOLO :,D
+# https://github.com/ultralytics/ultralytics/issues/8199
+
+
+# # options for yaml design: https://github.com/ultralytics/ultralytics/issues/8254
+

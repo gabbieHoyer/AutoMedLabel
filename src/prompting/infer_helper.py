@@ -23,7 +23,7 @@ import pydicom
 
 import SimpleITK as sitk
 
-from ultralytics import YOLO, RTDETR
+# from ultralytics import YOLO, RTDETR
 
 import pyrootutils
 root = pyrootutils.setup_root(
@@ -34,7 +34,6 @@ root = pyrootutils.setup_root(
 )
 
 from src.preprocessing.sam_prep import MaskPrep, ImagePrep
-from src.utils.file_management.file_handler import load_data
 from src.finetuning.engine.models.sam import finetunedSAM
 
 # ------------------- Visualization Tools ----------------------------------- #
@@ -272,54 +271,17 @@ def load_config(config_file_name, base_dir):
         config = yaml.safe_load(config_file) or {}
     return config
 
-def load_model(config):
-    model_type = config.get('model_type', 'YOLO').upper()  # Default to YOLO if not specified
+# def load_model(config):
+#     model_type = config.get('model_type', 'YOLO').upper()  # Default to YOLO if not specified
 
-    if model_type == 'YOLO':
-        model_class = YOLO
-    elif model_type == 'RTDETR':
-        model_class = RTDETR
-    else:
-        raise ValueError(f"Unsupported model type: {model_type}")
+#     if model_type == 'YOLO':
+#         model_class = YOLO
+#     elif model_type == 'RTDETR':
+#         model_class = RTDETR
+#     else:
+#         raise ValueError(f"Unsupported model type: {model_type}")
     
-    return model_class
-
-# def locate_files(directory_or_file):
-#     if os.path.isfile(directory_or_file):
-#         return [directory_or_file]
-#     elif os.path.isdir(directory_or_file):
-#         return [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
-#     else:
-#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
-
-# def locate_files(directory_or_file):
-#     if os.path.isfile(directory_or_file):
-#         return [directory_or_file]
-#     elif os.path.isdir(directory_or_file):
-#         return [directory_or_file]
-#     # [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
-#     else:
-#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
-
-
-# def locate_files(directory_or_file):
-#     if os.path.isfile(directory_or_file):
-#         # It's a single file (could be NIfTI or other file)
-#         return [directory_or_file]
-#     elif os.path.isdir(directory_or_file):
-#         contents = os.listdir(directory_or_file)
-#         full_paths = [os.path.join(directory_or_file, f) for f in contents]
-        
-#         if all(os.path.isdir(p) for p in full_paths):
-#             # It's a folder of folders (likely DICOM folders)
-#             return full_paths
-#         else:
-#             # It's a single folder (could be NIfTI files or a single DICOM folder)
-#             # return [directory_or_file]
-#             return [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
-#     else:
-#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
-
+#     return model_class
 
 def is_nifti_file(file_name):
     return file_name.endswith('.nii') or file_name.endswith('.nii.gz')
@@ -393,19 +355,6 @@ def extract_filename(img_file: str):
         file_name = os.path.splitext(file_name)[0] # Assuming file_name can be used as subject_id
 
     return file_name
-
-# def extract_filename(img_file:str):
-#     """ Extract filenames without extension
-#     Caution: fails for files with periods but no extension (ex. dicom file: "1.2.345")
-#     """
-#     file_name = os.path.basename(img_file)
-
-#     # Removes file extension
-#     # If zipped, remove zipped file extension (name.dcm.gz, name.nii.gz)
-#     if file_name.endswith('.gz'):
-#         file_name = file_name.rstrip('.gz')
-#     return os.path.splitext(file_name)[0] # Assuming file_name can be used as subject_id
-
 
 def determine_run_directory(base_dir, task_name, group_name=None):
     """

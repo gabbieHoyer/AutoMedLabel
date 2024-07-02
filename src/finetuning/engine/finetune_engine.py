@@ -113,9 +113,9 @@ class Trainer:
                 batch[key] = batch[key].to(self.device)
 
         # Now, extract the tensors directly from the batch
-        image = batch['image']
-        gt2D = batch['gt2D']
-        boxes = batch['boxes']
+        image = batch['image']   # torch.Size([2, 3, 1024, 1024])
+        gt2D = batch['gt2D']     # torch.Size([2, 1, 1024, 1024])
+        boxes = batch['boxes']   # torch.Size([2, 4])
         label_id = batch['label_id']
 
         if mode == 'train':
@@ -124,6 +124,7 @@ class Trainer:
                 self.optimizer.zero_grad()
 
             with autocast(enabled=self.use_amp):  # Conditional AMP
+                # https://github.com/facebookresearch/segment-anything/issues/277 -> # RuntimeError: The size of tensor a (4) must match the size of tensor b (2) at non-singleton dim 0
                 predictions = self.model(image, boxes)
 
                 loss = self.calculate_loss(predictions, gt2D) / accumulate_steps  # Normalize the loss

@@ -30,23 +30,42 @@
 
 
 # Activate conda environment
-export PATH=/netopt/rhel7/bin:$PATH
-eval "$('/netopt/rhel7/versions/python/Anaconda3-edge/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
+# export PATH=/netopt/rhel7/bin:$PATH
+# eval "$('/netopt/rhel7/versions/python/Anaconda3-edge/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
+export MODULEPATH=$MODULEPATH:/home/ghoyer/Modules/modulefiles
+module load use.own
+
+if [ -d "/home/ghoyer/miniconda3" ]; then
+    # Load Conda module for RHEL9
+    module load conda_base/1.0
+    if [ $? -ne 0 ]; then
+        echo "Failed to load Miniconda module for RHEL9. Check module name and path."
+    else
+        # Assuming conda init is already run and managed
+        echo "Conda is initialized for RHEL9."
+    fi
+else
+    echo "Miniconda3 directory not found on RHEL9."
+fi
+
+eval "$('/home/ghoyer/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
 
 # Your Conda environment name: 'myenv'
-CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/air
+# CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/air
+
+if [ -d /data/VirtualAging ] ;
+then
+  dVA="VirtualAging"
+else
+  dVA="virtualaging"
+fi
+
+CONDA_ENV_NAME=/data/$dVA/users/ghoyer/conda/envs/autolabel
+
 
 # Path to your config file
-
-# CONFIG_NAME="exp1_obj_det"
-# CONFIG_NAME="exp2_obj_det"
-
-# CONFIG_NAME="exp1_obb"
-# CONFIG_NAME="exp1_seg"  # Update this with your actual config name without the extension
-# CONFIG_NAME="exp1_class"
-
 # Thigh 
-CONFIG_NAME="OAI_Thigh2"
+CONFIG_NAME="OAI_Thigh_yolo"
 
 # Activate Conda environment
 echo "Activating Conda environment: ${CONDA_ENV_NAME}"
@@ -54,10 +73,6 @@ source activate ${CONDA_ENV_NAME} || conda activate ${CONDA_ENV_NAME}
 
 # Print node in the terminal
 echo "Running on node $HOSTNAME"
-
-# Navigate to the script's directory, then to the root directory
-# cd /data/VirtualAging/users/ghoyer/correcting_rad_workflow/detection/VLS/AirDet
-# cd /data/virtualaging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel
 
 ## Navigate to root directory
 cd .. || exit

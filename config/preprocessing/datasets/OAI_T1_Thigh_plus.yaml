@@ -1,0 +1,190 @@
+## mskSAM Dataset Pre-Processing Parameters
+## Params for:
+##     1. data_standardization.py: data standardization of input image and mask file
+##     2. metadata_extraction.py: standardize metadata for statistics
+##     3. sam_prep.py: SAM compatible npy data standardization and slice-level metadata creation
+##     4. prompt_prediction.py: extended functionality for choosing prompt experimentation / zeroshot inference
+
+
+# ------------------ PARAMS FOR ALL ------------------
+dataset:
+  name: OAI_thigh_muscle
+  description: "3.0T T1 Axial thigh dataset with muscle masks."
+
+overwrite_existing_flag: True
+
+# When you want to force processing of all files as DICOM - needed for OAI since dicom files lack extension
+no_dicom_extension_flag: True
+
+# --- OUTPUT (DEFAULT): uses default folder structure when output path is not specified (see load_config())
+default_output_dir: /data/bigbone3/ghoyer
+general_data_dir: ${default_output_dir}/standardized/OAI/thigh/T1_ax
+
+# ------------------ INFO FOR DATA STANDARDIZATION ------------------
+# Packaged MRI image and mask folder paths (can be dicom or other file type)
+image_data_paths: ${general_data_dir}/dataframes/yolo_sam_100_thigh_cohort_updated.csv
+mask_data_paths: ${general_data_dir}/dataframes/yolo_sam_100_thigh_cohort_updated.csv
+
+image_column: dcm_clipped_slice #.dcms without extensions
+mask_column: composite_resized_thigh #.nii.gz (w, h, slice)
+# image_column: AX_T1_THIGH 
+
+image_config:
+  key: 
+  transforms:
+  data_properties:
+    finite_values: True
+
+mask_config: 
+  key: 
+  transforms:
+    transpose: [2, 0, 1]
+    dtype: np.uint8
+  data_properties:
+    finite_values: True
+    type: int8
+
+## details about your dataset:
+mask_labels:
+  0: background  
+  1: sc_fat
+  2: fascia      
+  3: extensors
+  4: hamstrings
+  5: fem_cortex
+  6: fem_bm
+  7: adductors
+  8: sartorius
+  9: gracilis
+  10: nv
+
+# --- OUTPUT (OVERRIDE DEFAULT): location to Output/locate nifti files for MRI images and masks
+nifti_image_dir: ${general_data_dir}/nifti/imgs
+nifti_mask_dir: ${general_data_dir}/nifti/masks
+
+# ------------------ VISUALIZE NIFTI ------------------
+nifti_fig_cfg:
+  fig_type: 2D_overlay # Options: '2D_overlay', 'gif', ['2D_overlay', 'gif']
+  num_figs: 5  # Number of files to randomly select and process
+  slice_selection: 'with_segmentation' # 'any' 'with_segmentation'
+# --- OUTPUT (OVERRIDE DEFAULT): location to save figures
+  fig_path: ${general_data_dir}/nifti/figs
+
+# ------------------ INFO FOR SAM PREP ------------------
+## SAM compatible npy data standardization and slice-level metadata creation
+# Values for image preprocessing script
+preprocessing_cfg:
+  image_size: 1024
+  voxel_num_thre2d: 100
+  voxel_num_thre3d: 200
+  remove_label_ids: []  # No labels to remove in this configuration
+  target_label_id: null  # No specific label targeted for instance segmentation
+  instance_bbox: True
+
+# --- OUTPUT (OVERRIDE DEFAULT): Location to output SAM-compatible .npy files
+npy_dir: ${general_data_dir}/npy
+
+# ------------------ VISUALIZE NPY ------------------
+npy_fig_cfg:
+  fig_type: 2D_overlay # Options: '2D_overlay', 'gif', ['2D_overlay', 'gif']
+  num_figs: 10  # Number of files to randomly select and process; 'full' for complete dataset QC
+  slice_selection: 'any' # 'any' 'with_segmentation'
+# --- OUTPUT (OVERRIDE DEFAULT): location to save figures
+  fig_path: ${general_data_dir}/npy/figs
+
+# ------------------ INFO FOR METADATA EXTRACTION ------------------
+# Original MRI dicom image folder path
+mri_dicom_dir: ${image_data_paths}
+dicom_column: AX_T1_THIGH
+
+metadata_cfg:
+  # details about your dataset:
+  dataset_name: ${dataset.name}
+  anatomy: 'thigh'
+  field_strength: '3.0'  # '2.89'
+  mri_sequence: 't1_ax'
+
+  # MRI dicom header info to extract for statistics metadata:
+  dicom_values:
+    AccessionNumber: AccessionNumber
+    SOPInstanceUID: SOPInstanceUID
+    StudyInstanceUID: StudyInstanceUID
+    SeriesInstanceUID: SeriesInstanceUID
+    series_desc: SeriesDescription
+    study_desc: StudyDescription
+    TE: EchoTime
+    TR: RepetitionTime
+    flip_angle: FlipAngle
+    ETL: EchoTrainLength
+    field_strength: MagneticFieldStrength
+    receive_coil: ReceiveCoilName
+    scanner_name: StationName
+    scanner_model: ManufacturerModelName
+    slice_thickness: SliceThickness
+    slice_spacing: SpacingBetweenSlices
+    pixel_spacing: PixelSpacing
+    rows: Rows
+    columns: Columns
+    instanceNumber: InstanceNumber
+    slice_location: SliceLocation
+    image_position_patient: ImagePositionPatient
+
+
+# Operation A (Optional) 
+# Path to a table/dataframe for demographic or other info desired for metadata:
+extra_metadata_cfg:
+  csv_file_path: ${general_data_dir}/dataframes/oai_demos.csv
+  subject_id_col: 'subject_id'
+  column_mapping: # Standardized: Actual
+    Age: 'age'  
+    Sex: 'gender'
+    Race: 'race'
+    Hisp: 'hisp'
+    Height: 'height'
+    Weight: 'weight'
+    BMI: 'BMI'
+    OA_inc: 'oa_prog'
+    TKR: 'tkr'
+    # Add more mappings as needed
+
+# Operation B (Optional) 
+# JSON dictionary to provide supplementary info (demographics, imaging parameters) - default is our stats file
+additional_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
+
+# --- OUTPUTS (OVERRIDE DEFAULT): 
+# Operation A - location for Statistics slice-level information
+stats_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
+
+# Operation B - location of subject-level metadata used for training
+# getting the original Train/val/test subjects and hoping to just add the additional ones to train...
+# old_ml_metadata_file: /data/mskdata/standardized/OAI/thigh/T1_ax/metadata/volume_metadata_for_ml.json
+# ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json  # complete refresh with split assignments
+ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml_thigh_plus.json 
+
+# Operation C - location to parquet files for ML
+slice_info_parquet_dir: ${general_data_dir}/metadata/slice_paths
+# Operation D - location for text file of dicom metadata from one file
+dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
+
+# ------------------ Prompting Experimentation ------------------
+prompt_experiment: 
+  config: baseline_prompt.yaml
+
+
+# ------------------ INFO FOR YOLO PREP ------------------
+## YOLO compatible npy data standardization, txt label creation
+# Values for image preprocessing script
+yolo_preprocessing_cfg:
+  image_size: [1024, 512]
+  voxel_num_thre2d: 100
+  voxel_num_thre3d: 200
+  remove_label_ids: []  # No labels to remove in this configuration 
+  target_label_id: null  # No specific label targeted for instance segmentation
+  instance_bbox: True
+
+# output YOLO
+
+yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/train
+# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/train
+# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/val
+# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/test

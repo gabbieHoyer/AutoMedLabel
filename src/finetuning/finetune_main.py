@@ -66,8 +66,6 @@ def datamodule(cfg, run_path=None):
             max_subjects = cfg.get('datamodule', {}).get('max_subject_set', 'full')
             )
 
-            # bbox shift change after t1sag spine is done
-
     # -------------------- SAVE DATASET SUMMARY -------------------- #   
     log_info(f"max_train_sujects: {cfg.get('datamodule', {}).get('max_subject_set', 'full')}")
 

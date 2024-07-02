@@ -25,4 +25,7 @@ notebooks/*.ipynb
 /src/obj_detection/dev_work/
 /src/obj_detection/air/
 
+/docs/
+
+/scripts/prompting/
 

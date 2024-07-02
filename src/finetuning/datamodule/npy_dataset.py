@@ -50,8 +50,12 @@ class mskSAMDataset(Dataset):
                 
             # Load npy image (1024, 1024), [0,1]
             img_name = os.path.basename(self.gt_path_files[index])        
-            img_1024 = np.load(os.path.join(self.root_paths[index], "imgs", img_name), mmap_mode='r')
-            img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+            img_1024 = np.load(os.path.join(self.root_paths[index], "imgs", img_name), mmap_mode='r')  # img_1024.shape -> (1024, 1024, 3)
+
+            if img_1024.ndim == 2 or (img_1024.ndim == 3 and img_1024.shape[2] == 1):
+                img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+
+            # img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
 
             # Convert the shape to (3, H, W)
             img_1024 = np.transpose(img_1024, (2, 0, 1))  # (3, 1024, 1024)
@@ -157,7 +161,11 @@ class MultiClassSAMDataset(Dataset):
     def __getitem__(self, index):
         img_name = os.path.basename(self.gt_path_files[index])
         img_1024 = np.load(join(self.root_paths[index], "imgs", img_name), mmap_mode='r')
-        img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)
+        
+        if img_1024.ndim == 2 or (img_1024.ndim == 3 and img_1024.shape[2] == 1):
+            img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+
+        # img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)
         img_1024 = np.transpose(img_1024, (2, 0, 1))  # (3, 1024, 1024)
 
         if self.use_biomarkers:
@@ -261,7 +269,10 @@ class MultiClassNpyDataset(Dataset):
         # load npy image (1024, 1024), [0,1]
         img_name = os.path.basename(self.gt_path_files[index])        
         img_1024 = np.load(join(self.root_paths[index], "imgs", img_name), mmap_mode='r')
-        img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+        
+        if img_1024.ndim == 2 or (img_1024.ndim == 3 and img_1024.shape[2] == 1):
+            img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+        # img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
 
         # convert the shape to (3, H, W)
         img_1024 = np.transpose(img_1024, (2, 0, 1))  # (3, 1024, 1024)
@@ -341,7 +352,11 @@ class MultiInstanceClassNpyDataset(Dataset):
     def __getitem__(self, index):
         img_name = os.path.basename(self.gt_path_files[index])
         img_1024 = np.load(join(self.root_paths[index], "imgs", img_name), mmap_mode='r')
-        img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)
+        
+        if img_1024.ndim == 2 or (img_1024.ndim == 3 and img_1024.shape[2] == 1):
+            img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+        # img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)
+        
         img_1024 = np.transpose(img_1024, (2, 0, 1))  # (3, 1024, 1024)
         
         gt = np.load(self.gt_path_files[index], mmap_mode='r')
@@ -425,7 +440,10 @@ class NpyDataset_og(Dataset):
         # load npy image (1024, 1024), [0,1]
         img_name = os.path.basename(self.gt_path_files[index])        
         img_1024 = np.load(join(self.root_paths[index], "imgs", img_name), mmap_mode='r')
-        img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+        
+        if img_1024.ndim == 2 or (img_1024.ndim == 3 and img_1024.shape[2] == 1):
+            img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+        # img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
 
         # convert the shape to (3, H, W)
         img_1024 = np.transpose(img_1024, (2, 0, 1))  # (3, 1024, 1024)
@@ -505,7 +523,10 @@ class NpyRandInstanceGTMatchedDataset(Dataset):
             # Load npy image (1024, 1024), [0,1]
             img_name = os.path.basename(self.gt_path_files[index])        
             img_1024 = np.load(os.path.join(self.root_paths[index], "imgs", img_name), mmap_mode='r')
-            img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+            
+            if img_1024.ndim == 2 or (img_1024.ndim == 3 and img_1024.shape[2] == 1):
+                img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
+            # img_1024 = np.repeat(img_1024[:, :, None], 3, axis=-1)  # (1024, 1024, 3)
 
             # Convert the shape to (3, H, W)
             img_1024 = np.transpose(img_1024, (2, 0, 1))  # (3, 1024, 1024)

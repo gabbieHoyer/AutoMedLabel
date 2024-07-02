@@ -11,9 +11,9 @@
 echo "Running on node $HOSTNAME"
 
 # Activate conda environment
-export PATH=/netopt/rhel7/bin:$PATH
-eval "$('/netopt/rhel7/versions/python/Anaconda3-edge/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
-CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/medsam
+# export PATH=/netopt/rhel7/bin:$PATH
+# eval "$('/netopt/rhel7/versions/python/Anaconda3-edge/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
+# CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/medsam
 
 # List of configurations
 # CONFIG_NAMES=("P50-AF" "TBrecon" "OAI_imorphics" "Bacpac_t1sag_mdai" "DHAL" "Bacpac_t1ax_mdai")
