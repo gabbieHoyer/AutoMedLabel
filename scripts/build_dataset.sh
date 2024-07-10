@@ -86,8 +86,8 @@ for CONFIG_NAME in "${CONFIG_LIST[@]}"; do
     python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation C
 
     # ----------------------- Bonus ---------------------- #
-    echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation D"
-    python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation D
+    # echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation D"
+    # python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation D
 
     echo "All processes completed successfully."
 

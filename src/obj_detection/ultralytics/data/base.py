@@ -13,6 +13,7 @@ import cv2
 import numpy as np
 import psutil
 from torch.utils.data import Dataset
+import matplotlib.pyplot as plt
 
 from ultralytics.utils import DEFAULT_CFG, LOCAL_RANK, LOGGER, NUM_THREADS, TQDM
 from .utils import HELP_URL, IMG_FORMATS
@@ -146,9 +147,29 @@ class BaseDataset(Dataset):
         """Loads 1 image from dataset index 'i', returns (im, resized hw)."""
         im, f, fn = self.ims[i], self.im_files[i], self.npy_files[i]
         if im is None:  # not cached in RAM
+
+            # import pdb; pdb.set_trace()
+
             if fn.exists():  # load npy
                 try:
-                    im = np.load(fn)
+                    im = np.load(fn) # confirm this is equiv to BGR
+                    # im.shape -> (1024, 1024, 3)
+                    # im.dtype -> dtype('float64') # this is fine at this point :D
+                    
+                    # Check if the image dtype is float64 and convert to uint8
+                    if im.dtype == np.float64:
+                        im = (im * 255).astype(np.uint8)
+
+                    # outpath = '/data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/notebooks/debug'
+                    # # Plot original image
+                    # # img1 = np.transpose(im, (1, 2, 0))  # Convert from [C, H, W] to [H, W, C]
+
+                    # plt.imshow(im, cmap='gray')
+                    # plt.title('single dataset Image')
+                    # plt.savefig(f'{outpath}/single_data_image.png')
+                    # plt.close()
+
+                    # import pdb; pdb.set_trace()
                     
                 except Exception as e:
                     LOGGER.warning(f"{self.prefix}WARNING ⚠️ Removing corrupt *.npy image file {fn} due to: {e}")
@@ -168,6 +189,21 @@ class BaseDataset(Dataset):
             elif not (h0 == w0 == self.imgsz):  # resize by stretching image to square imgsz
                 im = cv2.resize(im, (self.imgsz, self.imgsz), interpolation=cv2.INTER_LINEAR)
 
+            # rect_mode is True for some reason
+            # print(f"img dtype: {im.dtype}")
+
+            # im.shape -> (1024, 1024, 3)
+            # im.dtype -> dtype('float64') # this is fine at this point :D
+
+            # img1 = np.transpose(im, (1, 2, 0))  # Convert from [C, H, W] to [H, W, C]
+
+            # plt.imshow(im, cmap='gray')
+            # plt.title('single dataset Image')
+            # plt.savefig(f'{outpath}/single_data_image_after_resize_maybe.png')
+            # plt.close()
+
+            # import pdb; pdb.set_trace()
+            
             # Add to buffer if training with augmentations
             if self.augment:
                 self.ims[i], self.im_hw0[i], self.im_hw[i] = im, (h0, w0), im.shape[:2]  # im, hw_original, hw_resized
@@ -175,6 +211,8 @@ class BaseDataset(Dataset):
                 if len(self.buffer) >= self.max_buffer_length:
                     j = self.buffer.pop(0)
                     self.ims[j], self.im_hw0[j], self.im_hw[j] = None, None, None
+
+            # import pdb; pdb.set_trace()
 
             return im, (h0, w0), im.shape[:2]
 

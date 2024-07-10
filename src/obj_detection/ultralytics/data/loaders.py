@@ -344,6 +344,9 @@ class LoadImages:
             # Read image
             self.count += 1
             if path.endswith(".npy"):
+
+                import pdb; pdb.set_trace()
+
                 im0 = np.load(path)  # Load .npy file
 
                 if im0.ndim == 2:
@@ -352,6 +355,7 @@ class LoadImages:
                 elif im0.shape[2] == 1:
                         im0 = cv2.cvtColor(im0, cv2.COLOR_GRAY2BGR)  # Convert single-channel to BGR
                 # If already 3 channels, no need to convert
+                # import pdb; pdb.set_trace()
 
             else:
                 im0 = cv2.imread(path)  # BGR

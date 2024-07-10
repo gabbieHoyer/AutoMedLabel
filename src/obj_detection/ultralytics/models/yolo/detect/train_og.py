@@ -5,10 +5,7 @@ import random
 from copy import copy
 
 import numpy as np
-import torch
 import torch.nn as nn
-
-import matplotlib.pyplot as plt
 
 from ultralytics.data import build_dataloader, build_yolo_dataset
 from ultralytics.engine.trainer import BaseTrainer
@@ -59,7 +56,7 @@ class DetectionTrainer(BaseTrainer):
             shuffle = False
             
         workers = self.args.workers if mode == "train" else self.args.workers * 2
-        
+
         return build_dataloader(dataset, batch_size, workers, shuffle, rank)  # return dataloader
 
     def preprocess_batch(self, batch):
@@ -81,73 +78,6 @@ class DetectionTrainer(BaseTrainer):
             batch["img"] = imgs
         return batch
 
-    # ### HERE! try to plot the image after making it float() 32
-    # def preprocess_batch(self, batch):
-    #     """Preprocesses a batch of images by scaling and converting to float."""
-    #     # import pdb; pdb.set_trace()
-        
-    #     # outpath = '/data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/notebooks/debug'
-    #     # # Plot original image
-    #     # img1 = batch['img'][0].cpu().numpy()  # Assuming the image is on GPU (3, 1024, 1024); dtype uint8
-    #     # img1 = np.transpose(img1, (1, 2, 0))  # Convert from [C, H, W] to [H, W, C]
-
-    #     # plt.imshow(img1, cmap='gray')
-    #     # plt.title('Original Image')
-    #     # plt.savefig(f'{outpath}/original_image.png')
-    #     # plt.close()
-
-    #     # import pdb; pdb.set_trace()
-
-    #     # img2 = 255 * img1
-    #     # img2 = img2.astype(np.uint8)
-    #     # img2 = torch.tensor(img2).to(self.device, non_blocking=True).float() / 255.0
-    #     # img2 = img2.cpu().numpy()
-
-    #     # plt.imshow(img2, cmap='gray')
-    #     # plt.title('2nd Image')
-    #     # plt.savefig(f'{outpath}/second_image.png')
-    #     # plt.close()
-
-    #     # import pdb; pdb.set_trace()
-
-    #     # img3 = batch['img'][0].to(self.device, non_blocking=True).float() / 255.0
-    #     # img3 = img3.cpu().numpy()
-    #     # img3 = np.transpose(img3, (1, 2, 0))  # Convert from [C, H, W] to [H, W, C]
-
-    #     # plt.imshow(img3, cmap='gray')
-    #     # plt.title('3rd Image')
-    #     # plt.savefig(f'{outpath}/third_image.png')
-    #     # plt.close()
-
-    #     # import pdb; pdb.set_trace()
-
-    #     if batch["img"].dtype == torch.float64:
-    #         # Convert float64 data to uint8 before normalization
-    #         data = batch["img"].cpu().numpy()  # Convert to numpy array
-    #         data = 255 * data  # Scale by 255
-    #         data = data.astype(np.uint8)  # Convert to uint8
-    #         batch["img"] = torch.tensor(data).to(self.device, non_blocking=True).float() / 255.0
-    #     else:
-    #         batch["img"] = batch["img"].to(self.device, non_blocking=True).float() / 255.0
-
-    #     if self.args.multi_scale:
-    #         imgs = batch["img"]
-    #         sz = (
-    #             random.randrange(self.args.imgsz * 0.5, self.args.imgsz * 1.5 + self.stride)
-    #             // self.stride
-    #             * self.stride
-    #         )  # size
-    #         sf = sz / max(imgs.shape[2:])  # scale factor
-    #         if sf != 1:
-    #             ns = [
-    #                 math.ceil(x * sf / self.stride) * self.stride for x in imgs.shape[2:]
-    #             ]  # new shape (stretched to gs-multiple)
-    #             imgs = nn.functional.interpolate(imgs, size=ns, mode="bilinear", align_corners=False)
-    #         batch["img"] = imgs
-        
-    #     return batch
-
-
     def set_model_attributes(self):
         """Nl = de_parallel(self.model).model[-1].nl  # number of detection layers (to scale hyps)."""
         # self.args.box *= 3 / nl  # scale to layers
@@ -168,7 +98,6 @@ class DetectionTrainer(BaseTrainer):
     def get_validator(self):
         """Returns a DetectionValidator for YOLO model validation."""
         self.loss_names = "box_loss", "cls_loss", "dfl_loss"
-
         return yolo.detect.DetectionValidator(
             self.test_loader, save_dir=self.save_dir, args=copy(self.args), _callbacks=self.callbacks
         )

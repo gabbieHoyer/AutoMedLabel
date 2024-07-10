@@ -2,7 +2,7 @@
 ## Params for:
 ##     1. data_standardization.py: data standardization of input image and mask file
 ##     2. metadata_extraction.py: standardize metadata for statistics
-##     3. sam_prep.py: SAM compatible npy data standardization and slice-level metadata creation
+##     3. model_prep.py: SAM compatible npy data standardization and slice-level metadata creation
 ##     4. prompt_prediction.py: extended functionality for choosing prompt experimentation / zeroshot inference
 
 
@@ -80,9 +80,12 @@ preprocessing_cfg:
   remove_label_ids: []  # No labels to remove in this configuration
   target_label_id: null  # No specific label targeted for instance segmentation
   instance_bbox: True
+  make_square: True
+  ratio_resize: False #True
+  yolo_compatible: True
 
 # --- OUTPUT (OVERRIDE DEFAULT): Location to output SAM-compatible .npy files
-npy_dir: ${general_data_dir}/npy
+npy_dir: ${general_data_dir}/npy/SAM
 
 # ------------------ VISUALIZE NPY ------------------
 npy_fig_cfg:
@@ -90,7 +93,8 @@ npy_fig_cfg:
   num_figs: 10  # Number of files to randomly select and process; 'full' for complete dataset QC
   slice_selection: 'any' # 'any' 'with_segmentation'
 # --- OUTPUT (OVERRIDE DEFAULT): location to save figures
-  fig_path: ${general_data_dir}/npy/figs
+  fig_path: ${npy_dir}/figs
+  # fig_path: ${general_data_dir}/npy/tired_yolo/figs
 
 # ------------------ INFO FOR METADATA EXTRACTION ------------------
 # Original MRI dicom image folder path
@@ -159,10 +163,15 @@ stats_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
 # getting the original Train/val/test subjects and hoping to just add the additional ones to train...
 # old_ml_metadata_file: /data/mskdata/standardized/OAI/thigh/T1_ax/metadata/volume_metadata_for_ml.json
 # ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json  # complete refresh with split assignments
+
 ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml_thigh_plus.json 
 
 # Operation C - location to parquet files for ML
-slice_info_parquet_dir: ${general_data_dir}/metadata/slice_paths
+slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
+
+# slice_info_parquet_dir: ${general_data_dir}/metadata/SAM_uint8/slice_paths
+# slice_info_parquet_dir: ${general_data_dir}/metadata/tired/slice_paths
+
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
 
@@ -171,20 +180,16 @@ prompt_experiment:
   config: baseline_prompt.yaml
 
 
-# ------------------ INFO FOR YOLO PREP ------------------
-## YOLO compatible npy data standardization, txt label creation
-# Values for image preprocessing script
+# # ------------------ INFO FOR YOLO PREP ------------------
+# ## YOLO compatible npy data standardization, txt label creation
+# # Values for image preprocessing script
 yolo_preprocessing_cfg:
   image_size: [1024, 512]
   voxel_num_thre2d: 100
   voxel_num_thre3d: 200
-  remove_label_ids: []  # No labels to remove in this configuration 
+  remove_label_ids: []  
   target_label_id: null  # No specific label targeted for instance segmentation
   instance_bbox: True
 
-# output YOLO
-
-yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/train
-# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/train
-# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/val
-# yolo_npy_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy/test
+# yolo_npy_dir: ${general_data_dir}/npy/YOLO
+yolo_npy_dir: ${general_data_dir}/npy/tired_yolo

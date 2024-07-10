@@ -23,76 +23,10 @@ from src.utils.file_management.config_handler import load_dataset_config
 from src.utils.file_management.file_handler import load_nifti
 
 # ----------------- DATA TRANSFORMATION FUNCTIONS -----------------
-from src.preprocessing.yolo_prep import MaskPrep, ImagePrep
+from src.preprocessing.dev.yolo_prep import MaskPrep, ImagePrep, write_list_to_file, get_bounding_boxes
 
 # --------------------- DATA SAVING FUNCTIONS ---------------------
-def write_list_to_file(file_path, data_list):
-    with open(file_path, 'w') as file:
-        for item in data_list:
-            file.write(str(item) + '\n')
-            
-def get_bounding_boxes(multiclass_mask, instance=False):
 
-    # obtain unique labels in the image
-    unique_labels = np.unique(multiclass_mask)
-    bounding_boxes = []
-
-    for label in unique_labels:
-        # Skip background label
-        if label == 0:
-            continue  
-        
-        if instance:
-            # Process each instance separately
-            gt2D = np.uint8(multiclass_mask == label)  # Binary mask for chosen class
-            labeled_array, num_features = scipy_label(gt2D)
-
-            for component in range(1, num_features + 1):
-                component_mask = labeled_array == component
-                y_indices, x_indices = np.where(component_mask)
-
-                # Compute the bounding box for the selected component
-                x_min, x_max = np.min(x_indices), np.max(x_indices)
-                y_min, y_max = np.min(y_indices), np.max(y_indices)
-
-                # Calculate center and dimensions
-                center_x = (x_min + x_max) / 2
-                center_y = (y_min + y_max) / 2
-                width = x_max - x_min
-                height = y_max - y_min
-
-                # Normalize
-                height_sz, width_sz = multiclass_mask.shape
-                bounding_boxes.append(
-                    str(label) +
-                    ' ' + str(center_x / width_sz) +
-                    ' ' + str(center_y / height_sz) +
-                    ' ' + str(width / width_sz) +
-                    ' ' + str(height / height_sz) )
-        else:
-            # Original logic for bounding box of entire label
-            indices = np.where(multiclass_mask == label)
-
-            # Calculate bounding box coordinates
-            min_row, min_col = np.min(indices[0]), np.min(indices[1])
-            max_row, max_col = np.max(indices[0]), np.max(indices[1])
-
-            # Calculate center and dimensions
-            center_x = (min_col + max_col) / 2
-            center_y = (min_row + max_row) / 2
-            width = max_col - min_col
-            height = max_row - min_row
-
-            # Normalize
-            height_sz, width_sz = multiclass_mask.shape
-            bounding_boxes.append(
-                str(label) +
-                ' ' + str(center_x / width_sz) +
-                ' ' + str(center_y / height_sz) +
-                ' ' + str(width / width_sz) +
-                ' ' + str(height / height_sz) )
-
-    return bounding_boxes
 
 def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, z_indices, output_dir:str, base_name):
     """
@@ -106,8 +40,8 @@ def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, z_indices, 
     - Saves 3 channel images slices in output_dir/imgs/base_name-###.npy, where ### is the slice index
     - Saves masks slices (1 channel) in output_dir/gt/base_name-###.npy, where ### is the slice index
     """
-    images_dir = os.path.join(output_dir, "images")
-    masks_dir = os.path.join(output_dir, "masks")
+    images_dir = os.path.join(output_dir, "imgs") # "images"
+    masks_dir = os.path.join(output_dir, "gts")   # "masks"
     annotations_dir = os.path.join(output_dir, "labels")
 
     os.makedirs(images_dir, exist_ok=True)
@@ -118,6 +52,8 @@ def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, z_indices, 
 
         # yolo wants 3 channels, and its challenging dealing with a single channel in the yolo codebase
         img_slice_3c = np.repeat(img_slice[:, :, None], 3, axis=-1)
+
+        print(f"img_slice_3c dtype: {img_slice_3c.dtype}")
 
         image_file_name = f"{base_name}-{str(z_indices[i]).zfill(3)}"
 
@@ -186,7 +122,10 @@ def yolo_slice_standardization(config_name):
         crop_non_zero_slices_flag = True,
         )
     
-    dataImagePrep = ImagePrep(image_size_tuple=cfg.get('yolo_preprocessing_cfg').get('image_size'))
+    dataImagePrep = ImagePrep(
+        image_size_tuple=cfg.get('yolo_preprocessing_cfg').get('image_size'),
+        make_square = cfg.get('preprocessing_cfg').get('make_square', False),
+        )
 
     nifti_to_npy(
         mask_dir=cfg.get('nifti_mask_dir'),

@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 from datetime import datetime
 from os.path import join
 import torch
@@ -66,8 +67,35 @@ def log_and_checkpoint(mode, train_loss, val_loss, module_cfg, model, optimizer,
     return best_train_loss, best_val_loss
 
 
+# Function to check if the 'module.' prefix is present
+def check_module_prefix(state_dict):
+    return any(k.startswith('module.') for k in state_dict.keys())
 
+def final_checkpoint_conversion(module_cfg, model_save_path, run_id):
 
+    best_checkpoint_path = os.path.join(model_save_path, f"{run_id}_finetuned_model_best.pth")
+    converted_checkpoint_path = os.path.join(model_save_path, f"{run_id}_finetuned_model_best_converted.pth")
+
+    # Load the fine-tuned checkpoint
+    finetuned_ckpt = torch.load(best_checkpoint_path)
+    
+    # Correct the 'model' keys if the checkpoint was saved from a multi-GPU setup
+    if 'model' in finetuned_ckpt and check_module_prefix(finetuned_ckpt['model']):
+        new_model_state_dict = OrderedDict()
+        for k, v in finetuned_ckpt['model'].items():
+            new_key = k[7:] if k.startswith('module.') else k  # remove `module.`
+            new_model_state_dict[new_key] = v
+        finetuned_ckpt['model'] = new_model_state_dict
+    
+    # Make sure the directory exists
+    os.makedirs(os.path.dirname(converted_checkpoint_path), exist_ok=True)
+    
+    # Save the updated checkpoint
+    torch.save(finetuned_ckpt, converted_checkpoint_path)
+
+    # Log the converted checkpoint path to wandb
+    if module_cfg.get('use_wandb', False):
+        wandb_log({"final_checkpoint_path": converted_checkpoint_path})
 
 
 

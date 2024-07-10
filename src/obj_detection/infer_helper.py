@@ -33,7 +33,8 @@ root = pyrootutils.setup_root(
     dotenv=True,
 )
 
-from src.preprocessing.sam_prep import MaskPrep, ImagePrep
+# from src.preprocessing.dev.sam_prep import MaskPrep, ImagePrep
+from src.preprocessing.model_prep import MaskPrep, ImagePrep
 from src.utils.file_management.file_handler import load_data
 from src.finetuning.engine.models.sam import finetunedSAM
 
@@ -190,6 +191,59 @@ def save_prediction(seg_3D, save_dir, filename, output_ext):
         nib.save(new_nii, nifti_output_path)
     return
 
+
+# def save_prediction_for_ITK(seg_3D, save_dir, filename, output_ext):
+#     """Save prediction as .nii.gz using SimpleITK for .nii.gz files."""
+#     # Ensure the output directory exists
+#     output_dir = os.path.join(save_dir, 'pred')
+#     os.makedirs(output_dir, exist_ok=True)
+
+#     nifti_output_path = os.path.join(output_dir, f"{filename}_itk10.nii.gz")
+
+#     # Transpose the numpy array to get the desired dimensions (512, 256, 15)
+#     seg_3D_transposed = np.transpose(seg_3D, (2, 1, 0))
+
+#     # Reverse the order of slices
+#     seg_3D_reversed = seg_3D_transposed[::-1]
+
+#     # Flip along the y-axis to correct orientation for ITK-SNAP
+#     seg_3D_flipped = np.flip(seg_3D_reversed, axis=0)
+
+#     gh_rev = seg_3D_flipped[:,:, ::-1]
+
+#     # Create a new NIfTI image using an identity affine transformation matrix 
+#     new_nii = nib.Nifti1Image(gh_rev, np.eye(4))
+
+#     nib.save(new_nii, nifti_output_path)
+    
+#     return
+
+def save_prediction_for_ITK(seg_3D, save_dir, filename, output_ext):
+    """Save prediction as .nii.gz using SimpleITK for .nii.gz files."""
+    # Ensure the output directory exists
+    output_dir = os.path.join(save_dir, 'pred')
+    os.makedirs(output_dir, exist_ok=True)
+
+    nifti_output_path = os.path.join(output_dir, f"{filename}_itk10.nii.gz")
+
+    # Transpose the numpy array to get the desired dimensions (512, 256, 15)
+    seg_3D_transposed = np.transpose(seg_3D, (2, 1, 0))
+
+    # Reverse the order of slices
+    seg_3D_reversed = seg_3D_transposed[::-1]
+
+    # Flip along the y-axis to correct orientation for ITK-SNAP
+    seg_3D_flipped = np.flip(seg_3D_reversed, axis=0)
+
+    # gh_rev = seg_3D_flipped[:,:, ::-1]
+
+    # Create a new NIfTI image using an identity affine transformation matrix 
+    new_nii = nib.Nifti1Image(seg_3D_flipped, np.eye(4))
+
+    nib.save(new_nii, nifti_output_path)
+    
+    return
+
 # -------------------- MODEL FUNCTIONS -------------------- #
 def make_predictor(model_type:str, comp_cfg, initial_weights:str, finetuned_weights:str=None, device:str="cpu"):
 
@@ -206,7 +260,7 @@ def make_predictor(model_type:str, comp_cfg, initial_weights:str, finetuned_weig
     # Check if finetuned_weights are the same as initial_weights
     if finetuned_weights == initial_weights:
         return finetuned_model
-    
+
     # Check if a checkpoint exists to resume training
     if finetuned_weights and os.path.isfile(finetuned_weights):
         try:
@@ -233,19 +287,35 @@ def make_prediction(predictor, img_slice, bbox):
     return sam_mask
 
 # -------------------- DATA POST-PROCESS FUNCTIONS -------------------- #
-def postprocess_resize(mask, image_size_tuple:tuple[int,int]):
+def postprocess_resize(mask, image_size_tuple:tuple[int,int], make_square):
     """Resize mask to new dimensions."""
-    predMaskPrep = MaskPrep()
+    predMaskPrep = MaskPrep(make_square=make_square)
     resized_mask = predMaskPrep.resize_mask(mask_data = mask.astype(np.uint8),
                                             image_size_tuple = image_size_tuple)
     return resized_mask
 
-def resize_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int):
+def resize_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int, make_square):
     """Convert SAM prediction into segmentation mask with original image dims and label ids."""
-    sam_mask_resized = postprocess_resize(sam_pred, image_size_tuple)
+    sam_mask_resized = postprocess_resize(sam_pred, image_size_tuple, make_square)
     sam_mask = np.zeros_like(sam_mask_resized, dtype=np.uint8)
     sam_mask[sam_mask_resized > 0] = label_id
     return sam_mask
+
+
+# def postprocess_resize(mask, image_size_tuple:tuple[int,int]):
+#     """Resize mask to new dimensions."""
+#     predMaskPrep = MaskPrep()
+#     resized_mask = predMaskPrep.resize_mask(mask_data = mask.astype(np.uint8),
+#                                             image_size_tuple = image_size_tuple)
+#     return resized_mask
+
+# def resize_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int):
+#     """Convert SAM prediction into segmentation mask with original image dims and label ids."""
+#     sam_mask_resized = postprocess_resize(sam_pred, image_size_tuple)
+#     sam_mask = np.zeros_like(sam_mask_resized, dtype=np.uint8)
+#     sam_mask[sam_mask_resized > 0] = label_id
+#     return sam_mask
+
 
 def postprocess_prediction(sam_pred):
     # Ensure sam_pred is in the range [0, 255] and of type np.uint8

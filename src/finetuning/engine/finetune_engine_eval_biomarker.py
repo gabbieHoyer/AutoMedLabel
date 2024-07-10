@@ -76,6 +76,7 @@ class Tester:
                         "model_type": self.eval_cfg['model_type'],
                         "description": self.experiment_cfg['description'],
                         "finetuned_weights": self.eval_cfg['model_weights'],
+                        "model_ID": self.eval_cfg['finetuned_model'],
                         "balanced": self.eval_cfg['model_details']['balanced'],
                         "subject_subject_set": self.eval_cfg['model_details']['subject'],
                         "image_encoder": self.eval_cfg['trainable']['image_encoder'],
@@ -312,6 +313,8 @@ class Tester:
         for filename, data in filenames:
             path = os.path.join(base_path, f"{self.run_id}_{self.data_type}_data_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}", filename)
             self.save_to_csv(data, path)
+            if self.module_cfg.get('use_wandb', False):
+                wandb_log({filename: path})
 
     def test(self):
         logger.info(f"Testing with {self.data_type} data...")

@@ -19,10 +19,10 @@ from src.utils.file_management.config_handler import load_dataset_config
 from src.utils.file_management.file_handler import load_nifti
 
 # ----------------- DATA TRANSFORMATION FUNCTIONS -----------------
-from src.preprocessing.model_prep import MaskPrep, ImagePrep, write_list_to_file, get_bounding_boxes
+from src.preprocessing.sam_prep import MaskPrep, ImagePrep
 
 # --------------------- DATA SAVING FUNCTIONS ---------------------
-def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, dataImagePrep, z_indices, output_dir:str, base_name, yolo_processing):
+def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, z_indices, output_dir:str, base_name):
     """
     Save processed image and mask data as .npy files after resizing and normalization.
     Params:
@@ -38,35 +38,21 @@ def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, dataImagePr
     masks_dir = os.path.join(output_dir, "gts")
     os.makedirs(images_dir, exist_ok=True)
     os.makedirs(masks_dir, exist_ok=True)
-
-    if yolo_processing:
-        annotations_dir = os.path.join(output_dir, "labels")
-        os.makedirs(annotations_dir, exist_ok=True)
     
     for i, (img_slice, mask_slice) in enumerate(zip(image_data, mask_data)):
         
-        # img_slice = dataImagePrep.prep_image_step2(img_slice)
-
-        # print(f"img_slice dtype: {img_slice.dtype}")
-
         img_slice_3c = np.repeat(img_slice[:, :, None], 3, axis=-1) 
 
-        print(f"img_slice_3c dtype: {img_slice_3c.dtype}")
-
-        image_file_name = f"{base_name}-{str(z_indices[i]).zfill(3)}"
-        np.save(os.path.join(images_dir, image_file_name + ".npy"), img_slice_3c)  # wut their size is (640, 1024) to (640, 1024, 3)
-        np.save(os.path.join(masks_dir, image_file_name + ".npy"), mask_slice)  # wut their size is (640, 1024)
-
-
-        if yolo_processing:
-            write_list_to_file(os.path.join(annotations_dir, image_file_name + ".txt"), get_bounding_boxes(mask_slice, instance=True))
+        image_file_name = f"{base_name}-{str(z_indices[i]).zfill(3)}.npy"
+        np.save(os.path.join(images_dir, image_file_name), img_slice_3c)
+        np.save(os.path.join(masks_dir, image_file_name), mask_slice)
 
         sys.stdout.flush()  # Ensure output is flushed immediately
 
 
 # -------------------- MAIN PIPELINE FUNCTION --------------------
         
-def nifti_to_npy(mask_dir, image_dir, dataMaskPrep, dataImagePrep, output_dir, file_suffix, yolo_processing):
+def nifti_to_npy(mask_dir, image_dir, dataMaskPrep, dataImagePrep, output_dir, file_suffix):
     """
     Code to convert standardized NIfTI to preprocessed NPY for input to SAM during fine tuning.
     Params:
@@ -84,7 +70,7 @@ def nifti_to_npy(mask_dir, image_dir, dataMaskPrep, dataImagePrep, output_dir, f
     names=sorted(os.listdir(mask_dir))
     
     # Iterate through each file name provided in the 'names' list
-    for name in tqdm(names[0:2], dynamic_ncols=True, position=0):
+    for name in tqdm(names, dynamic_ncols=True, position=0):
         #print(f"Processing {name}")
         
         # Load the mask data from the specified directory and file name
@@ -105,7 +91,7 @@ def nifti_to_npy(mask_dir, image_dir, dataMaskPrep, dataImagePrep, output_dir, f
         # Derive the base filename for saving processed files without their original extension
         base_name = name.split(file_suffix)[0]
         # Save the processed image and mask data
-        save_processed_data(prepped_image_data, prepped_mask_data, dataImagePrep, z_indices, output_dir, base_name, yolo_processing)
+        save_processed_data(prepped_image_data, prepped_mask_data, z_indices, output_dir, base_name)
 
 
 def slice_standardization(config_name):
@@ -123,16 +109,12 @@ def slice_standardization(config_name):
         pixel_threshold_2d=cfg.get('preprocessing_cfg').get('voxel_num_thre2d'),
         image_size_tuple=(cfg.get('preprocessing_cfg').get('image_size'),
                           cfg.get('preprocessing_cfg').get('image_size')),
-        crop_non_zero_slices_flag = cfg.get('preprocessing_cfg').get('crop_non_zero_slices_flag', True),
-        make_square = cfg.get('preprocessing_cfg').get('make_square', False),
-        ratio_resize = cfg.get('preprocessing_cfg').get('ratio_resize', False),
+        crop_non_zero_slices_flag = True,
         )
 
     dataImagePrep = ImagePrep(
         image_size_tuple=(cfg.get('preprocessing_cfg').get('image_size'),
                           cfg.get('preprocessing_cfg').get('image_size')),
-        make_square = cfg.get('preprocessing_cfg').get('make_square', False),
-        ratio_resize = cfg.get('preprocessing_cfg').get('ratio_resize', False),
     )
     nifti_to_npy(
         mask_dir=cfg.get('nifti_mask_dir'),
@@ -140,8 +122,7 @@ def slice_standardization(config_name):
         dataMaskPrep=dataMaskPrep,
         dataImagePrep=dataImagePrep,
         output_dir=cfg.get('npy_dir'),
-        file_suffix=".nii.gz",  # Assuming this is a constant suffix for all files
-        yolo_processing=cfg.get('yolo_compatible', 'False')
+        file_suffix=".nii.gz"  # Assuming this is a constant suffix for all files
     )
     return
 

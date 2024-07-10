@@ -12,10 +12,10 @@ root = pyrootutils.setup_root(
     dotenv=True,
 )
 
+from src.utils.misc import remap_labels
 from src.utils.file_management.config_handler import load_dataset_config
 from src.utils.file_management.file_handler import load_standardized_npy_data 
 from src.utils.file_management.path_info import pair_volume_id_paths
-from src.utils.misc import remap_labels
 from src.utils.visualizers import plot_segmentation_overlay, create_segmentation_overlay_gif
 
 class NpyFigureInfo():

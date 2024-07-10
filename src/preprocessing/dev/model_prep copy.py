@@ -1,9 +1,11 @@
 
-import cc3d
-import numpy as np
 from typing import Union #, Tuple, List
-from skimage import transform
+import numpy as np
+
 from scipy.ndimage import center_of_mass
+from scipy.ndimage import label as scipy_label
+import cc3d
+from skimage import transform
 
 # ---------------------- UTILITY FUNCTIONS ----------------------
 
@@ -36,13 +38,15 @@ class MaskPrep():
     Input Params:
     - mask_data: The mask data as a numpy array. Supports 2D slices or 3D volumes.
     """
-    def __init__(self, remove_label_ids: list = [], target_label_id: Union[int, list[int]] = [], voxel_threshold_3d: int = 0, pixel_threshold_2d: int = 0, image_size_tuple:tuple[int, int] = [], crop_non_zero_slices_flag:bool=True):
+    def __init__(self, remove_label_ids: list = [], target_label_id: Union[int, list[int]] = [], voxel_threshold_3d: int = 0, pixel_threshold_2d: int = 0, image_size_tuple:tuple[int, int] = [], crop_non_zero_slices_flag:bool=True, make_square:bool=False, ratio_resize:bool=False):
         self.remove_label_ids = remove_label_ids
         self.target_label_id = target_label_id
         self.voxel_threshold_3d = voxel_threshold_3d
         self.pixel_threshold_2d = pixel_threshold_2d
         self.image_size_tuple = image_size_tuple
         self.crop_non_zero_slices_flag = crop_non_zero_slices_flag
+        self.make_square = make_square
+        self.ratio_resize = ratio_resize
 
     # -------------------- UTILITY FUNCTIONS --------------------
         
@@ -166,6 +170,63 @@ class MaskPrep():
         
         return mask_data
     
+    def resize_mask(self, mask_data, image_size_tuple:tuple[int,int]= None):
+        """
+        Resize mask data using nearest-neighbor interpolation to preserve label integrity.
+        Parameters:
+        - mask_data: The mask data as a numpy array.
+        - image_size_tuple: (H, W) in pixels to resize mask. 
+        
+        Returns:
+        - A numpy array with dimensions (H, W).
+        """
+        def resize_mask_2D(mask_slice, image_size_tuple:tuple[int,int]):
+            # Resize the mask slice
+            resized_mask = transform.resize(
+                mask_slice,
+                image_size_tuple,
+                order=0,  # nearest-neighbor interpolation to preserve label integrity
+                preserve_range=True,
+                mode='constant',
+                anti_aliasing=False
+            )
+            return resized_mask
+        
+        def pad_to_square(mask_slice):
+            height, width = mask_slice.shape
+            if height > width:
+                pad = (height - width) // 2
+                padded_mask = np.pad(mask_slice, ((0, 0), (pad, height - width - pad)), mode='constant')
+            elif width > height:
+                pad = (width - height) // 2
+                padded_mask = np.pad(mask_slice, ((pad, width - height - pad), (0, 0)), mode='constant')
+            else:
+                padded_mask = mask_slice  # already square
+            return padded_mask
+        
+        if self.make_square:
+            if len(mask_data.shape) == 2:
+                mask_data = pad_to_square(mask_data)
+            elif len(mask_data.shape) == 3:
+                mask_data = np.array([pad_to_square(slice) for slice in mask_data])
+
+        if image_size_tuple is None:
+            image_size_tuple = self.image_size_tuple
+
+        dims = len(np.shape(mask_data))
+        if dims == 2:
+            resized_masks = resize_mask_2D(mask_data, image_size_tuple)
+        elif dims == 3:
+            resized_masks = []
+            for mask_slice in mask_data:
+                resized_mask = resize_mask_2D(mask_slice, image_size_tuple)
+                resized_masks.append(resized_mask)
+            resized_masks = np.array(resized_masks)
+        
+        return resized_masks
+    
+
+
     # def resize_mask(self, mask_data, image_size_tuple:tuple[int,int]= None):
     #     """
     #     Resize mask data using nearest-neighbor interpolation to preserve label integrity.
@@ -206,7 +267,7 @@ class MaskPrep():
     
     # -------------------- DATA TRANSFORMATION FUNCTIONS --------------------
 
-    def prep_mask_study_specific_step1(self, mask_data: np.ndarray) -> np.ndarray:
+    def prep_mask_step1(self, mask_data: np.ndarray) -> np.ndarray:   # prep_mask_study_specific_step1
         '''
         Apply preprocessing steps that are specific to the study to the mask data.
         Params:
@@ -234,18 +295,17 @@ class MaskPrep():
 
         return (mask_data, z_indices)
 
-    # def prep_mask_sam_specific_step2(self, mask_data: np.ndarray) -> np.ndarray:
-    #     '''
-    #     Apply preprocessing steps that are specific to sam to the mask data.
-    #     Params:
-    #     - mask_data: Supports 2D [H x W] and 3D [Slice x H x W] mask_data.
-    #     '''
-    #     # Resize the cropped mask data before saving
-    #     preprocessed_mask = self.resize_mask(mask_data)
-
-    #     # Convert data type to uint8
-    #     preprocessed_mask = np.uint8(preprocessed_mask)
-    #     return preprocessed_mask
+    def prep_mask_step2(self, mask_data: np.ndarray) -> np.ndarray:   # prep_mask_sam_specific_step2
+        '''
+        Apply preprocessing steps that are specific to sam to the mask data.
+        Params:
+        - mask_data: Supports 2D [H x W] and 3D [Slice x H x W] mask_data.
+        '''
+        # Resize the cropped mask data before saving
+        preprocessed_mask = self.resize_mask(mask_data)
+        # Convert data type to uint8
+        preprocessed_mask = np.uint8(preprocessed_mask)
+        return preprocessed_mask
     
     def preprocess_mask(self, mask_data: np.ndarray) -> np.ndarray:
         '''
@@ -253,15 +313,14 @@ class MaskPrep():
         Params:
         - mask_data: Supports 2D [H x W] and 3D [Slice x H x W] mask_data.
         '''
-        mask_data, z_indices = self.prep_mask_study_specific_step1(mask_data)
-        
-        # preprocessed_mask = self.prep_mask_sam_specific_step2(mask_data)
-
-        return (mask_data, z_indices)  #(preprocessed_mask, z_indices)
+        mask_data, z_indices = self.prep_mask_step1(mask_data)
+        preprocessed_mask = self.prep_mask_step2(mask_data)
+        return (preprocessed_mask, z_indices)
+    
 
 class ImagePrep():
     """
-    Class of static variables and functions to prepare images for SAM. Supports 2D or 3D mask input.
+    Class of static variables and functions to prepare images for SAM/YOLO. Supports 2D or 3D mask input.
     
     Static Params:
     - image_size_tuple: (H, W) in pixels to resize images using cubic spline interpolation. This 
@@ -272,8 +331,11 @@ class ImagePrep():
     - z_indices: True or False. Indicate whether to crop volume to only slices specified. This makes it
         possible to only select slices with segmentations. (Only possible for 3D masks)
     """
-    def __init__(self, image_size_tuple:tuple[int, int] = []):
+    def __init__(self, image_size_tuple:tuple[int, int] = [], make_square:bool=False, ratio_resize:bool=False):
         self.image_size_tuple = image_size_tuple
+        self.make_square = make_square
+        self.ratio_resize = ratio_resize
+    
     
     # -------------------- UTILITY FUNCTIONS --------------------
 
@@ -307,6 +369,7 @@ class ImagePrep():
 
     def resize_images(self, image_data: np.ndarray, image_size_tuple:tuple[int, int]=None, n_channels:int=0) -> np.ndarray:
         """Resize image data using cubic spline interpolation."""
+        
         def resize_image_2D(img_slice, image_size_tuple:(int,int)):
             # Resize the normalized image slice
             resized_img = transform.resize(
@@ -319,8 +382,34 @@ class ImagePrep():
             )
             return resized_img
         
+        def pad_to_square(img_slice):
+            height, width = img_slice.shape[-2:]  # Only consider the last two dimensions
+            if height > width:
+                pad = (height - width) // 2
+                padded_img = np.pad(img_slice, ((0, 0), (pad, height - width - pad)), mode='constant')
+            elif width > height:
+                pad = (width - height) // 2
+                padded_img = np.pad(img_slice, ((pad, width - height - pad), (0, 0)), mode='constant')
+            else:
+                padded_img = img_slice  # already square
+            return padded_img
+        
         if image_size_tuple is None:
             image_size_tuple = self.image_size_tuple
+
+        # original_dtype = image_data.dtype
+
+        if self.ratio_resize:
+
+        if self.make_square:
+            if len(image_data.shape) == 2:
+                image_data = pad_to_square(image_data)
+            elif len(image_data.shape) == 3 and n_channels == 0:
+                image_data = np.array([pad_to_square(slice) for slice in image_data])
+            elif len(image_data.shape) == 3 and n_channels > 0:
+                image_data = np.array([pad_to_square(slice) for slice in image_data])
+            elif len(image_data.shape) == 4 and n_channels > 0:
+                image_data = np.array([[pad_to_square(slice) for slice in img_channel] for img_channel in image_data])
 
         dims = len(np.shape(image_data))
         if (dims==2 and n_channels==0) or (dims==3 and n_channels>0):   
@@ -332,11 +421,14 @@ class ImagePrep():
                 resized_images.append(resized_img)
             resized_images = np.array(resized_images)
         
+
+        # resized_images = resized_images.astype(original_dtype)
+
         return resized_images
     
     # -------------------- DATA TRANSFORMATION FUNCTIONS --------------------
 
-    def prep_image_study_specific_step1(self, image_data: np.ndarray, z_indices:list[int] = []) -> np.ndarray:
+    def prep_image_step1(self, image_data: np.ndarray, z_indices:list[int] = []) -> np.ndarray:  # prep_image_study_specific_step1
         '''
         Apply preprocessing steps that are specific to the study to the image data.
         Params:
@@ -356,7 +448,7 @@ class ImagePrep():
         
         return normalized_data
     
-    def prep_image_sam_specific_step2(self, normalized_data: np.ndarray) -> np.ndarray:
+    def prep_image_step2(self, normalized_data: np.ndarray) -> np.ndarray:  # prep_image_sam_specific_step2
         '''
         Apply preprocessing steps that are specific to sam to the image data.
         Params:
@@ -364,7 +456,16 @@ class ImagePrep():
         '''
         # Resize and normalize the cropped image and mask data before saving
         resized_data = self.resize_images(normalized_data)
+
+        # resized_data = np.uint8(resized_data)
+
+        # Removed on 4/9/2024 - resized_normalized_data = self.normalize_image_data_by_slice(resized_data)
         resized_normalized_data = self.normalize_image_data_by_slice(resized_data)
+
+        # import pdb; pdb.set_trace()
+
+        # resized_normalized_data = np.uint8(resized_normalized_data)
+
         return resized_normalized_data
     
     def preprocess_image(self, image_data: np.ndarray, z_indices:list[int] = []) -> np.ndarray:
@@ -374,15 +475,82 @@ class ImagePrep():
         - image_data: Supports 2D [H x W] and 3D [Slice x H x W] image data.
         - z_indices: relevant slices to keep if image_data is 3D
         '''
-        normalized_data = self.prep_image_study_specific_step1(image_data, z_indices)
-        
-        # resized_normalized_data = self.prep_image_sam_specific_step2(normalized_data)
-        
-        return normalized_data  #resized_normalized_data
+        normalized_data = self.prep_image_step1(image_data, z_indices)
+
+        print(f"normalized_data dtype: {normalized_data.dtype}")
+
+        resized_normalized_data = self.prep_image_step2(normalized_data)
+
+        # print(f"resized_normalized_data dtype: {resized_normalized_data.dtype}")
+
+        return resized_normalized_data
     
-    # def check_valid_pixels(self, image_data: np.ndarray,) -> np.ndarray:
-    #     """Ensure the image has valid intensities"""
-    #     valid_pixels = image_data[image_data > 0]
-    #     if not valid_pixels.size:
-    #         return np.zeros_like(image_data, dtype=np.uint8)  # Handle case with no valid pixels
-    #     return image_data
+# ---------------------- Bounding Box Creation ------------------------------------- #
+
+def write_list_to_file(file_path, data_list):
+    with open(file_path, 'w') as file:
+        for item in data_list:
+            file.write(str(item) + '\n')
+            
+def get_bounding_boxes(multiclass_mask, instance=False):
+
+    # obtain unique labels in the image
+    unique_labels = np.unique(multiclass_mask)
+    bounding_boxes = []
+
+    for label in unique_labels:
+        # Skip background label
+        if label == 0:
+            continue  
+        
+        if instance:
+            # Process each instance separately
+            gt2D = np.uint8(multiclass_mask == label)  # Binary mask for chosen class
+            labeled_array, num_features = scipy_label(gt2D)
+
+            for component in range(1, num_features + 1):
+                component_mask = labeled_array == component
+                y_indices, x_indices = np.where(component_mask)
+
+                # Compute the bounding box for the selected component
+                x_min, x_max = np.min(x_indices), np.max(x_indices)
+                y_min, y_max = np.min(y_indices), np.max(y_indices)
+
+                # Calculate center and dimensions
+                center_x = (x_min + x_max) / 2
+                center_y = (y_min + y_max) / 2
+                width = x_max - x_min
+                height = y_max - y_min
+
+                # Normalize
+                height_sz, width_sz = multiclass_mask.shape
+                bounding_boxes.append(
+                    str(label) +
+                    ' ' + str(center_x / width_sz) +
+                    ' ' + str(center_y / height_sz) +
+                    ' ' + str(width / width_sz) +
+                    ' ' + str(height / height_sz) )
+        else:
+            # Original logic for bounding box of entire label
+            indices = np.where(multiclass_mask == label)
+
+            # Calculate bounding box coordinates
+            min_row, min_col = np.min(indices[0]), np.min(indices[1])
+            max_row, max_col = np.max(indices[0]), np.max(indices[1])
+
+            # Calculate center and dimensions
+            center_x = (min_col + max_col) / 2
+            center_y = (min_row + max_row) / 2
+            width = max_col - min_col
+            height = max_row - min_row
+
+            # Normalize
+            height_sz, width_sz = multiclass_mask.shape
+            bounding_boxes.append(
+                str(label) +
+                ' ' + str(center_x / width_sz) +
+                ' ' + str(center_y / height_sz) +
+                ' ' + str(width / width_sz) +
+                ' ' + str(height / height_sz) )
+
+    return bounding_boxes

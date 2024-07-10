@@ -194,15 +194,13 @@ def generate_subject_metadata(dataset_info:dict, subject_info:dict, additional_m
 
 # ------------------------------------------------------------------------------------------
 
-# def generate_slice_info_for_subject(img_file_paths, mask_file_paths, dataset_info):
-def generate_slice_info_for_subject(img_file_paths, mask_file_paths, label_file_paths, dataset_info):
+def generate_slice_info_for_subject(img_file_paths, mask_file_paths, dataset_info):
     """
     For a single subject/volume, summarize file path info about all slices.
 
     Parameters:
     - img_file_paths: List of valid paths to all images that correspond to one subject/volume.
     - mask_file_paths: List of valid paths to all masks that correspond to one subject/volume.
-    - label_file_paths: List of valid paths to all labels that correspond to one subject/volume (optional).
     - dataset_info: Additional characteristics from dataset.
 
     Returns:
@@ -210,32 +208,22 @@ def generate_slice_info_for_subject(img_file_paths, mask_file_paths, label_file_
     """
     data = []
 
+    # import pdb; pdb.set_trace()
+
     for img_path in sorted(img_file_paths):
         subject_id = os.path.basename(img_path).rsplit('-',1)[0]
         slice_number = img_path.rsplit('-')[-1].split('.')[0].zfill(3)  # Format slice_number with leading zeros
         mask_path = [f for f in mask_file_paths if f"{subject_id}-{slice_number}" in f][0]
 
-        if label_file_paths is not None:
-            label_path = [f for f in label_file_paths if f"{subject_id}-{slice_number}" in f][0]
-            data.append({'subject_id': subject_id,
-                            'slice_number': slice_number,
-                            'npy_base_dir': dataset_info['npy_dir'],
-                            'npy_image_path': img_path,
-                            'npy_mask_path': mask_path,
-                            'txt_label_path': label_path,
-                            'Dataset': dataset_info['dataset_name'],
-                            'mask_labels': 'placeholder'})
-        else:
-            data.append({'subject_id': subject_id,
-                            'slice_number': slice_number,
-                            'npy_base_dir': dataset_info['npy_dir'],
-                            'npy_image_path': img_path,
-                            'npy_mask_path': mask_path,
-                            'Dataset': dataset_info['dataset_name'],
-                            'mask_labels': 'placeholder'})
+        data.append({'subject_id': subject_id,
+                        'slice_number': slice_number,
+                        'npy_base_dir': dataset_info['npy_dir'],
+                        'npy_image_path': img_path,
+                        'npy_mask_path': mask_path,
+                        'Dataset': dataset_info['dataset_name'],
+                        'mask_labels': 'placeholder'})
 
-    # subject_df = pd.concat([pd.DataFrame(data)])
-    subject_df = pd.DataFrame(data)
+    subject_df = pd.concat([pd.DataFrame(data)])
 
     return subject_df
 

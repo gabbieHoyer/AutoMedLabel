@@ -43,7 +43,7 @@ IMG_FORMATS = "bmp", "dng", "jpeg", "jpg", "mpo", "png", "tif", "tiff", "webp", 
 VID_FORMATS = "asf", "avi", "gif", "m4v", "mkv", "mov", "mp4", "mpeg", "mpg", "ts", "wmv", "webm"  # video suffixes
 PIN_MEMORY = str(os.getenv("PIN_MEMORY", True)).lower() == "true"  # global pin_memory for dataloaders
 
-
+# HERE: could be useful to adjust for custom dataset/loader
 def img2label_paths(img_paths):
     """Define label paths as a function of image paths."""
     sa, sb = f"{os.sep}images{os.sep}", f"{os.sep}labels{os.sep}"  # /images/, /labels/ substrings
@@ -79,6 +79,9 @@ def verify_image(args):
     nf, nc, msg = 0, 0, ""
     try:
         if im_file.suffix == '.npy':
+
+            # import pdb; pdb.set_trace()
+            
             im = np.load(im_file) # Load the npy file
             shape = im.shape[:2] # Assume HxWxC or HxW for grayscale
             # no need for further PIL-based checks since it's already a numpy array

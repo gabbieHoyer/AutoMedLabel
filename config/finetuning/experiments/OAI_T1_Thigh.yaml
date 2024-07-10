@@ -17,7 +17,7 @@ distributed: True
 datamodule:
   max_subject_set: 5 
   balanced: False
-  bbox_shift: 20
+  bbox_shift: 0
   batch_size: 2
   num_workers: 1
   # augmentation_pipeline: 
@@ -34,13 +34,13 @@ module:
     image_encoder: True  
     mask_decoder: True     
 
-  task_name: OAI-Thigh
+  task_name: OAI_Thigh_SAM_YOLO
   group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
   model_type: vit_b
-  use_wandb: False 
+  use_wandb: True 
   visualize: True
 
-  num_epochs: 1 #500
+  num_epochs: 1000
 
   optimizer:
     weight_decay: 0.01

@@ -70,7 +70,9 @@ class Compose:
 
     def __call__(self, data):
         """Applies a series of transformations to input data."""
-        for t in self.transforms:
+        # import pdb; pdb.set_trace()
+
+        for t in self.transforms:  # HERE
             data = t(data)
         return data
 
@@ -891,6 +893,8 @@ class Albumentations:
             check_version(A.__version__, "1.0.3", hard=True)  # version requirement
 
             # HERE
+            # import pdb; pdb.set_trace()
+
             # Transforms
             T = [
                 A.Blur(p=0.01),
@@ -1005,6 +1009,9 @@ class Format:
 
     def _format_img(self, img):
         """Format the image for YOLO from Numpy array to PyTorch tensor."""
+        
+        # import pdb; pdb.set_trace()
+
         if len(img.shape) < 3:
             img = np.expand_dims(img, -1)
         img = np.ascontiguousarray(img.transpose(2, 0, 1)[::-1])
@@ -1058,6 +1065,7 @@ def v8_transforms(dataset, imgsz, hyp, stretch=False):
             raise ValueError(f"data.yaml flip_idx={flip_idx} length must be equal to kpt_shape[0]={kpt_shape[0]}")
 
     # HERE: 
+    # import pdb; pdb.set_trace()
     return Compose(
         [
             pre_transform,

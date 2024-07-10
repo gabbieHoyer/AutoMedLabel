@@ -16,6 +16,8 @@ from .augment import Compose, Format, Instances, LetterBox, classify_augmentatio
 from .base import BaseDataset
 from .utils import HELP_URL, LOGGER, get_hash, img2label_paths, verify_image, verify_image_label
 
+#### ooooh maybe can alter img2label_paths to have variant of loading directories  :D
+
 # Ultralytics dataset *.cache version, >= 1.0.0 for YOLOv8
 DATASET_CACHE_VERSION = "1.0.3"
 

@@ -15,16 +15,37 @@ names:
 
 nc: 11
 
-path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy
+# original dataset - not resized to 1024x1024 - need to check if 3 channels included; doesn't include extra 48 subjects:
+# path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/full_thigh_npy
 
-# temp test func
+# includes entire 100 subjects; resized to be compatible with SAM; inclues 3 channels to start
+# path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/yolo_npy
+
+# do this for yolo; keep sam separate probs 
+# includes entire 100 subjects; not resized; 3-channels built-in
+# train successfull at train11
+# path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/yolo_not_resized_npy
+
+# includes entire 100 subjects; made square then resized; 3 channels - ok for SAM
+# hopefully fixed for yolo!!! :,) yes, praise the Lord; it worked after altering loading :)
+path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/yolo_square_resized
+
+# didnt work :(  entire 100 subjects uint8 square and resized; 3 channel:
+# path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/yolo_squared_resized_uint8_still_float64
+
 train: train/images
-val: train/images
-test: test/labels
-
+val: val/images
+test: test/images
 
 meta_path: /data/bigbone3/ghoyer/standardized/OAI/thigh/T1_ax/metadata/volume_metadata_for_ml_thigh_plus.json 
 
+
+
+
+# temp test func
+# train: train/images
+# val: train/images
+# test: test/labels
 
 # BTW *.npy files are only generated if you use cache=disk during training. By default these are not generated.
 

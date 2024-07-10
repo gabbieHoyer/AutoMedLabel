@@ -28,7 +28,7 @@ root = pyrootutils.setup_root(
 
 import src.finetuning.utils.gpu_setup as GPUSetup #is_distributed
 from src.finetuning.utils.utils import plot_combined_losses, plot_losses, save_losses, reduce_tensor, plot_metrics, save_metrics
-from src.finetuning.utils.checkpointing import log_and_checkpoint
+from src.finetuning.utils.checkpointing import log_and_checkpoint, final_checkpoint_conversion
 from src.finetuning.utils.logging import main_process_only, log_info, wandb_log
 from src.finetuning.utils.fig_QC import quality_check, visualize_input, visualize_predictions
 
@@ -324,6 +324,8 @@ class Trainer:
         plot_combined_losses(self.shared_losses['train'], self.shared_losses['val'], self.model_save_path, self.run_id)
         save_losses(self.shared_losses, self.model_save_path, self.run_id)
         save_metrics(self.shared_metrics, self.model_save_path, self.run_id)
+        final_checkpoint_conversion(self.module_cfg, self.model_save_path, self.run_id)
+
 
 
 

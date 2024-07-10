@@ -66,30 +66,6 @@ echo "MASTER_PORT=$MASTER_PORT"
 echo "DIST_URL=$DIST_URL"
 
 # Activate conda environment
-# export PATH=/netopt/rhel7/bin:$PATH
-# eval "$('/netopt/rhel7/versions/python/Anaconda3-edge/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
-
-export MODULEPATH=$MODULEPATH:/home/ghoyer/Modules/modulefiles
-module load use.own
-
-if [ -d "/home/ghoyer/miniconda3" ]; then
-    # Load Conda module for RHEL9
-    module load conda_base/1.0
-    if [ $? -ne 0 ]; then
-        echo "Failed to load Miniconda module for RHEL9. Check module name and path."
-    else
-        # Assuming conda init is already run and managed
-        echo "Conda is initialized for RHEL9."
-    fi
-else
-    echo "Miniconda3 directory not found on RHEL9."
-fi
-
-eval "$('/home/ghoyer/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-
-
-# Your Conda environment name: 'myenv'
-# CONDA_ENV_NAME=/data/VirtualAging/users/ghoyer/conda/envs/medsam
 
 if [ -d /data/VirtualAging ] ;
 then

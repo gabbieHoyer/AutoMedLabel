@@ -2,8 +2,8 @@ import os
 import yaml
 import argparse
 from string import Template
+#from ultralytics import YOLO, RTDETR, NAS
 from ultralytics import YOLO, RTDETR, NAS
-
 
 def load_config(config_file_name, base_dir):
     """Loads and processes a YAML configuration file."""
@@ -40,11 +40,13 @@ def main(config):
     # Load a model based on configuration
     ModelClass = load_model(config)
 
+    # import pdb; pdb.set_trace()
+
     # passes cleanly
     model = ModelClass(config["model"])
 
     # Train the model using parameters from the config
-    model.train(data=config['data_yaml'], epochs=config['epochs'], imgsz=config['imgsz'], rect=config['rect'], batch=config['batch'], plots=True)
+    model.train(data=config['data_yaml'], epochs=config['epochs'], imgsz=config['imgsz'], rect=config['rect'], batch=config['batch'], workers=config['workers'], plots=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train YOLO Model with Config File")

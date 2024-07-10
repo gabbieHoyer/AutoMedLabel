@@ -76,6 +76,7 @@ class Tester:
                         "model_type": self.eval_cfg['model_type'],
                         "description": self.experiment_cfg['description'],
                         "finetuned_weights": self.eval_cfg['model_weights'],
+                        "model_ID": self.eval_cfg['finetuned_model'],
                         "balanced": self.eval_cfg['model_details']['balanced'],
                         "subject_subject_set": self.eval_cfg['model_details']['subject'],
                         "image_encoder": self.eval_cfg['trainable']['image_encoder'],
@@ -102,7 +103,7 @@ class Tester:
 
         self.model.eval()
         self.dice_metric.reset()
-        self.IoU_metric.reset() # new
+        self.IoU_metric.reset() 
 
         with torch.no_grad():
 
@@ -431,6 +432,16 @@ class Tester:
         global_csv_path = os.path.join(self.run_path, 'test_eval', f"{self.run_id}_data_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}_global_{metric_name}.csv")
         result_df.to_csv(global_csv_path, index=False)
         print(f'Saved global-level {metric_name} scores to {global_csv_path}')
+
+        # Log all the paths to wandb at once
+        if self.module_cfg.get('use_wandb', False):
+            # Create the wandb_log_data dictionary at the bottom
+            wandb_log_data = {
+                "slice_csv_path": slice_csv_path,
+                "volume_csv_path": volume_csv_path,
+                "global_csv_path": global_csv_path
+            }
+            wandb_log(wandb_log_data)
 
     def test(self):
         logger.info(f"Testing with {self.data_type} data...")
