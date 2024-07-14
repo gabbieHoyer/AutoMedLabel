@@ -1,0 +1,183 @@
+## mskSAM Dataset Pre-Processing Parameters
+## Params for:
+##     1. data_standardization.py: data standardization of input image and mask file
+##     2. metadata_extraction.py: standardize metadata for statistics
+##     3. sam_prep.py: SAM compatible npy data standardization and slice-level metadata creation
+##     4. prompt_prediction.py: extended functionality for choosing prompt experimentation / zeroshot inference
+
+
+# ------------------ PARAMS FOR ALL ------------------
+dataset:
+  name: BACPAC_UH3_T1sag
+  description: "3.0T T1 Sagittal lumbar spine dataset with disc and vertebrae masks."
+
+overwrite_existing_flag: True
+
+# --- OUTPUT (DEFAULT): uses default folder structure when output path is not specified (see load_config())
+default_output_dir: /data/mskscratch/users/ghoyer/spine_pipeline
+general_data_dir: ${default_output_dir}/standardized_spine/BACPAC_UH3/lumbar_spine/T1_sag
+        
+# ------------------ INFO FOR DATA STANDARDIZATION ------------------
+# Packaged MRI image and mask folder paths (can be dicom or other file type)
+image_data_paths: ${general_data_dir}/dataframes/Bacpac_t1sag_vert_disc_dcm_mask_data.csv
+mask_data_paths:  ${image_data_paths}
+
+image_column: imgs_dcms
+mask_column: [vert_h5, disc_h5]
+
+image_config:
+  key: 
+  transforms:
+  data_properties:
+    finite_values: True
+
+mask_config: 
+  key: pred
+  transforms:
+    combination_method: add_multi_class_labels
+    #transpose: [2, 0, 1]
+    dtype: np.uint32
+  data_properties:
+    finite_values: True
+    type: int32
+
+
+## details about your dataset:
+mask_labels:
+  0: background
+  #vertebrae
+  9: L1
+  7: L2
+  5: L3
+  3: L4
+  1: L5
+  #discs
+  8: L1-L2
+  6: L2-L3
+  4: L3-L4
+  2: L4-L5
+  12: L5-S1
+  #additional vert
+  27: T8
+  23: T9
+  19: T10
+  15: T11
+  11: T12
+  13: S1
+  17: S2
+  21: S3
+  25: S4
+  #additional discs
+  26: T8-T9
+  22: T9-T10
+  18: T10-T11
+  14: T11-T12
+  10: T12-L1
+  16: S1-S2
+  20: S2-S3
+  24: S3-S4
+
+# --- OUTPUT (OVERRIDE DEFAULT): location to Output/locate nifti files for MRI images and masks
+nifti_image_dir: ${general_data_dir}/nifti/imgs
+nifti_mask_dir: ${general_data_dir}/nifti/masks
+
+# ------------------ VISUALIZE NIFTI ------------------
+nifti_fig_cfg:
+  fig_type: ['2D_overlay', 'gif'] # Options: '2D_overlay', 'gif', ['2D_overlay', 'gif']
+  num_figs: 5  # Number of files to randomly select and process
+  slice_selection: 'with_segmentation' # 'any' 'with_segmentation'
+# --- OUTPUT (OVERRIDE DEFAULT): location to save figures
+  fig_path: ${general_data_dir}/nifti/figs
+
+# ------------------ INFO FOR SAM PREP ------------------
+## SAM compatible npy data standardization and slice-level metadata creation
+# Values for image preprocessing script
+preprocessing_cfg:
+  image_size: 1024
+  voxel_num_thre2d: 100
+  voxel_num_thre3d: 400
+  remove_label_ids: []  # No labels to remove in this configuration
+  target_label_id: null #1 #null  # No specific label targeted for instance segmentation
+  instance_bbox: True
+  yolo_compatible: True
+
+# --- OUTPUT (OVERRIDE DEFAULT): Location to output SAM-compatible .npy files
+npy_dir: ${general_data_dir}/npy/SAM
+
+# ------------------ VISUALIZE NPY ------------------
+npy_fig_cfg:
+  fig_type: 2D_overlay # Options: '2D_overlay', 'gif', ['2D_overlay', 'gif']
+  num_figs: 10  # Number of files to randomly select and process
+  slice_selection: 'any' # 'any' 'with_segmentation'
+# --- OUTPUT (OVERRIDE DEFAULT): location to save figures
+  fig_path: ${npy_dir}/figs
+
+# ------------------ INFO FOR METADATA EXTRACTION ------------------
+# Original MRI dicom image folder path
+mri_dicom_dir: ${image_data_paths}
+dicom_column: imgs_dcms
+
+metadata_cfg:
+  ## details about your dataset:
+  dataset_name: ${dataset.name}
+  anatomy: 'lumbar_spine'
+  field_strength: '3.0'
+  mri_sequence: 't1_sag'
+
+  ## MRI dicom header info to extract for statistics metadata:
+  dicom_values:
+    PID: PatientID
+    AccessionNumber: AccessionNumber
+    SOPInstanceUID: SOPInstanceUID
+    StudyInstanceUID: StudyInstanceUID
+    SeriesInstanceUID: SeriesInstanceUID
+    series_desc: SeriesDescription
+    study_desc: StudyDescription
+    TE: EchoTime
+    TR: RepetitionTime
+    flip_angle: FlipAngle
+    ETL: EchoTrainLength
+    field_strength: MagneticFieldStrength
+    receive_coil: ReceiveCoilName
+    scanner_name: StationName
+    scanner_model: ManufacturerModelName
+    slice_thickness: SliceThickness
+    slice_spacing: SpacingBetweenSlices
+    pixel_spacing: PixelSpacing
+    rows: Rows
+    columns: Columns
+    instanceNumber: InstanceNumber
+    Age: PatientAge   
+    Sex: PatientSex
+    Weight: PatientWeight
+
+# Operation A (Optional) 
+# Path to a table/dataframe for demographic or other info desired for metadata:
+# extra_metadata_cfg: 
+#   csv_file_path: /data/mskdata/notebooks/BACPAC_UH3/BACPAC_UH3_additional_info.csv
+#   subject_id_col: 'subject_id'
+#   column_mapping: # Standardized: Actual
+#     Age: 'Age'  
+#     Sex: 'Sex'
+#     Weight: 'Weight'
+#     # Add more mappings as needed
+    
+
+# Operation B (Optional) 
+# JSON dictionary to provide supplementary info (demographics, imaging parameters) - default is our stats file
+additional_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
+
+# --- OUTPUTS (OVERRIDE DEFAULT): 
+# Operation A - location for Statistics slice-level information
+stats_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
+# Operation B - location of subject-level metadata used for training
+ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json
+# Operation C - location to parquet files for ML
+slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
+
+# Operation D - location for text file of dicom metadata from one file
+dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
+
+# ------------------ Prompting Experimentation ------------------
+prompt_experiment: 
+  config: baseline_prompt.yaml

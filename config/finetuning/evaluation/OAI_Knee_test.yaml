@@ -1,0 +1,95 @@
+# ------------------------ Evaluation ------------------------ #
+evaluation:
+  name: "OAI_Knee"
+  description: "Evaluating models finetuned on the OAI Knee MRI dataset."
+
+SEED: 42
+distributed: False
+
+dataset:
+  OAI-imorphics:
+    config: OAI_imorphics.yaml      
+    project: OAI-imorphics-Evaluation
+
+datamodule:
+  max_subject_set: 3
+  bbox_shift: 0
+  batch_size: 1  
+  num_workers: 1
+  # ---------------- Custom Metric Implementation ----------------- # in dev
+  metric:
+    func:
+      cartilagethickness: true
+    tissues: [1, 2, 3, 4]
+    dicom_fields: ['pixel_spacing', 'slice_thickness', 'rows', 'columns']
+    representative_slice: False
+  # --------------------------------------------------------------- #
+
+module:
+  work_dir: "work_dir/evaluation"
+  task_name: Knee-Evaluation
+  use_wandb: True
+  visualize: True
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${evaluation.name}_data_summary.csv
+  logging_level: INFO 
+
+base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+
+models:
+
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/OAI_Knee/no_aug_bbox_shift_0/img_enc_False/early_stop_patience_10/subject_full/20240522-2350_finetuned_model_best.pth
+    model_weights: OAI_Knee-bal_False-subject_set_full-bbox_shift_0
+    model_type: vit_b
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: false
+      mask_decoder: true
+    # --------------------------------------------------------------------------------------- #
+
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/OAI_Knee/aug_bbox_shift_20/img_enc_False/early_stop_patience_10/subject_full/20240524-2258_finetuned_model_best.pth
+  #   model_weights: OAI_Knee-bal_False-subject_set_full-bbox_shift_20
+  #   model_type: vit_b
+  #   model_details:
+  #     balanced: false
+  #     subject: full
+  #     bbox_shift: 20
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: false
+  #     mask_decoder: true
+  #   # --------------------------------------------------------------------------------------- #
+
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/OAI_Knee/no_aug_bbox_shift_0/img_enc_True/early_stop_patience_10/subject_full/20240527-0312_finetuned_model_best.pth
+  #   model_weights: OAI_Knee-bal_False-subject_set_full-bbox_shift_0
+  #   model_type: vit_b
+  #   model_details:
+  #     balanced: false
+  #     subject: full
+  #     bbox_shift: 0
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: true
+  #     mask_decoder: true
+  #   # --------------------------------------------------------------------------------------- #
+
+      
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/OAI_Knee/aug_bbox_shift_20/img_enc_True/early_stop_patience_10/subject_full/20240608-1844_finetuned_model_best.pth
+  #   model_weights: OAI_Knee-bal_False-subject_set_full-bbox_shift_20
+  #   model_type: vit_b
+  #   model_details:
+  #     balanced: false
+  #     subject: full
+  #     bbox_shift: 20
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: true
+  #     mask_decoder: true

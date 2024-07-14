@@ -7,6 +7,9 @@ epochs: 100
 batch: 8 #1 #2 #4 #8 #16
 rect: False
 workers: 4 #1 
+run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/OAI_Thigh/runs
+
+# project: OAI_Thigh
 # multi_scale: True
 
 # best_weights: runs/detect/train/weights/best.pt

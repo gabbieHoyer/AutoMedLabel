@@ -39,6 +39,13 @@ from src.utils.file_management.file_handler import load_data
 from src.finetuning.engine.models.sam import finetunedSAM
 
 # ------------------- Visualization Tools ----------------------------------- #
+def set_image_clim(image):
+    image_norm = 'percentile'
+    # can do percentiles here
+    if image_norm == 'percentile':
+        return [np.percentile(image[:], 2),np.percentile(image[:], 98)]
+    else:
+        return [np.min(image[:]),np.max(image[:])]
 
 def map_labels_to_colors(pred_mask, mask_labels):
     # Define a colormap that can provide a distinct color for each class
@@ -79,19 +86,22 @@ def add_colorbar(fig, ax, mask_labels):
     cbar.set_ticks(unique_labels)
     cbar.set_ticklabels([mask_labels[label] for label in unique_labels])
 
-def visualize_full_pred(image, pred_mask, mask_labels, image_name, model_save_path):  
+def visualize_full_pred(image, pred_mask, mask_labels, image_name, model_save_path, image_clim=None):  
     if image.shape[0] == 3:
         image = np.transpose(image, (1, 2, 0))  # Convert from [C, H, W] to [H, W, C]
 
     fig, ax = plt.subplots(1, 2, figsize=(10, 5))  # Create a figure with three subplots
 
     # Original image
-    ax[0].imshow(image, cmap='gray')  # Assuming image is in [C, H, W] format
+    ax[0].imshow(image, cmap='gray', clim=image_clim)  # Assuming image is in [C, H, W] format
     ax[0].set_title('Original Image')
     ax[0].axis('off')
 
     # Prediction overlay
-    ax[1].imshow(image, cmap='gray')  # Original image
+    if image_clim is not None:
+        ax[1].imshow(image, cmap='gray', clim=image_clim)  # Original image
+    else:
+        ax[1].imshow(image, cmap='gray')  # Original image
     colored_pred_mask = map_labels_to_colors(pred_mask, mask_labels)
     im = ax[1].imshow(colored_pred_mask, alpha=0.5)  # Overlay the colored mask
     ax[1].set_title('Prediction Overlay')
@@ -120,7 +130,7 @@ def visualize_input(image, image_name, model_save_path):
     plt.title('Original Image')
     plt.axis('off')
 
-    figure_file_path = os.path.join(model_save_path, "QC", f"{image_name}_yolo_input_QC.png")
+    figure_file_path = os.path.join(model_save_path, "input_QC", f"{image_name}.png")
     os.makedirs(os.path.dirname(figure_file_path), exist_ok=True)
 
     plt.savefig(figure_file_path) 
@@ -128,7 +138,7 @@ def visualize_input(image, image_name, model_save_path):
 
 # -----------------------------------------------------------------
 
-def visualize_pred(image, pred_mask, binary_pred, boxes, image_name, model_save_path):  # pred_mask_bin, label_id,
+def visualize_pred(image, pred_mask, binary_pred, boxes, image_name, model_save_path, image_clim=None):  # pred_mask_bin, label_id,
     if image.shape[0] == 3:
         image = np.transpose(image, (1, 2, 0))  # Convert from [C, H, W] to [H, W, C]
 
@@ -136,18 +146,18 @@ def visualize_pred(image, pred_mask, binary_pred, boxes, image_name, model_save_
 
     # Original image
     # Assuming image is in [C, H, W] format and is an RGB image
-    ax[0].imshow(image)  # Assuming image is in [C, H, W] format
+    ax[0].imshow(image, cmap='gray', clim=image_clim)  # Assuming image is in [C, H, W] format
     ax[0].set_title('Original Image')
     ax[0].axis('off')
 
     # Prediction overlay
-    ax[1].imshow(image)  # Original image
+    ax[1].imshow(image, cmap='gray', clim=image_clim)  # Original image
     ax[1].imshow(pred_mask, alpha=0.5)  # Overlay the colored mask
     ax[1].set_title('Prediction Overlay')
     ax[1].axis('off')
 
     # Prediction overlay
-    ax[2].imshow(image)  # Original image
+    ax[2].imshow(image, cmap='gray', clim=image_clim)  # Original image
     ax[2].imshow(binary_pred, alpha=0.5)  # Overlay the colored mask
     ax[2].set_title('Binary Prediction Overlay')
     ax[2].axis('off')
@@ -190,33 +200,6 @@ def save_prediction(seg_3D, save_dir, filename, output_ext):
         new_nii = nib.Nifti1Image(seg_3D, np.eye(4))
         nib.save(new_nii, nifti_output_path)
     return
-
-
-# def save_prediction_for_ITK(seg_3D, save_dir, filename, output_ext):
-#     """Save prediction as .nii.gz using SimpleITK for .nii.gz files."""
-#     # Ensure the output directory exists
-#     output_dir = os.path.join(save_dir, 'pred')
-#     os.makedirs(output_dir, exist_ok=True)
-
-#     nifti_output_path = os.path.join(output_dir, f"{filename}_itk10.nii.gz")
-
-#     # Transpose the numpy array to get the desired dimensions (512, 256, 15)
-#     seg_3D_transposed = np.transpose(seg_3D, (2, 1, 0))
-
-#     # Reverse the order of slices
-#     seg_3D_reversed = seg_3D_transposed[::-1]
-
-#     # Flip along the y-axis to correct orientation for ITK-SNAP
-#     seg_3D_flipped = np.flip(seg_3D_reversed, axis=0)
-
-#     gh_rev = seg_3D_flipped[:,:, ::-1]
-
-#     # Create a new NIfTI image using an identity affine transformation matrix 
-#     new_nii = nib.Nifti1Image(gh_rev, np.eye(4))
-
-#     nib.save(new_nii, nifti_output_path)
-    
-#     return
 
 def save_prediction_for_ITK(seg_3D, save_dir, filename, output_ext):
     """Save prediction as .nii.gz using SimpleITK for .nii.gz files."""
@@ -301,22 +284,6 @@ def resize_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int, m
     sam_mask[sam_mask_resized > 0] = label_id
     return sam_mask
 
-
-# def postprocess_resize(mask, image_size_tuple:tuple[int,int]):
-#     """Resize mask to new dimensions."""
-#     predMaskPrep = MaskPrep()
-#     resized_mask = predMaskPrep.resize_mask(mask_data = mask.astype(np.uint8),
-#                                             image_size_tuple = image_size_tuple)
-#     return resized_mask
-
-# def resize_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int):
-#     """Convert SAM prediction into segmentation mask with original image dims and label ids."""
-#     sam_mask_resized = postprocess_resize(sam_pred, image_size_tuple)
-#     sam_mask = np.zeros_like(sam_mask_resized, dtype=np.uint8)
-#     sam_mask[sam_mask_resized > 0] = label_id
-#     return sam_mask
-
-
 def postprocess_prediction(sam_pred):
     # Ensure sam_pred is in the range [0, 255] and of type np.uint8
     sam_pred = sam_pred.astype(np.uint8) * 255  # Convert binary 0/1 to grayscale 0/255
@@ -353,42 +320,6 @@ def load_model(config):
         raise ValueError(f"Unsupported model type: {model_type}")
     
     return model_class
-
-# def locate_files(directory_or_file):
-#     if os.path.isfile(directory_or_file):
-#         return [directory_or_file]
-#     elif os.path.isdir(directory_or_file):
-#         return [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
-#     else:
-#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
-
-# def locate_files(directory_or_file):
-#     if os.path.isfile(directory_or_file):
-#         return [directory_or_file]
-#     elif os.path.isdir(directory_or_file):
-#         return [directory_or_file]
-#     # [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
-#     else:
-#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
-
-
-# def locate_files(directory_or_file):
-#     if os.path.isfile(directory_or_file):
-#         # It's a single file (could be NIfTI or other file)
-#         return [directory_or_file]
-#     elif os.path.isdir(directory_or_file):
-#         contents = os.listdir(directory_or_file)
-#         full_paths = [os.path.join(directory_or_file, f) for f in contents]
-        
-#         if all(os.path.isdir(p) for p in full_paths):
-#             # It's a folder of folders (likely DICOM folders)
-#             return full_paths
-#         else:
-#             # It's a single folder (could be NIfTI files or a single DICOM folder)
-#             # return [directory_or_file]
-#             return [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
-#     else:
-#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
 
 
 def is_nifti_file(file_name):
@@ -464,18 +395,6 @@ def extract_filename(img_file: str):
 
     return file_name
 
-# def extract_filename(img_file:str):
-#     """ Extract filenames without extension
-#     Caution: fails for files with periods but no extension (ex. dicom file: "1.2.345")
-#     """
-#     file_name = os.path.basename(img_file)
-
-#     # Removes file extension
-#     # If zipped, remove zipped file extension (name.dcm.gz, name.nii.gz)
-#     if file_name.endswith('.gz'):
-#         file_name = file_name.rstrip('.gz')
-#     return os.path.splitext(file_name)[0] # Assuming file_name can be used as subject_id
-
 
 def determine_run_directory(base_dir, task_name, group_name=None):
     """
@@ -510,3 +429,102 @@ def determine_run_directory(base_dir, task_name, group_name=None):
     return full_run_path
 
 # ----------------------------------------------------------------------------------- #
+
+
+
+
+
+
+
+
+
+
+
+# def save_prediction_for_ITK(seg_3D, save_dir, filename, output_ext):
+#     """Save prediction as .nii.gz using SimpleITK for .nii.gz files."""
+#     # Ensure the output directory exists
+#     output_dir = os.path.join(save_dir, 'pred')
+#     os.makedirs(output_dir, exist_ok=True)
+
+#     nifti_output_path = os.path.join(output_dir, f"{filename}_itk10.nii.gz")
+
+#     # Transpose the numpy array to get the desired dimensions (512, 256, 15)
+#     seg_3D_transposed = np.transpose(seg_3D, (2, 1, 0))
+
+#     # Reverse the order of slices
+#     seg_3D_reversed = seg_3D_transposed[::-1]
+
+#     # Flip along the y-axis to correct orientation for ITK-SNAP
+#     seg_3D_flipped = np.flip(seg_3D_reversed, axis=0)
+
+#     gh_rev = seg_3D_flipped[:,:, ::-1]
+
+#     # Create a new NIfTI image using an identity affine transformation matrix 
+#     new_nii = nib.Nifti1Image(gh_rev, np.eye(4))
+
+#     nib.save(new_nii, nifti_output_path)
+    
+#     return
+
+# def postprocess_resize(mask, image_size_tuple:tuple[int,int]):
+#     """Resize mask to new dimensions."""
+#     predMaskPrep = MaskPrep()
+#     resized_mask = predMaskPrep.resize_mask(mask_data = mask.astype(np.uint8),
+#                                             image_size_tuple = image_size_tuple)
+#     return resized_mask
+
+# def resize_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int):
+#     """Convert SAM prediction into segmentation mask with original image dims and label ids."""
+#     sam_mask_resized = postprocess_resize(sam_pred, image_size_tuple)
+#     sam_mask = np.zeros_like(sam_mask_resized, dtype=np.uint8)
+#     sam_mask[sam_mask_resized > 0] = label_id
+#     return sam_mask
+
+# def extract_filename(img_file:str):
+#     """ Extract filenames without extension
+#     Caution: fails for files with periods but no extension (ex. dicom file: "1.2.345")
+#     """
+#     file_name = os.path.basename(img_file)
+
+#     # Removes file extension
+#     # If zipped, remove zipped file extension (name.dcm.gz, name.nii.gz)
+#     if file_name.endswith('.gz'):
+#         file_name = file_name.rstrip('.gz')
+#     return os.path.splitext(file_name)[0] # Assuming file_name can be used as subject_id
+
+
+# def locate_files(directory_or_file):
+#     if os.path.isfile(directory_or_file):
+#         return [directory_or_file]
+#     elif os.path.isdir(directory_or_file):
+#         return [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
+#     else:
+#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
+
+# def locate_files(directory_or_file):
+#     if os.path.isfile(directory_or_file):
+#         return [directory_or_file]
+#     elif os.path.isdir(directory_or_file):
+#         return [directory_or_file]
+#     # [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
+#     else:
+#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
+
+
+# def locate_files(directory_or_file):
+#     if os.path.isfile(directory_or_file):
+#         # It's a single file (could be NIfTI or other file)
+#         return [directory_or_file]
+#     elif os.path.isdir(directory_or_file):
+#         contents = os.listdir(directory_or_file)
+#         full_paths = [os.path.join(directory_or_file, f) for f in contents]
+        
+#         if all(os.path.isdir(p) for p in full_paths):
+#             # It's a folder of folders (likely DICOM folders)
+#             return full_paths
+#         else:
+#             # It's a single folder (could be NIfTI files or a single DICOM folder)
+#             # return [directory_or_file]
+#             return [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
+#     else:
+#         raise ValueError(f"{directory_or_file} is not a valid file or directory")

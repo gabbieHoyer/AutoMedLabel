@@ -1,0 +1,62 @@
+# ------------------------ Evaluation ------------------------ #
+evaluation:
+  name: "UH2_UH3_T1sag_Spine"
+  description: "Evaluating models finetuned on the UH2 and UH3 T1 Sagittal Spine MRI datasets."
+
+SEED: 42
+distributed: False
+
+dataset:
+  UH3-t1sag:
+    config: UH3_T1sag.yaml 
+    project: UH3_T1sag-Evaluation
+
+  # UH2-t1sag:
+  #   config: UH2_T1sag.yaml  
+  #   project: UH2_T1sag-Evaluation
+  # UH2-t1sag-vert:
+  #   config: UH2_T1sag_vert.yaml 
+  #   project: UH2_T1sag-Evaluation
+
+datamodule:
+  max_subject_set: 3
+  bbox_shift: 0
+  batch_size: 1  
+  num_workers: 1
+  # ---------------- Custom Metric Implementation ----------------- # in dev
+  metric:
+    func:
+      tissueheight: true
+    # tissues: [2]    # for UH2
+    tissues: [2, 4, 6, 8, 12]     # for UH3
+    dicom_fields: ['pixel_spacing', 'rows', 'columns']
+    representative_slice: True
+  # --------------------------------------------------------------- #
+
+module:
+  work_dir: "work_dir/evaluation"
+  task_name: Spine-Evaluation
+  visualize: True
+  use_wandb: True
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${evaluation.name}_data_summary.csv
+  logging_level: INFO 
+
+base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+models:
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/Spine_UH2_UH3/UH2_UH3_T1sag
+      /no_aug_bbox_shift_0/img_enc_False/early_stop_patience_10/subject_full/20240524-1628_finetuned_model_best.pth
+    model_weights: Spine_T1sag_UH2_UH3-bal_False-subject_set_full-bbox_shift_0
+    model_type: vit_b
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: false
+      mask_decoder: true

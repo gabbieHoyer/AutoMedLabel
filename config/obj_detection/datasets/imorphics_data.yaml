@@ -1,0 +1,20 @@
+names:
+- background
+- femoral cartilage
+- lateral tibial cartilage
+- medial tibial cartilage
+- patellar cartilage
+- lateral meniscus
+- medial meniscus
+
+nc: 7
+
+# path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/knee_yolo
+path: /data/mskscratch/users/ghoyer/knee_pipeline/standardized_knee/OAI/knee/3D_DESS/Imorphics/npy/YOLO
+
+train: train/images
+val: val/images
+test: test/images
+
+meta_path: /data/bigbone3/ghoyer/standardized_knee/OAI/knee/3D_DESS/Imorphics/metadata/volume_metadata_for_ml.json 
+

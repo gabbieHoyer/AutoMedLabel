@@ -1,0 +1,53 @@
+data:
+  # data_dir: standardized_data/KICK_thigh/K004_OPC.nii.gz
+  # data_dir: standardized_data/KICK_thigh/standardized_K004_OPC.nii.gz
+  # data_dir: standardized_data/KICK_thigh/standardized_K004_Fat.nii.gz
+  data_dir: standardized_data/KICK_thigh/standardized_K004_Water.nii.gz
+
+  mask_labels:
+    0: background
+    1: sc_fat
+    2: fascia
+    3: extensors
+    4: hamstrings
+    5: fem_cortex
+    6: fem_bm
+    7: adductors
+    8: sartorius
+    9: gracilis
+    10: nv
+
+preprocessing_cfg:
+  image_size: 1024
+  voxel_num_thre2d: 100
+  voxel_num_thre3d: 200
+  remove_label_ids: []
+  instance_bbox: True
+  make_square: True
+
+device: cuda:0
+models:
+  obj_det:
+    model_path: work_dir/obj_detection/OAI_Thigh/runs/train30/weights/best.pt
+    model_weights: thighYOLO8_100epoch_square_resize
+    model_type: YOLO
+    conf: 0.2
+    post_processing: False #True # lols realized this may not be used currently
+  segmentation:
+    base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    model_path: work_dir/finetuning/OAI_Thigh_SAM_YOLO/SAM_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_6/20240706-1605_finetuned_model_best_converted.pth  # had the early stopping of 10 epochs
+    model_weights: multiclass_Thigh_SAM_with_fascia_square_resize
+    model_type: vit_b
+    trainable:
+      prompt_encoder: False
+      image_encoder: True
+      mask_decoder: True
+
+
+output_cfg:
+  base_output_dir: work_dir/inference
+  task_name: KICK_Thigh
+  output_ext: nii.gz
+  visualize: True
+  img_clim: False
+  logging_level: DEBUG

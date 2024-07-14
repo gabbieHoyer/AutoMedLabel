@@ -36,8 +36,9 @@ eval "$('/home/ghoyer/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
 # -------------------- USER DEFINED PARAMS -------------------- #
 
 # Define a list containing the base name of your config file without the path or extension
-CONFIG_LIST=("OAI_T1_Thigh_plus")
-
+# CONFIG_LIST=("OAI_T1_Thigh_plus")
+# CONFIG_LIST=("OAI_imorphics")
+CONFIG_LIST=("UH3_T1sag")
 
 # Your Conda environment name: 'myenv'
 if [ -d /data/VirtualAging ] ;
@@ -86,8 +87,8 @@ for CONFIG_NAME in "${CONFIG_LIST[@]}"; do
     python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation C
 
     # ----------------------- Bonus ---------------------- #
-    # echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation D"
-    # python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation D
+    echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation D"
+    python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation D
 
     echo "All processes completed successfully."
 

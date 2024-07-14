@@ -1,0 +1,45 @@
+data:
+  data_dir: standardized_data/challenging_cases/knee_test
+
+  mask_labels:
+    0: background
+    1: femoral cartilage
+    2: lateral tibial cartilage
+    3: medial tibial cartilage
+    4: patellar cartilage
+    5: lateral meniscus
+    6: medial meniscus
+
+preprocessing_cfg:
+  image_size: 1024
+  voxel_num_thre2d: 100
+  voxel_num_thre3d: 1000
+  remove_label_ids: []
+  instance_bbox: True
+  make_square: False
+
+device: cuda:0
+models:
+  obj_det:
+    model_path: work_dir/obj_detection/OAI_Knee/runs/train5/weights/best.pt
+    model_weights: kneeYOLO8_100epoch
+    model_type: YOLO
+    conf: 0.25
+    post_processing: True
+  segmentation:
+    base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    model_path: work_dir/model_weights/finetuned/mskSAM_full_no_bal/20240618-0018_finetuned_model_best.pth
+    model_weights: mskSAM_OAI_Knee
+    model_type: vit_b
+    trainable:
+      prompt_encoder: False
+      image_encoder: True
+      mask_decoder: True
+
+output_cfg:
+  base_output_dir: work_dir/inference
+  task_name: OAI_Imorphics_Knee
+  output_ext: nii.gz
+  visualize: True
+  img_clim: True
+  logging_level: DEBUG

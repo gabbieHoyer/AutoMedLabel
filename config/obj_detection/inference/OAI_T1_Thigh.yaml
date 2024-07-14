@@ -32,7 +32,7 @@ preprocessing_cfg:
 device: cuda:0
 models:
   obj_det:
-    model_path: work_dir/obj_detection/runs/detect/train30/weights/best.pt
+    model_path: work_dir/obj_detection/OAI_Thigh/runs/train30/weights/best.pt
     model_weights: thighYOLO8_100epoch_square_resize
     model_type: YOLO
     conf: 0.2

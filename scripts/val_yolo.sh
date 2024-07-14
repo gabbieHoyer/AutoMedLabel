@@ -57,7 +57,13 @@ fi
 CONDA_ENV_NAME=/data/$dVA/users/ghoyer/conda/envs/autolabel
 
 # Specify the configuration name here
-CONFIG_NAME="OAI_Thigh_yolo"
+# Path to your config file
+# Thigh 
+# CONFIG_NAME="OAI_Thigh_yolo"
+# Knee
+# CONFIG_NAME="OAI_imorphics_yolo"
+# Spine
+CONFIG_NAME="UH3_spine_t1sag_yolo"
 
 # Activate Conda environment
 echo "Activating Conda environment: ${CONDA_ENV_NAME}"

@@ -20,10 +20,15 @@ from src.utils.file_management.config_handler import load_experiment, summarize_
 from ultralytics import YOLO, RTDETR
 from infer_helper import *
 
-def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name, mask_labels, remove_label_ids=[], conf=0.5, visualize=False, run_dir=None, device='cpu'):
+def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name, mask_labels, remove_label_ids=[], conf=0.5, visualize=False, img_clim=False, run_dir=None, device='cpu'):
 
     # Note image processing is in 2 steps. Step 2 is performed on a per slice basis
     img_3D = dataImagePrep.prep_image_step1(img_3D_unprocessed)
+    if img_clim:
+        image_clim = set_image_clim(img_3D)
+    else: 
+        image_clim=None
+
     mask_3D_orig_size = np.zeros_like(img_3D_unprocessed, dtype=np.uint8)  # mask_3D_orig_size.shape -> (27, 640, 1024)
     orig_img_with_bbox_size = (img_3D_unprocessed.shape[1], img_3D_unprocessed.shape[2])
 
@@ -65,13 +70,14 @@ def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name,
                     pred_binary = torch.sigmoid(sam_pred) > 0.5 # Convert logits to binary predictions
 
                     # ----------- #
-                    # if visualize: 
-                    #     visualize_pred(image=img_2D_3c.detach().cpu(),
-                    #                 pred_mask=sam_pred.squeeze().detach().cpu(),
-                    #                 binary_pred=pred_binary.squeeze().detach().cpu(),
-                    #                 boxes=bbox.detach().cpu().numpy(), 
-                    #                 image_name=f"{img_name}_{slice_idx}_labelID_{label_id}",
-                    #                 model_save_path=run_dir)
+                    if visualize: 
+                        visualize_pred(image=img_2D_3c.detach().cpu(),
+                                    pred_mask=sam_pred.squeeze().detach().cpu(),
+                                    binary_pred=pred_binary.squeeze().detach().cpu(),
+                                    boxes=bbox.detach().cpu().numpy(), 
+                                    image_name=f"{img_name}_{slice_idx}_labelID_{label_id}",
+                                    model_save_path=run_dir,
+                                    image_clim=image_clim)
                     # ----------- #
 
                     # sam_mask = resize_prediction(pred_binary.squeeze().detach().cpu().numpy(), orig_img_with_bbox_size, label_id)
@@ -90,12 +96,13 @@ def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name,
         # Convert combined_mask to the final integer mask
         mask_3D_orig_size[slice_idx] = combined_mask.cpu().numpy().astype(np.uint8)
         
-        if visualize and slice_idx % 3 == 0: 
-            visualize_full_pred(image=img_3D_unprocessed[slice_idx,...],
-                            pred_mask=mask_3D_orig_size[slice_idx,...],
-                            mask_labels=mask_labels,
-                            image_name=f"{img_name}_{slice_idx}",
-                            model_save_path=run_dir)
+        # if visualize: # and slice_idx % 3 == 0: 
+        #     visualize_full_pred(image=img_3D_unprocessed[slice_idx,...],
+        #                     pred_mask=mask_3D_orig_size[slice_idx,...],
+        #                     mask_labels=mask_labels,
+        #                     image_name=f"{img_name}_{slice_idx}",
+        #                     model_save_path=run_dir,
+        #                     image_clim=image_clim)
             
     return mask_3D_orig_size
 
@@ -116,6 +123,7 @@ def setup_system(data_cfg, preprocessing_cfg, detection_cfg, segmentation_cfg, o
                             )
     
     visualize_enabled = output_cfg['visualize']
+    img_clim = output_cfg.get('img_clim', False)
 
     med_files = locate_files(data_cfg['data_dir'])
     for i, image_path in enumerate(tqdm(med_files)): 
@@ -128,7 +136,7 @@ def setup_system(data_cfg, preprocessing_cfg, detection_cfg, segmentation_cfg, o
 
         img_name = extract_filename(image_path)
 
-        pred_volume = autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name, data_cfg['mask_labels'], preprocessing_cfg['remove_label_ids'], detection_cfg['conf'], visualize_enabled, run_dir, device)
+        pred_volume = autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name, data_cfg['mask_labels'], preprocessing_cfg['remove_label_ids'], detection_cfg['conf'], visualize_enabled, img_clim, run_dir, device)
         # pred_volume, pred_annotations =                                     
         save_prediction(pred_volume, run_dir, filename=img_name, output_ext=output_cfg['output_ext'])
         # save_prediction_for_ITK(pred_volume, run_dir, filename=img_name, output_ext=output_cfg['output_ext'])

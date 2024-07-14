@@ -1,0 +1,77 @@
+nc: 28
+
+path: /data/mskscratch/users/ghoyer/spine_pipeline/standardized_spine/BACPAC_UH3/lumbar_spine/T1_sag/npy/YOLO
+
+train: train/images
+val: val/images
+test: test/images
+
+meta_path: /data/bigbone3/ghoyer/standardized_spine/BACPAC_UH3/lumbar_spine/T1_sag/metadata/volume_metadata_for_ml.json 
+
+
+names:
+- background
+- L5
+- L4-L5
+- L4
+- L3-L4
+- L3
+- L2-L3
+- L2
+- L1-L2
+- L1
+- T12-L1
+- T12
+- L5-S1
+- S1
+- T11-T12
+- T11
+- S1-S2
+- S2
+- T10-T11
+- T10
+- S2-S3
+- S3
+- T9-T10
+- T9
+- S3-S4
+- S4
+- T8-T9
+- T8
+
+
+# I think yolo links label names to order provided - out of order dict could cause issues?
+
+# mask_labels:
+#   0: background
+#   #vertebrae
+#   9: L1
+#   7: L2
+#   5: L3
+#   3: L4
+#   1: L5
+#   #discs
+#   8: L1-L2
+#   6: L2-L3
+#   4: L3-L4
+#   2: L4-L5
+#   12: L5-S1
+#   #additional vert
+#   27: T8
+#   23: T9
+#   19: T10
+#   15: T11
+#   11: T12
+#   13: S1
+#   17: S2
+#   21: S3
+#   25: S4
+#   #additional discs
+#   26: T8-T9
+#   22: T9-T10
+#   18: T10-T11
+#   14: T11-T12
+#   10: T12-L1
+#   16: S1-S2
+#   20: S2-S3
+#   24: S3-S4

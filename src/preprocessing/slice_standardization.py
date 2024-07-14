@@ -51,7 +51,7 @@ def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, dataImagePr
 
         img_slice_3c = np.repeat(img_slice[:, :, None], 3, axis=-1) 
 
-        print(f"img_slice_3c dtype: {img_slice_3c.dtype}")
+        # print(f"img_slice_3c dtype: {img_slice_3c.dtype}")
 
         image_file_name = f"{base_name}-{str(z_indices[i]).zfill(3)}"
         np.save(os.path.join(images_dir, image_file_name + ".npy"), img_slice_3c)  # wut their size is (640, 1024) to (640, 1024, 3)
@@ -84,7 +84,7 @@ def nifti_to_npy(mask_dir, image_dir, dataMaskPrep, dataImagePrep, output_dir, f
     names=sorted(os.listdir(mask_dir))
     
     # Iterate through each file name provided in the 'names' list
-    for name in tqdm(names[0:2], dynamic_ncols=True, position=0):
+    for name in tqdm(names, dynamic_ncols=True, position=0):
         #print(f"Processing {name}")
         
         # Load the mask data from the specified directory and file name

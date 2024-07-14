@@ -1,0 +1,78 @@
+
+preprocessing_cfg:
+  image_size: 1024
+  voxel_num_thre2d: 100
+  voxel_num_thre3d: 1000
+  remove_label_ids: []
+  instance_bbox: True
+  make_square: False
+
+device: cuda:0
+models:
+  obj_det:
+    # model_path: work_dir/obj_detection/UH3_Spine/runs/train3/weights/best.pt
+    model_path: work_dir/obj_detection/UH3_Spine/runs/train4/weights/best.pt
+    model_weights: spineYOLO8_100epoch
+    model_type: YOLO
+    conf: 0.25 #0.5
+    post_processing: True
+  segmentation:
+    base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    # base_model: work_dir/model_weights/MedSAM/medsam_vit_b.pth
+    model_path: work_dir/model_weights/finetuned/spineSAM/20240525-0302_finetuned_model_best.pth
+    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    # model_path: work_dir/model_weights/MedSAM/medsam_vit_b.pth
+    model_weights: SAM_UH3_Spine
+    # model_weights: SAM
+    # model_weights: MedSAM
+    model_type: vit_b
+    trainable:
+      prompt_encoder: False
+      image_encoder: True
+      mask_decoder: True
+
+output_cfg:
+  base_output_dir: work_dir/inference
+  task_name: UH3_Spine
+  output_ext: nii.gz
+  visualize: True
+  logging_level: DEBUG
+
+
+data:
+  # data_dir: standardized_data/challenging_cases/spine_test/BACPAC0101001_01-20210818.nii.gz
+  data_dir: standardized_data/challenging_cases/spine_UH2
+
+  mask_labels:
+    0: background
+    #vertebrae
+    9: L1
+    7: L2
+    5: L3
+    3: L4
+    1: L5
+    #discs
+    8: L1-L2
+    6: L2-L3
+    4: L3-L4
+    2: L4-L5
+    12: L5-S1
+    #additional vert
+    27: T8
+    23: T9
+    19: T10
+    15: T11
+    11: T12
+    13: S1
+    17: S2
+    21: S3
+    25: S4
+    #additional discs
+    26: T8-T9
+    22: T9-T10
+    18: T10-T11
+    14: T11-T12
+    10: T12-L1
+    16: S1-S2
+    20: S2-S3
+    24: S3-S4

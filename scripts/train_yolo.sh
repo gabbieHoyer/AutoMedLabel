@@ -19,7 +19,7 @@
 #SBATCH --output=../logs/%x-%j-yolov8_msk.out
 #SBATCH --error=../logs/yolov8_msk.err
 #SBATCH --nodes=1                                    # Request 1 node
-#SBATCH --time=20:00:00                              # Set a time limit for the job
+#SBATCH --time=22:00:00                              # Set a time limit for the job
 
 # #SBATCH --nodelist=juno
 # #SBATCH --partition=dgx
@@ -29,13 +29,13 @@
 # #SBATCH --cpus-per-task=6     
 # f
 
-#SBATCH --nodelist=rhea                          
-#SBATCH --partition=gpu  
-#SBATCH --ntasks-per-node=4                         # Request 2 tasks (processes) per node                            
-#SBATCH --gres=gpu:4                               # 32 GB VRAM per GPU; 4 GPUs; 64 CPU Cores; 48 Hrs max wall time
-#SBATCH --mem=128G 
-#SBATCH --cpus-per-task=8                            # Request 2 CPUs per task (useful for multi-threading)
-
+# #SBATCH --nodelist=rhea                          
+# #SBATCH --partition=gpu  
+# #SBATCH --ntasks-per-node=4                         # Request 2 tasks (processes) per node                            
+# #SBATCH --gres=gpu:4                               # 32 GB VRAM per GPU; 4 GPUs; 64 CPU Cores; 48 Hrs max wall time
+# #SBATCH --mem=128G 
+# #SBATCH --cpus-per-task=8                            # Request 2 CPUs per task (useful for multi-threading)
+# f
 
 # #SBATCH --nodelist=rhea                          
 # #SBATCH --partition=gpu  
@@ -44,6 +44,21 @@
 # #SBATCH --mem=96G 
 # #SBATCH --cpus-per-task=8                            # Request 2 CPUs per task (useful for multi-threading)
 # d
+
+# #SBATCH --nodelist=hyperion
+# #SBATCH --partition=gpu
+# #SBATCH --gres=gpu:3
+# #SBATCH --ntasks-per-node=3                          # Request 2 tasks (processes) per node
+# #SBATCH --mem=72G                                    # 32 GB VRAM per GPU; 16 GPUs; 96 CPU Cores; 24 Hrs max wall time
+# #SBATCH --cpus-per-task=6                            # Request 2 CPUs per task (useful for multi-threading)
+# g
+
+#SBATCH --nodelist=anahita
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:4
+#SBATCH --ntasks-per-node=4                        
+#SBATCH --mem=132G                                    # 40 GB VRAM per GPU; 4 GPUs; 32 CPU Cores; 24 Hrs max wall time
+#SBATCH --cpus-per-task=8   
 
 # Activate conda environment
 
@@ -59,7 +74,11 @@ CONDA_ENV_NAME=/data/$dVA/users/ghoyer/conda/envs/autolabel
 
 # Path to your config file
 # Thigh 
-CONFIG_NAME="OAI_Thigh_yolo"
+# CONFIG_NAME="OAI_Thigh_yolo"
+# Knee
+CONFIG_NAME="OAI_imorphics_yolo"
+# Spine
+# CONFIG_NAME="UH3_spine_t1sag_yolo"
 
 # Activate Conda environment
 echo "Activating Conda environment: ${CONDA_ENV_NAME}"

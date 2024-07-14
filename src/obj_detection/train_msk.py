@@ -46,7 +46,7 @@ def main(config):
     model = ModelClass(config["model"])
 
     # Train the model using parameters from the config
-    model.train(data=config['data_yaml'], epochs=config['epochs'], imgsz=config['imgsz'], rect=config['rect'], batch=config['batch'], workers=config['workers'], plots=True)
+    model.train(data=config['data_yaml'], epochs=config['epochs'], imgsz=config['imgsz'], rect=config['rect'], batch=config['batch'], workers=config['workers'], plots=True,  run_dir=config.get('run_dir', None))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train YOLO Model with Config File")
