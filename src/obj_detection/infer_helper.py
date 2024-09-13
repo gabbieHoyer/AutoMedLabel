@@ -11,6 +11,7 @@ import matplotlib.patches as patches
 
 import cv2
 import torch
+
 from segment_anything import sam_model_registry, SamPredictor
 from pathlib import Path
 import nibabel as nib
@@ -34,9 +35,12 @@ root = pyrootutils.setup_root(
 )
 
 # from src.preprocessing.dev.sam_prep import MaskPrep, ImagePrep
-from src.preprocessing.model_prep import MaskPrep, ImagePrep
+from src.preprocessing.model_prep import MaskPrep
 from src.utils.file_management.file_handler import load_data
 from src.finetuning.engine.models.sam import finetunedSAM
+
+from src.finetuning.engine.models.sam2 import finetunedSAM2, finetunedSAM2_1024
+from src.sam2.build_sam import build_sam2
 
 # ------------------- Visualization Tools ----------------------------------- #
 def set_image_clim(image):
@@ -228,6 +232,17 @@ def save_prediction_for_ITK(seg_3D, save_dir, filename, output_ext):
     return
 
 # -------------------- MODEL FUNCTIONS -------------------- #
+
+
+def get_model_pathway(model_type):
+    if model_type in sam_model_registry:
+        return 'SAM'
+    elif model_type.endswith('.yaml'):
+        return 'SAM2'
+    else:
+        raise ValueError(f"Unsupported model_type: {model_type}")
+
+
 def make_predictor(model_type:str, comp_cfg, initial_weights:str, finetuned_weights:str=None, device:str="cpu"):
 
     sam_model = sam_model_registry[model_type](checkpoint=initial_weights).to(device)
@@ -255,6 +270,39 @@ def make_predictor(model_type:str, comp_cfg, initial_weights:str, finetuned_weig
         
     # predictor = SamPredictor(sam_model)
     return finetuned_model
+
+
+# ----------------------------- SAM2 Predictor ------------------------------------ #
+def make_sam2_predictor(comp_cfg, sam2_model_cfg:str, initial_weights:str, finetuned_weights:str=None, device:str="cpu"):
+
+    # sam_model = sam_model_registry[model_type](checkpoint=initial_weights).to(device)
+
+    sam2_checkpoint = initial_weights
+    sam2_model = build_sam2(sam2_model_cfg, sam2_checkpoint, device=device, apply_postprocessing=True)
+
+    finetuned_model = finetunedSAM2_1024(
+        model=sam2_model,
+        config=comp_cfg
+    ).to(device)
+
+    # Check if finetuned_weights are the same as initial_weights
+    if finetuned_weights == initial_weights:
+        return finetuned_model
+
+    # Check if a checkpoint exists to resume training
+    if finetuned_weights and os.path.isfile(finetuned_weights):
+        try:
+            checkpoint = torch.load(finetuned_weights, map_location=device)
+            finetuned_model.load_state_dict(checkpoint["model"])
+        except Exception as e:
+            # Decide whether to continue with training from scratch or to abort
+            raise e
+        
+    # predictor = SamPredictor(sam_model)
+    return finetuned_model
+
+
+# --------------------------------------------------------------------------------- #
 
 def make_prediction(predictor, img_slice, bbox):
     """Predict segmentation for image (2D) from bounding box prompt"""
@@ -436,95 +484,3 @@ def determine_run_directory(base_dir, task_name, group_name=None):
 
 
 
-
-
-
-
-# def save_prediction_for_ITK(seg_3D, save_dir, filename, output_ext):
-#     """Save prediction as .nii.gz using SimpleITK for .nii.gz files."""
-#     # Ensure the output directory exists
-#     output_dir = os.path.join(save_dir, 'pred')
-#     os.makedirs(output_dir, exist_ok=True)
-
-#     nifti_output_path = os.path.join(output_dir, f"{filename}_itk10.nii.gz")
-
-#     # Transpose the numpy array to get the desired dimensions (512, 256, 15)
-#     seg_3D_transposed = np.transpose(seg_3D, (2, 1, 0))
-
-#     # Reverse the order of slices
-#     seg_3D_reversed = seg_3D_transposed[::-1]
-
-#     # Flip along the y-axis to correct orientation for ITK-SNAP
-#     seg_3D_flipped = np.flip(seg_3D_reversed, axis=0)
-
-#     gh_rev = seg_3D_flipped[:,:, ::-1]
-
-#     # Create a new NIfTI image using an identity affine transformation matrix 
-#     new_nii = nib.Nifti1Image(gh_rev, np.eye(4))
-
-#     nib.save(new_nii, nifti_output_path)
-    
-#     return
-
-# def postprocess_resize(mask, image_size_tuple:tuple[int,int]):
-#     """Resize mask to new dimensions."""
-#     predMaskPrep = MaskPrep()
-#     resized_mask = predMaskPrep.resize_mask(mask_data = mask.astype(np.uint8),
-#                                             image_size_tuple = image_size_tuple)
-#     return resized_mask
-
-# def resize_prediction(sam_pred, image_size_tuple:tuple[int,int], label_id:int):
-#     """Convert SAM prediction into segmentation mask with original image dims and label ids."""
-#     sam_mask_resized = postprocess_resize(sam_pred, image_size_tuple)
-#     sam_mask = np.zeros_like(sam_mask_resized, dtype=np.uint8)
-#     sam_mask[sam_mask_resized > 0] = label_id
-#     return sam_mask
-
-# def extract_filename(img_file:str):
-#     """ Extract filenames without extension
-#     Caution: fails for files with periods but no extension (ex. dicom file: "1.2.345")
-#     """
-#     file_name = os.path.basename(img_file)
-
-#     # Removes file extension
-#     # If zipped, remove zipped file extension (name.dcm.gz, name.nii.gz)
-#     if file_name.endswith('.gz'):
-#         file_name = file_name.rstrip('.gz')
-#     return os.path.splitext(file_name)[0] # Assuming file_name can be used as subject_id
-
-
-# def locate_files(directory_or_file):
-#     if os.path.isfile(directory_or_file):
-#         return [directory_or_file]
-#     elif os.path.isdir(directory_or_file):
-#         return [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
-#     else:
-#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
-
-# def locate_files(directory_or_file):
-#     if os.path.isfile(directory_or_file):
-#         return [directory_or_file]
-#     elif os.path.isdir(directory_or_file):
-#         return [directory_or_file]
-#     # [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
-#     else:
-#         raise ValueError(f"{directory_or_file} is not a valid file or directory")
-
-
-# def locate_files(directory_or_file):
-#     if os.path.isfile(directory_or_file):
-#         # It's a single file (could be NIfTI or other file)
-#         return [directory_or_file]
-#     elif os.path.isdir(directory_or_file):
-#         contents = os.listdir(directory_or_file)
-#         full_paths = [os.path.join(directory_or_file, f) for f in contents]
-        
-#         if all(os.path.isdir(p) for p in full_paths):
-#             # It's a folder of folders (likely DICOM folders)
-#             return full_paths
-#         else:
-#             # It's a single folder (could be NIfTI files or a single DICOM folder)
-#             # return [directory_or_file]
-#             return [os.path.join(directory_or_file, f) for f in os.listdir(directory_or_file) if os.path.isfile(os.path.join(directory_or_file, f))]
-#     else:
-#         raise ValueError(f"{directory_or_file} is not a valid file or directory")

@@ -115,28 +115,6 @@ class ColorInfo():
         plt.setp(cbar.ax.get_xticklabels(), rotation=45, ha='right')
 
 
-# -------------------- Plot Images (2D) --------------------
-# import cv2
-
-# def show_mask(mask, ax, random_color=False):
-#     if random_color:
-#         color = np.concatenate([np.random.random(3), np.array([0.6])], axis=0)
-#     else:
-#         color = np.array([251/255, 252/255, 30/255, 0.5])
-#     h, w = mask.shape[-2:]
-#     mask_image = mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
-#     ax.imshow(mask_image)
-
-# def save_slice_image(slice_img, filepath):
-#     """
-#     Saves a slice image to the specified filepath.
-#     """
-#     plt.imshow(slice_img, cmap='gray')
-#     plt.axis('off')
-#     plt.savefig(filepath, bbox_inches='tight', pad_inches=0)
-#     plt.close()
-
-
 # -------------------- Plot Volumes (3D) --------------------
         
 def plot_volume(vol, save_path:str=None, cols:int=6, scale:int=3, \
@@ -338,9 +316,6 @@ def plot_bbox_overlay(vol, volume_bbox_list, save_path:str=None, cols:int=6, sca
     if title:
         plt.suptitle(title, fontsize=20)
     
-    #if (labels_dict is not {}) and (unique_labels != []) and (num_images > 0):
-    #    ColorFns.add_colorbar(fig, axes, labels_dict, adjusted_cmap, norm, unique_labels)
-
     # Save
     if save_path:
         plt.savefig(save_path, bbox_inches='tight', dpi=300)
