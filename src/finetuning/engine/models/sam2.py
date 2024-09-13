@@ -12,16 +12,11 @@ root = pyrootutils.setup_root(
 
 from src.sam2.utils.transforms import SAM2Transforms
 
-
 class finetunedSAM2(nn.Module):
     def __init__(self, model, config):
         super().__init__()
-       
-        # medsam way
+
         self.sam2_model = model
-        # # freeze prompt encoder
-        # for param in self.sam2_model.sam_prompt_encoder.parameters():
-        #     param.requires_grad = False
 
         # Apply trainable configuration / Freeze components based on config
         if not config['prompt_encoder']:
@@ -35,11 +30,6 @@ class finetunedSAM2(nn.Module):
             for name, param in self.sam2_model.named_parameters():
                 if 'sam_mask_decoder' in name:
                     param.requires_grad = True
-
-        # mask decoder should always be finetuned in our case
-        # if not config['mask_decoder']:
-        #     for param in self.sam2_model.sam_mask_decoder.parameters():
-        #         param.requires_grad = False
 
         # Spatial dim for backbone feature maps
         self._bb_feat_sizes = [(256, 256),(128, 128),(64, 64),]
@@ -79,7 +69,6 @@ class finetunedSAM2(nn.Module):
     
     def _image_encoder(self, input_image):
         # From sam2_image_predictor.py def set_image:
-
         backbone_out = self.sam2_model.forward_image(input_image)
         
         _, vision_feats, _, _ = self.sam2_model._prepare_backbone_features(backbone_out)
@@ -100,29 +89,11 @@ class finetunedSAM2(nn.Module):
         return _features
 
 
-
 class finetunedSAM2_1024(nn.Module):
     def __init__(self, model, config, mask_threshold=0.0, max_hole_area=0.0, max_sprinkle_area=0.0):
         super().__init__()
        
-        # medsam way
         self.sam2_model = model
-        # # freeze prompt encoder
-        # for param in self.sam2_model.sam_prompt_encoder.parameters():
-        #     param.requires_grad = False
-
-        # Apply trainable configuration / Freeze components based on config
-        # if not config['prompt_encoder']:
-        #     for param in self.sam2_model.sam_prompt_encoder.parameters():
-        #         param.requires_grad = False
-
-        # if not config['image_encoder']:
-        #     for param in self.sam2_model.sam_image_encoder.parameters():
-        #         param.requires_grad = False
-
-        # if not config['mask_decoder']:
-        #     for param in self.sam2_model.sam_mask_decoder.parameters():
-        #         param.requires_grad = False
 
         if not config['prompt_encoder']:
             for param in self.sam2_model.sam_prompt_encoder.parameters():
@@ -183,45 +154,19 @@ class finetunedSAM2_1024(nn.Module):
         resized_masks_logits = self._transforms.postprocess_masks(
             low_res_masks_logits, orig_hw=(image.size(2), image.size(3))
         )
-        # resized_masks_logits = F.interpolate(
-        #     low_res_masks_logits,size=(image.size(2), image.size(3)), 
-        #     mode="bilinear", align_corners=False)
 
         return resized_masks_logits
-
-        # resized_masks_logits = F.interpolate(
-        #     low_res_masks_logits,size=(image.size(2), image.size(3)), 
-        #     mode="bilinear", align_corners=False)
-
-        # return resized_masks_logits
-        
-    
-        # from sam2 codebase - they upscale masks 
-        #     # Upscale the masks to the original image resolution
-        # masks = self._transforms.postprocess_masks(
-        #     low_res_masks, self._orig_hw[img_idx]
-        # )
-        # low_res_masks = torch.clamp(low_res_masks, -32.0, 32.0)
-        # if not return_logits:
-        #     masks = masks > self.mask_threshold
-
-        # return masks, iou_predictions, low_res_masks
     
     def _image_encoder(self, input_image):
         # From sam2_image_predictor.py def set_image:
-
         backbone_out = self.sam2_model.forward_image(input_image)
         
         _, vision_feats, _, _ = self.sam2_model._prepare_backbone_features(backbone_out)
-        # backbone_out, vision_feats, vision_pos_embeds, feat_sizes = '''
-        #NOTE: check if these feat_sizes are same or diff from bb_feat_sizes
 
         # Add no_mem_embed, which is added to the lowest rest feat. map during training on videos
         if self.sam2_model.directly_add_no_mem_embed:
             vision_feats[-1] = vision_feats[-1] + self.sam2_model.no_mem_embed
         
-        # bb_feat_sizes = [(256, 256), (128, 128), (64, 64)]
-
         feats = [
             feat.permute(1, 2, 0).view(input_image.size(0), -1, *feat_size)
             for feat, feat_size in zip(vision_feats[::-1], self._bb_feat_sizes[::-1])
@@ -231,27 +176,3 @@ class finetunedSAM2_1024(nn.Module):
 
         return _features
 
-
-
-
-
-    # def forward(self, image, box):
-    #     image_embedding = self.image_encoder(image)  # (B, 256, 64, 64)
-
-    #     with torch.no_grad():
-    #         box_torch = torch.as_tensor(box, dtype=torch.float32, device=image.device)
-    #         if len(box_torch.shape) == 2:
-    #             box_torch = box_torch[:, None, :]  # (B, 1, 4)
-
-    #         sparse_embeddings, dense_embeddings = self.prompt_encoder(
-    #             points=None,
-    #             boxes=box_torch,
-    #             masks=None,
-    #         )
-    #     low_res_masks, _ = self.mask_decoder(
-    #         image_embeddings=image_embedding,  # (B, 256, 64, 64)
-    #         image_pe=self.prompt_encoder.get_dense_pe(),  # (1, 256, 64, 64)
-    #         sparse_prompt_embeddings=sparse_embeddings,  # (B, 2, 256)
-    #         dense_prompt_embeddings=dense_embeddings,  # (B, 256, 64, 64)
-    #         multimask_output=False,
-    #     )

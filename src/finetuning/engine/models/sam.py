@@ -55,26 +55,3 @@ class finetunedSAM(nn.Module):
         )
         return ori_res_masks
     
-
-
-
-    # def forward(self, image, box):
-    #     image_embedding = self.image_encoder(image)  # (B, 256, 64, 64)
-
-    #     with torch.no_grad():
-    #         box_torch = torch.as_tensor(box, dtype=torch.float32, device=image.device)
-    #         if len(box_torch.shape) == 2:
-    #             box_torch = box_torch[:, None, :]  # (B, 1, 4)
-
-    #         sparse_embeddings, dense_embeddings = self.prompt_encoder(
-    #             points=None,
-    #             boxes=box_torch,
-    #             masks=None,
-    #         )
-    #     low_res_masks, _ = self.mask_decoder(
-    #         image_embeddings=image_embedding,  # (B, 256, 64, 64)
-    #         image_pe=self.prompt_encoder.get_dense_pe(),  # (1, 256, 64, 64)
-    #         sparse_prompt_embeddings=sparse_embeddings,  # (B, 2, 256)
-    #         dense_prompt_embeddings=dense_embeddings,  # (B, 256, 64, 64)
-    #         multimask_output=False,
-    #     )
