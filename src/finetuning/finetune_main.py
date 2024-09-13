@@ -31,8 +31,11 @@ from src.utils.file_management.config_handler import load_experiment, summarize_
 from src.utils.file_management.args_handler import process_kwargs, apply_overrides
 from src.finetuning.datamodule.dynamic_dataset_loader import get_dataset_info, process_dataset, save_dataset_summary, create_dataloader
 from src.finetuning.engine.finetune_engine import Trainer, Tester  
-from src.finetuning.engine.models.sam import finetunedSAM
+from src.finetuning.engine.models.sam2 import finetunedSAM2
 from src.finetuning.utils.logging import log_info
+from src.sam2.modeling.sam2_base import SAM2Base
+from src.sam2.utils.transforms import SAM2Transforms
+from src.sam2.build_sam import build_sam2
 
 # Retrieve a logger for the module
 logger = logging.getLogger(__name__)
@@ -83,20 +86,39 @@ def datamodule(cfg, run_path=None):
     return train_loader, val_loader, test_loader
 
 
-def prepare_training_base(comp_cfg, model_type:str, initial_weights:str, optimizer_cfg:dict, scheduler_cfg:dict, resume_checkpoint_path:str, device):
+def prepare_training_base(comp_cfg, sam2_model_cfg:str, initial_weights:str, optimizer_cfg:dict, scheduler_cfg:dict, resume_checkpoint_path:str, device):
     log_info(f"Preparing training base on {device}")
 
     start_epoch = 0  # Default to starting from scratch
 
-    sam_model = sam_model_registry[model_type](checkpoint=initial_weights)
+    sam2_checkpoint = initial_weights
+    sam2_model = build_sam2(sam2_model_cfg, sam2_checkpoint, device=device, apply_postprocessing=True)
 
-    # Model finetuning setup
-    finetuned_model = finetunedSAM(
-        image_encoder=sam_model.image_encoder,
-        mask_decoder=sam_model.mask_decoder,
-        prompt_encoder=sam_model.prompt_encoder,
+    finetuned_model = finetunedSAM2(
+        model=sam2_model,
         config=comp_cfg
     ).to(device)
+
+    print(
+        "Number of total parameters: ",
+        sum(p.numel() for p in finetuned_model.parameters()),
+    )  
+    # 93735472 - for img enc true
+    # 93735472 - for img enc false
+    print(
+        "Number of trainable parameters: ",
+        sum(p.numel() for p in finetuned_model.parameters() if p.requires_grad),
+    )  
+    # 93729252 - for img enc true
+    # 4058340 - for img enc false
+
+    img_mask_encdec_params = list(finetuned_model.sam2_model.image_encoder.parameters()) + list(
+        finetuned_model.sam2_model.sam_mask_decoder.parameters()
+    )
+    print(
+        "Number of image encoder and mask decoder parameters: ",
+        sum(p.numel() for p in img_mask_encdec_params if p.requires_grad),
+    )  
 
     # Check if a checkpoint exists to resume training
     if resume_checkpoint_path and os.path.isfile(resume_checkpoint_path):
@@ -109,6 +131,8 @@ def prepare_training_base(comp_cfg, model_type:str, initial_weights:str, optimiz
             logger.error(f"Failed to load checkpoint from {resume_checkpoint_path}: {e}")
             # Decide whether to continue with training from scratch or to abort
             raise e
+
+    # import pdb; pdb.set_trace()
 
     # Prepare optimizer with parameters that require gradients
     img_mask_encdec_params = [param for param in finetuned_model.parameters() if param.requires_grad]
@@ -173,9 +197,10 @@ def finetune_main(cfg):
 
     # --------------- SET UP MODEL --------------- #
     # Initialize model, optimizer, loss functions, and potentially load checkpoint
+
     model, optimizer, scheduler, loss_fn, start_epoch = prepare_training_base(
             comp_cfg = cfg.get('module').get('trainable', {}),
-            model_type = cfg.get('module').get('model_type'), 
+            sam2_model_cfg = cfg.get('module').get('sam2_model_cfg'), 
             initial_weights = cfg.get('module').get('pretrain_model'),
             optimizer_cfg = {'lr': cfg.get('module').get('optimizer').get('lr'), 
                         'weight_decay': cfg.get('module').get('optimizer').get('weight_decay')},

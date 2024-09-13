@@ -1,0 +1,108 @@
+## Muskuloskeletal MRI Finetuning Experimentation Config
+
+# ------------------------ Finetuning ------------------------ #
+experiment:
+  name: "mskSAM2"
+  pretrained_weights: SAM2
+  description: f"Fine-tuning model ${experiment.pretrained_weights} on combined MSK MRI datasets."
+
+dataset:
+  TBrecon:
+    config: TBrecon.yaml
+  P50-MAPSS:
+    config: P50_compart.yaml
+  AFCL-MAPSS:
+    config: AFACL_compart.yaml
+  OAI-imorphics:
+    config: OAI_imorphics.yaml
+  OAI-thigh:
+    config: OAI_T1_Thigh.yaml 
+  KICK-hip:
+    config: KICK_cube.yaml
+  DHAL-cube:
+    config: DHAL.yaml
+  UH2-t1ax:
+    config: UH2_T1ax.yaml
+  UH2-t1sag:
+    config: UH2_T1sag.yaml
+  UH2-t1sag-vert:
+    config: UH2_T1sag_vert.yaml
+  UH2-t2ax:
+    config: UH2_T2ax.yaml
+  UH3-t1sag:
+    config: UH3_T1sag.yaml
+
+
+  # K2S-cube:
+  #   config: K2S.yaml
+
+SEED: 42
+distributed: True
+
+datamodule:
+  max_subject_set: full
+  balanced: False
+  bbox_shift: 5
+  batch_size: 4
+  num_workers: 2 #1
+  # augmentation_pipeline: 
+  #   config: simple.yaml
+
+module:
+  work_dir: "work_dir/finetuning"
+  # pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_tiny.pt"
+  # pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_small.pt"
+  pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
+
+  # pretrain_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
+  # pretrain_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+  checkpoint: ''
+  
+  trainable:
+    prompt_encoder: False  
+    image_encoder: True   
+    mask_decoder: True    
+
+  task_name: mskSAM
+  group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
+  # model_type: vit_b
+  # sam2_model_cfg: sam2_hiera_t.yaml
+  # sam2_model_cfg: sam2_hiera_s.yaml
+  sam2_model_cfg: sam2_hiera_b+.yaml
+
+  use_wandb: True
+  visualize: True
+
+  num_epochs: 1000 
+
+  optimizer:
+    weight_decay: 0.01
+    lr: 0.0001
+
+  scheduler:
+    eta_min: 0.00001
+
+  use_amp: True
+  clip_grad: 1.0
+  grad_accum: 4
+
+  early_stopping:
+    enabled: True
+    patience: 10
+    min_delta: 0.0001
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${experiment.name}_data_summary.csv
+  logging_level: INFO 
+
+# ------------------ Prompting Test Set Evaluation ------------------
+prompt_experiment: 
+  config: finetuned_prompt.yaml
+  finetuned_model:
+    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    model_path: ${module.work_dir}/${module.task_name}/${module.group_name}/PLACEHOLDER_RUN_ID_finetuned_model_best.pth
+    model_weights: ${experiment.name}_weights_name 
+    model_type: ${module.model_type}

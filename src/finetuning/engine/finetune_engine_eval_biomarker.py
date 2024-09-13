@@ -73,7 +73,7 @@ class Tester:
             wandb.login()
             wandb.init(project=self.module_cfg['task_name'], 
                     config={
-                        "model_type": self.eval_cfg['model_type'],
+                        "model_type": self.eval_cfg['sam2_model_cfg'],
                         "description": self.experiment_cfg['description'],
                         "finetuned_weights": self.eval_cfg['model_weights'],
                         "model_ID": self.eval_cfg['finetuned_model'],
@@ -90,12 +90,16 @@ class Tester:
                     }, 
                     settings=wandb.Settings(_service_wait=300),
                     tags=['test', self.experiment_cfg['name'], self.datamodule_cfg['dataset_name'], self.eval_cfg['model_weights']],
-                    name="{}_{}_{}".format(self.datamodule_cfg['dataset_name'], self.eval_cfg['model_weights'], run_id)
+                    name=run_id
+                    #"{}_{}_{}".format(self.datamodule_cfg['dataset_name'], self.eval_cfg['model_weights'], run_id)
                     )
         return model_save_path, run_id
     
     def evaluate_multilabel_test_set(self):
         """ for datasets with multiple instances of labels """
+
+        if self.module_cfg['visualize']: # and self.data_type == 'sampled':
+            quality_check(self.test_loader, self.model_save_path)
 
         self.model.eval()
         for metric in self.metrics:
@@ -111,7 +115,9 @@ class Tester:
                 # Determine the number of present classes for the current subject
                 present_labels = torch.unique(gt2D[gt2D != 0]).tolist()  # Exclude background
 
-                batch_size, height, width = images.size(0), images.size(2), images.size(3)
+                # batch_size, height, width = images.size(0), images.size(2), images.size(3)
+                batch_size, height, width = gt2D.size(0), gt2D.size(2), gt2D.size(3)
+
                 combined_mask = torch.zeros((batch_size, height, width), device=self.device, dtype=torch.int64)
 
                 for img_idx in range(batch_size):
@@ -191,7 +197,7 @@ class Tester:
     def evaluate_non_multilabel_test_set(self):
         """ for datasets without multiple instances of labels """
 
-        if self.module_cfg['visualize'] and self.data_type == 'sampled':
+        if self.module_cfg['visualize']: # and self.data_type == 'sampled':
             quality_check(self.test_loader, self.model_save_path)
 
         self.model.eval()
@@ -208,6 +214,8 @@ class Tester:
                 multi_masks = torch.zeros_like(gt2D[0], device=self.device)
                 num_classes = self.datamodule_cfg['num_classes']  
 
+                # import pdb; pdb.set_trace()
+
                 batch_size, height, width = multi_masks.size(0), multi_masks.size(1), multi_masks.size(2)
                 multi_class_probs = torch.zeros((batch_size, num_classes, height, width), device=self.device)
 
@@ -221,6 +229,7 @@ class Tester:
                         subject_slice_meta = extract_meta(self.metadata_dict, subj_id, self.dicom_fields, slice_id=slice_id)
 
                 for box, label_id in zip(boxes[0], label_ids[0]):  
+
                     # Get prediction for a single bounding box
                     prediction = self.model(images, box.unsqueeze(0))  
 
@@ -275,8 +284,6 @@ class Tester:
                 total_volumes_pred, total_volumes_true = metric.compute()
                 aggregated_volumes_pred, aggregated_volumes_true = metric.aggregate_by_subject()
 
-                # import pdb; pdb.set_trace()
-
                 self.save_custom_metric_scores(metric_name, total_volumes_pred, total_volumes_true, aggregated_volumes_pred, aggregated_volumes_true)
 
                 # in dev - hasn't been tested
@@ -285,19 +292,23 @@ class Tester:
 
     @main_process_only
     def save_to_csv(self, data, path):
+        # Collect all possible columns from all subjects
+        all_columns = set()
+        for subj_data in data.values():
+            all_columns.update(subj_data.keys())
+        all_columns = sorted(all_columns)  # Optional: sort the columns
+
+        # Create the DataFrame from the data dictionary
         df = pd.DataFrame.from_dict(data, orient='index')
-        if len(df.columns) == len(self.class_names) + 1:
-            df.columns = self.class_names + ['total']
 
-        # likely  need more complex logic to handle case of instance labels vs not
-        # how are these lining up exactly????
-        else:
-            df.columns = self.class_names
-
+        # Reindex the DataFrame to include all columns, filling missing values with NaN
+        df = df.reindex(columns=all_columns)
         df.index.name = 'Subject'
+
         os.makedirs(os.path.dirname(path), exist_ok=True)
         df.to_csv(path)
         print(f'Saved custom metric scores to {path}')
+
 
     def save_custom_metric_scores(self, metric_name, total_volumes_pred, total_volumes_true, aggregated_volumes_pred, aggregated_volumes_true):
         base_path = os.path.join(self.run_path, 'test_eval')
@@ -311,7 +322,7 @@ class Tester:
         ]
         
         for filename, data in filenames:
-            path = os.path.join(base_path, f"{self.run_id}_{self.data_type}_data_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}", filename)
+            path = os.path.join(base_path, f"{self.run_id}_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}", self.data_type, filename)
             self.save_to_csv(data, path)
             if self.module_cfg.get('use_wandb', False):
                 wandb_log({filename: path})
@@ -332,12 +343,37 @@ class Tester:
 
 
 
+# ---------------- old version ------------------- #
 
     # @main_process_only
     # def save_to_csv(self, data, path):
     #     df = pd.DataFrame.from_dict(data, orient='index')
-    #     df.columns = self.class_names + ['total']
+    #     if len(df.columns) == len(self.class_names) + 1:
+    #         df.columns = self.class_names + ['total']
+
+    #     # likely  need more complex logic to handle case of instance labels vs not
+    #     # how are these lining up exactly????
+    #     else:
+    #         df.columns = self.class_names
+
     #     df.index.name = 'Subject'
     #     os.makedirs(os.path.dirname(path), exist_ok=True)
     #     df.to_csv(path)
     #     print(f'Saved custom metric scores to {path}')
+
+    # def save_custom_metric_scores(self, metric_name, total_volumes_pred, total_volumes_true, aggregated_volumes_pred, aggregated_volumes_true):
+    #     base_path = os.path.join(self.run_path, 'test_eval')
+    #     os.makedirs(base_path, exist_ok=True)
+        
+    #     filenames = [
+    #         (f"{metric_name}_pred_slice_volume.csv", total_volumes_pred),
+    #         (f"{metric_name}_gt_slice_volume.csv", total_volumes_true),
+    #         (f"{metric_name}_pred_volume.csv", aggregated_volumes_pred),
+    #         (f"{metric_name}_gt_volume.csv", aggregated_volumes_true)
+    #     ]
+        
+    #     for filename, data in filenames:
+    #         path = os.path.join(base_path, f"{self.run_id}_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}", self.data_type, filename)
+    #         self.save_to_csv(data, path)
+    #         if self.module_cfg.get('use_wandb', False):
+    #             wandb_log({filename: path})

@@ -89,7 +89,7 @@ def autoLabel(det_model, sam_model, img_3D_unprocessed, dataImagePrep, img_name,
         # Convert combined_mask to the final integer mask
         mask_3D_orig_size[slice_idx] = combined_mask.cpu().numpy().astype(np.uint8)
         
-        if visualize: # and slice_idx % 10 == 0:
+        if visualize and slice_idx % 5 == 0:   # % 5 == 0:
             visualize_full_pred(image=img_3D_unprocessed[slice_idx,...],
                             pred_mask=mask_3D_orig_size[slice_idx,...],
                             mask_labels=mask_labels,

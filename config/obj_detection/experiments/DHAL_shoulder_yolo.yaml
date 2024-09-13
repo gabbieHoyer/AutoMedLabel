@@ -1,0 +1,19 @@
+model: YOLO8/yolov8n.pt
+model_type: YOLO
+data_yaml: dhal_data.yaml
+imgsz: 1024
+epochs: 200
+batch: 8 #2 #1 #2 #4 #8 #16
+rect: False
+workers: 8 #4 # 4 #1 
+run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/DHAL_Shoulder/runs
+# multi_scale: True
+
+# best_weights: runs/detect/train/weights/best.pt
+
+# for testing inference
+data: /data/mskscratch/users/ghoyer/shoulder_pipeline/dicom_cases/
+
+
+
+

@@ -29,12 +29,8 @@ from src.finetuning.datamodule.experiment_summary import (
     add_ml_characteristics,
     aggregate_summaries,
 )
-# from src.finetuning.datamodule.npy_dataset import NpyDataset_og, NpyRandInstanceGTMatchedDataset
-# NpyRandInstanceGTMatchedDataset if instance
-# NpyDataset_og if not instance
-# Eventually make this a single dataset
 
-from src.finetuning.datamodule.npy_dataset import mskSAMDataset
+from src.finetuning.datamodule.npy_dataset import mskSAM2Dataset
 
 # Retrieve a logger for the module
 logger = logging.getLogger(__name__)
@@ -139,9 +135,9 @@ def process_dataset(dataset_info:list[tuple], augmentation_config:dict, bbox_shi
             # Note: Assuming the same augmentation pipeline for 'val' and 'test'
             split_augmentation_config = augmentation_config.get(split_name, None)
 
-            dataset = mskSAMDataset(
+            dataset = mskSAM2Dataset(
                 paths['root_paths'],
-                paths['gt_paths'],
+                paths['gt_paths'],   # same b/c name changed in slice extraction function
                 paths['img_paths'],
                 bbox_shift,
                 instance_bbox,
@@ -241,13 +237,13 @@ def create_dataloader(datasets, batch_size, num_workers):
     
     # Use DistributedSampler for the training/val datasets in a distributed setup
     if GPUSetup.is_distributed():
-        train_sampler = DistributedSampler(train_dataset, num_replicas=num_tasks, rank=global_rank, shuffle=True)
+        train_sampler = DistributedSampler(train_dataset, num_replicas=num_tasks, rank=global_rank, shuffle=False)
         val_sampler   = DistributedSampler(val_dataset, num_replicas=num_tasks, rank=global_rank, shuffle=False)
         shuffle = False  # Shuffle is handled by the DistributedSampler
     else:
         train_sampler = None
         val_sampler = None
-        shuffle = True
+        shuffle = False
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True, sampler=train_sampler, shuffle=shuffle)
     val_loader   = DataLoader(val_dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True, sampler=val_sampler, shuffle=shuffle)
@@ -257,6 +253,37 @@ def create_dataloader(datasets, batch_size, num_workers):
     logger.info(f"Rank {global_rank}: DataLoaders initialized with batch_size={batch_size}, num_workers={num_workers}")
 
     return train_loader, val_loader, test_loader
+
+
+# with normal shuffling feature - add in  as default option for training
+
+# def create_dataloader(datasets, batch_size, num_workers):
+#     train_dataset, val_dataset, test_dataset = datasets
+
+#     num_tasks = GPUSetup.get_world_size()
+#     global_rank = GPUSetup.get_rank()
+    
+#     # Use DistributedSampler for the training/val datasets in a distributed setup
+#     if GPUSetup.is_distributed():
+#         train_sampler = DistributedSampler(train_dataset, num_replicas=num_tasks, rank=global_rank, shuffle=True)
+#         val_sampler   = DistributedSampler(val_dataset, num_replicas=num_tasks, rank=global_rank, shuffle=False)
+#         shuffle = False  # Shuffle is handled by the DistributedSampler
+#     else:
+#         train_sampler = None
+#         val_sampler = None
+#         shuffle = True
+
+#     train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True, sampler=train_sampler, shuffle=shuffle)
+#     val_loader   = DataLoader(val_dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True, sampler=val_sampler, shuffle=shuffle)
+#     test_loader  = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
+    
+#     # After DataLoader initialization
+#     logger.info(f"Rank {global_rank}: DataLoaders initialized with batch_size={batch_size}, num_workers={num_workers}")
+
+#     return train_loader, val_loader, test_loader
+
+
+
 
 
 

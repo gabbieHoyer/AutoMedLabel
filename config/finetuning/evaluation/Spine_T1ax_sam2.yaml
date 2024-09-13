@@ -1,0 +1,97 @@
+
+
+
+# ------------------------ Evaluation ------------------------ #
+evaluation:
+  name: "UH2_T1ax_Spine_SAM2"
+  description: "Evaluating models finetuned on the UH2 T1 Axial Spine MRI dataset."
+
+SEED: 42
+distributed: False
+
+dataset:
+  UH2-t1ax:
+    config: UH2_T1ax.yaml
+    project: UH2_T1ax-Evaluation
+
+datamodule:
+  max_subject_set: 3
+  bbox_shift: 0
+  batch_size: 1  
+  num_workers: 1
+
+module:
+  work_dir: "work_dir/evaluation"
+  task_name: UH2_T1ax-Evaluation
+  visualize: True
+  use_wandb: True
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${evaluation.name}_data_summary.csv
+  logging_level: INFO 
+
+# base_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
+# "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
+# base_model: "work_dir/model_weights/SAM2/sam2_hiera_tiny.pt"
+# base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+models:
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/Spine_T1ax/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_1/20240816-0246_finetuned_model_best_converted.pth
+    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_0
+    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: false
+      mask_decoder: true
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/Spine_T1ax/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_2/20240816-2315_finetuned_model_best_converted.pth
+    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_5
+    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 5
+    trainable:
+      prompt_encoder: false
+      image_encoder: false
+      mask_decoder: true
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/Spine_T1ax/SAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240818-2344_finetuned_model_best_converted.pth
+    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_0
+    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: true
+      mask_decoder: true
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/Spine_T1ax/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240815-2352_finetuned_model_best_converted.pth
+    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_0
+    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: true
+      mask_decoder: true
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/Spine_T1ax/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_2/20240816-1424_finetuned_model_best_converted.pth
+    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_5
+    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 5
+    trainable:
+      prompt_encoder: false
+      image_encoder: true
+      mask_decoder: true

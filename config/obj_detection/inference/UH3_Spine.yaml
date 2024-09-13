@@ -11,21 +11,29 @@ device: cuda:0
 models:
   obj_det:
     # model_path: work_dir/obj_detection/UH3_Spine/runs/train3/weights/best.pt
-    model_path: work_dir/obj_detection/UH3_Spine/runs/train4/weights/best.pt
+    model_path: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/model_weights/finetuned/UH3_spine_t1sag/best.pt
     model_weights: spineYOLO8_100epoch
     model_type: YOLO
     conf: 0.25 #0.5
     post_processing: True
   segmentation:
-    base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    # base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
     # base_model: work_dir/model_weights/MedSAM/medsam_vit_b.pth
-    model_path: work_dir/model_weights/finetuned/spineSAM/20240525-0302_finetuned_model_best.pth
+    base_model: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
+    
+    # model_path: work_dir/model_weights/finetuned/spineSAM/20240525-0302_finetuned_model_best.pth
     # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
     # model_path: work_dir/model_weights/MedSAM/medsam_vit_b.pth
-    model_weights: SAM_UH3_Spine
+    model_path: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
+    
+    # model_weights: SAM_UH3_Spine
     # model_weights: SAM
     # model_weights: MedSAM
-    model_type: vit_b
+    model_weights: SAM2
+
+    # model_type: vit_b
+    model_type: sam2_hiera_b+.yaml
+
     trainable:
       prompt_encoder: False
       image_encoder: True
@@ -40,8 +48,8 @@ output_cfg:
 
 
 data:
-  # data_dir: standardized_data/challenging_cases/spine_test/BACPAC0101001_01-20210818.nii.gz
-  data_dir: standardized_data/challenging_cases/spine_UH2
+  data_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/challenging_cases/spine_test  #BACPAC0101001_01-20210818.nii.gz
+  # data_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/challenging_cases/spine_UH2
 
   mask_labels:
     0: background

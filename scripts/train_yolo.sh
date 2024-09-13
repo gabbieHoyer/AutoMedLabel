@@ -21,13 +21,13 @@
 #SBATCH --nodes=1                                    # Request 1 node
 #SBATCH --time=22:00:00                              # Set a time limit for the job
 
-# #SBATCH --nodelist=juno
-# #SBATCH --partition=dgx
-# #SBATCH --gres=gpu:teslav100:4
-# #SBATCH --ntasks-per-node=4                          # Request 2 tasks (processes) per node
-# #SBATCH --mem=128G                                    # 32 GB VRAM per GPU; 16 GPUs; 96 CPU Cores; 24 Hrs max wall time
-# #SBATCH --cpus-per-task=6     
-# f
+#SBATCH --nodelist=juno
+#SBATCH --partition=dgx
+#SBATCH --gres=gpu:teslav100:4
+#SBATCH --ntasks-per-node=4                          # Request 2 tasks (processes) per node
+#SBATCH --mem=128G                                    # 32 GB VRAM per GPU; 16 GPUs; 96 CPU Cores; 24 Hrs max wall time
+#SBATCH --cpus-per-task=6     
+
 
 # #SBATCH --nodelist=rhea                          
 # #SBATCH --partition=gpu  
@@ -53,12 +53,13 @@
 # #SBATCH --cpus-per-task=6                            # Request 2 CPUs per task (useful for multi-threading)
 # g
 
-#SBATCH --nodelist=anahita
-#SBATCH --partition=gpu
-#SBATCH --gres=gpu:4
-#SBATCH --ntasks-per-node=4                        
-#SBATCH --mem=132G                                    # 40 GB VRAM per GPU; 4 GPUs; 32 CPU Cores; 24 Hrs max wall time
-#SBATCH --cpus-per-task=8   
+# #SBATCH --nodelist=anahita
+# #SBATCH --partition=gpu
+# #SBATCH --gres=gpu:4
+# #SBATCH --ntasks-per-node=4                        
+# #SBATCH --mem=132G                                    # 40 GB VRAM per GPU; 4 GPUs; 32 CPU Cores; 24 Hrs max wall time
+# #SBATCH --cpus-per-task=8   
+# g
 
 # Activate conda environment
 
@@ -76,9 +77,11 @@ CONDA_ENV_NAME=/data/$dVA/users/ghoyer/conda/envs/autolabel
 # Thigh 
 # CONFIG_NAME="OAI_Thigh_yolo"
 # Knee
-CONFIG_NAME="OAI_imorphics_yolo"
+# CONFIG_NAME="OAI_imorphics_yolo"
 # Spine
 # CONFIG_NAME="UH3_spine_t1sag_yolo"
+
+CONFIG_NAME="DHAL_shoulder_yolo"
 
 # Activate Conda environment
 echo "Activating Conda environment: ${CONDA_ENV_NAME}"

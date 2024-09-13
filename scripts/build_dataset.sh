@@ -38,7 +38,9 @@ eval "$('/home/ghoyer/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
 # Define a list containing the base name of your config file without the path or extension
 # CONFIG_LIST=("OAI_T1_Thigh_plus")
 # CONFIG_LIST=("OAI_imorphics")
-CONFIG_LIST=("UH3_T1sag")
+# CONFIG_LIST=("UH3_T1sag")
+# CONFIG_LIST=("TBrecon") # 
+CONFIG_LIST=("K2S")
 
 # Your Conda environment name: 'myenv'
 if [ -d /data/VirtualAging ] ;
@@ -64,31 +66,31 @@ for CONFIG_NAME in "${CONFIG_LIST[@]}"; do
     echo "**************************************************"
     echo "config $CONFIG_NAME chosen for data-processing pipeline"
 
-    # Run your scripts
-    echo "Starting data_standardization.py with ${CONFIG_NAME}"
-    python3 preprocessing/data_standardization.py "${CONFIG_NAME}"
+    # # Run your scripts
+    # echo "Starting data_standardization.py with ${CONFIG_NAME}"
+    # python3 preprocessing/data_standardization.py "${CONFIG_NAME}"
 
-    echo "Starting nifti_viz.py with ${CONFIG_NAME}"
-    python3 evaluation/visualization/nifti_viz.py "${CONFIG_NAME}"
+    # echo "Starting nifti_viz.py with ${CONFIG_NAME}"
+    # python3 evaluation/visualization/nifti_viz.py "${CONFIG_NAME}"
 
     echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation A"
     python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation A
 
-    echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation B"
-    python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation B
+    # echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation B"
+    # python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation B
 
-    echo "Starting slice_standardization.py with ${CONFIG_NAME}"
-    python3 preprocessing/slice_standardization.py "${CONFIG_NAME}"
+    # echo "Starting slice_standardization.py with ${CONFIG_NAME}"
+    # python3 preprocessing/slice_standardization.py "${CONFIG_NAME}"
 
-    echo "Starting npy_viz.py with ${CONFIG_NAME}"
-    python3 evaluation/visualization/npy_viz.py "${CONFIG_NAME}"
+    # echo "Starting npy_viz.py with ${CONFIG_NAME}"
+    # python3 evaluation/visualization/npy_viz.py "${CONFIG_NAME}"
 
-    echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation C"
-    python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation C
+    # echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation C"
+    # python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation C
 
     # ----------------------- Bonus ---------------------- #
-    echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation D"
-    python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation D
+    # echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation D"
+    # python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation D
 
     echo "All processes completed successfully."
 

@@ -35,28 +35,25 @@ def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, dataImagePr
     - Saves masks slices (1 channel) in output_dir/gt/base_name-###.npy, where ### is the slice index
     """
     images_dir = os.path.join(output_dir, "imgs")
-    masks_dir = os.path.join(output_dir, "gts")
+    masks_dir = os.path.join(output_dir, "gts_256")
+    # masks_dir = os.path.join(output_dir, "gts")
     os.makedirs(images_dir, exist_ok=True)
     os.makedirs(masks_dir, exist_ok=True)
 
     if yolo_processing:
-        annotations_dir = os.path.join(output_dir, "labels")
+        annotations_dir = os.path.join(output_dir, "labels_256")
+        # annotations_dir = os.path.join(output_dir, "labels")
         os.makedirs(annotations_dir, exist_ok=True)
     
     for i, (img_slice, mask_slice) in enumerate(zip(image_data, mask_data)):
         
         # img_slice = dataImagePrep.prep_image_step2(img_slice)
 
-        # print(f"img_slice dtype: {img_slice.dtype}")
-
         img_slice_3c = np.repeat(img_slice[:, :, None], 3, axis=-1) 
-
-        # print(f"img_slice_3c dtype: {img_slice_3c.dtype}")
 
         image_file_name = f"{base_name}-{str(z_indices[i]).zfill(3)}"
         np.save(os.path.join(images_dir, image_file_name + ".npy"), img_slice_3c)  # wut their size is (640, 1024) to (640, 1024, 3)
         np.save(os.path.join(masks_dir, image_file_name + ".npy"), mask_slice)  # wut their size is (640, 1024)
-
 
         if yolo_processing:
             write_list_to_file(os.path.join(annotations_dir, image_file_name + ".txt"), get_bounding_boxes(mask_slice, instance=True))

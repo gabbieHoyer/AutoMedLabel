@@ -36,7 +36,8 @@ def extract_paths_and_count_slices(subjects, parquet_base_folder, sampling_rate=
         else:
             sampled_df = df
         paths['img_paths'].extend(sampled_df['npy_image_path'].tolist())
-        paths['gt_paths'].extend(sampled_df['npy_mask_path'].tolist())
+        # paths['gt_paths'].extend(sampled_df['npy_mask_path'].tolist())
+        paths['gt_paths'].extend(sampled_df['npy256_mask_path'].tolist())
         paths['root_paths'].extend(sampled_df['npy_base_dir'].tolist())
         for path in additional_paths:
             paths[path].extend(sampled_df[path].tolist())
@@ -265,72 +266,3 @@ def aggregate_summaries(summaries):
     return combined_summary
 
     
-
-
-# def extract_paths_and_count_slices(subjects, parquet_base_folder, sampling_rate=1):
-#     """Extracts image and mask paths for given subjects from Parquet files, with optional downsampling."""
-    
-#     subject_ids = []
-#     paths = {'img_paths': [], 'gt_paths': [], 'root_paths': []}
-#     total_slices = 0
-#     sampled_slice_counts = 0
-    
-#     for subject_id in subjects:
-#         parquet_file = os.path.join(parquet_base_folder, f"{subject_id}.parquet")
-#         df = pd.read_parquet(parquet_file)
-#         if sampling_rate > 1:
-#             # Downsampling: select slices based on the sampling rate
-#             sampled_df = df.iloc[::sampling_rate, :]
-#         else:
-#             sampled_df = df
-#         paths['img_paths'].extend(sampled_df['npy_image_path'].tolist())
-#         paths['gt_paths'].extend(sampled_df['npy_mask_path'].tolist())
-#         paths['root_paths'].extend(sampled_df['npy_base_dir'].tolist())
-#         total_slices += len(df)
-#         sampled_slice_counts += len(sampled_df)
-#         subject_ids.append(subject_id)
-#     return paths, sampled_slice_counts, subject_ids
-
-
-# def filter_subjects_by_max_number(splits, max_subjects):
-#     """Filter subjects to include only up to max_subjects from each split."""
-#     filtered_splits = {}
-#     for split_name, subjects in splits.items():
-#         # Sort subjects based on some criteria, e.g., randomly or based on their metadata like 'Age' or 'Sex'
-#         # Here, we'll do it randomly. Ensure reproducibility by setting a seed if necessary.
-#         random.shuffle(subjects)
-#         filtered_subjects = subjects[:max_subjects]
-#         filtered_splits[split_name] = filtered_subjects
-#     return filtered_splits
-
-
-
-# def summarize_and_save(experiment_config, summaries, downsampling_factors=None):
-#     # Check if summaries is a dictionary (single dataset case), wrap it in a list
-#     if isinstance(summaries, dict):
-#         summaries = [summaries]
-    
-#     # Initialize an empty list to hold modified summaries with dataset names
-#     modified_summaries = []
-
-#     # Iterate through summaries and add dataset names
-#     for dataset_name, summary in zip(experiment_config['datasets'].keys(), summaries):
-#         # Copy the summary to avoid modifying the original summary in place
-#         modified_summary = summary.copy()
-#         modified_summary['dataset_name'] = dataset_name
-#         modified_summaries.append(modified_summary)
-
-#     # If there is more than one dataset, add the combined summary
-#     if len(modified_summaries) > 1:
-#         combined_summary = aggregate_summaries(modified_summaries)
-#         combined_summary['dataset_name'] = 'combined'
-#         modified_summaries.append(combined_summary)
-
-#     # Convert the list of modified summaries to a DataFrame
-#     summary_df = pd.DataFrame(modified_summaries)
-    
-#     # Save the DataFrame to CSV
-#     summary_file_path = os.path.join(experiment_config['output_configuration']['save_path'], experiment_config['output_configuration']['summary_file'])
-#     summary_df.to_csv(summary_file_path, index=False)
-
-#     print(f"Summary saved to {summary_file_path}")

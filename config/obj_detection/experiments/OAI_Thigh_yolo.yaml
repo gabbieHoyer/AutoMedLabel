@@ -6,8 +6,14 @@ imgsz: 1024
 epochs: 100
 batch: 8 #1 #2 #4 #8 #16
 rect: False
-workers: 4 #1 
+workers: 8 #4 #1 
 run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/OAI_Thigh/runs
+
+# add these in to improve symmetry - overcome fact that there are missing labels in ground truth for one side
+fliplr: 1.0
+translate: 0.05
+scale: 0.4
+copy_paste: 0.1
 
 # project: OAI_Thigh
 # multi_scale: True
@@ -16,10 +22,13 @@ run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMed
 # best_weights: work_dir/obj_detection/runs/detect/train17/weights/best.pt
 # best_weights: work_dir/obj_detection/runs/detect/train18/weights/best.pt
 # best_weights: work_dir/obj_detection/runs/detect/train7/weights/best.pt
-best_weights: work_dir/obj_detection/runs/detect/train30/weights/best.pt
+best_weights: work_dir/obj_detection/OAI_Thigh/runs/train30/weights/best.pt
 
-data: standardized_data/dpr/thigh_npy3_instance/test/images/OAI_9437407-003.npy
+# data: standardized_data/dpr/thigh_npy3_instance/test/images/OAI_9437407-003.npy
+data: standardized_data/yolo_not_resized_npy/test/images/OAI_9004175-007.npy # works in predictor; 
 
+# need to adjust predictor probably to check if image is already float before something happens loooooools
+# data: standardized_data/yolo_square_resized/test/images/OAI_9263025-007.npy  # fails in predictor :/ black image, but confidence intervals showing high scores?
 
 
 

@@ -1,0 +1,90 @@
+
+
+
+
+# ------------------------ Evaluation ------------------------ #
+evaluation:
+  name: "UH2_UH3_T1sag_Spine_biomarker"
+  description: "Evaluating models finetuned on MSK MRI dataset for potential in downstream biomarker computation."
+
+SEED: 42
+distributed: False
+
+dataset:
+  # UH2-t1sag:
+  #   config: UH2_T1sag.yaml  
+  #   project: UH2_T1sag-Evaluation
+  # UH2-t1sag-vert:
+  #   config: UH2_T1sag_vert.yaml 
+  #   project: UH2_T1sag-Evaluation
+  UH3-t1sag:
+    config: UH3_T1sag.yaml 
+    project: UH3_T1sag-Evaluation
+
+    # config: size_1024/UH3_T1sag.yaml   # cant remember why i used this one lols
+ 
+# spine out of distribution
+#  # DL50_T1sag:
+#  #   config: DL50_T1sag.yaml       
+#  #   project: DL50_T1sag-Evaluation 
+ 
+datamodule:
+  max_subject_set: 3
+  bbox_shift: 0
+  batch_size: 1  
+  num_workers: 1
+  metric:
+    func:
+      tissueheight: true
+    # tissues: [2]    # for UH2
+    # tissues: [2, 4, 6, 8, 12]  # for UH3
+    tissues: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26]     # for UH3
+    dicom_fields: ['pixel_spacing', 'rows', 'columns']
+    representative_slice: True
+
+module:
+  work_dir: "work_dir/evaluation"
+  task_name: Spine-Evaluation
+  visualize: True
+  use_wandb: True
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${evaluation.name}_data_summary.csv
+  logging_level: INFO 
+
+# base_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
+# base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
+
+models:
+  # best for cartilage-esque label:
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/Spine_T1sag/SAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240819-0005_finetuned_model_best_converted.pth
+
+    model_weights: Spine_T1sag_SAM2_mem
+    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: true
+      mask_decoder: true
+
+
+    # best for bone
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/Spine_T1sag/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_3/20240816-0045_finetuned_model_best_converted.pth
+
+  #   model_weights: Spine_T1sag_SAM2-bal_False-sub_set_full-bbox_shift_0
+  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_details:
+  #     balanced: false
+  #     subject: full
+  #     bbox_shift: 0
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: false
+  #     mask_decoder: true

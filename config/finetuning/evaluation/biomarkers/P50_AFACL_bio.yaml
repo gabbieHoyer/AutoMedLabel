@@ -1,0 +1,76 @@
+
+
+# ------------------------ Evaluation ------------------------ #
+evaluation:
+  name: "P50_AFACL_MAPSS_Knee_biomarker"
+  description: "Evaluating models finetuned on MSK MRI dataset for potential in downstream biomarker computation."
+
+SEED: 42
+distributed: False
+
+dataset:
+  # P50-MAPSS:
+  #   config: P50_compart.yaml        
+  #   project: P50-Evaluation
+  # AFCL-MAPSS:
+  #   config: AFACL_compart.yaml      
+  #   project: AFACL-Evaluation
+  # P50-MAPSS:
+  #   config: size_1024/P50_compart.yaml        
+  #   project: P50-Evaluation
+  AFCL-MAPSS:
+    config: size_1024/AFACL_compart.yaml      
+    project: AFACL-Evaluation
+
+datamodule:
+  max_subject_set: 3
+  bbox_shift: 0
+  batch_size: 1  
+  num_workers: 1
+  metric:
+    func:
+      t1rho: true
+      t2: true
+    tissues: [1,2,3,4,5,6]
+    dicom_fields: ['pixel_spacing', 'slice_thickness', 'rows', 'columns']  # not really needed for maps? I guess could be lols
+    representative_slice: True
+
+  # metric:
+  #   func:
+  #     cartilagethickness: true
+  #   tissues: [1,2,3,4,5,6]
+  #   dicom_fields: ['pixel_spacing', 'slice_thickness', 'rows', 'columns']  # not really needed for maps? I guess could be lols
+  #   representative_slice: True
+
+module:
+  work_dir: "work_dir/evaluation"
+  task_name: Knee-Evaluation
+  use_wandb: True
+  visualize: True
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${evaluation.name}_data_summary.csv
+  logging_level: INFO 
+
+# base_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
+# base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
+
+models:
+
+  # best for cartilage: 
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/P50_AF/SAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240818-2238_finetuned_model_best_converted.pth
+
+    model_weights: P50_AFACL_SAM2_mem
+    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: true
+      mask_decoder: true

@@ -1,0 +1,19 @@
+names:
+- background
+- muscle_erector_spinae
+- muscle_multifidus
+- muscle_psoas
+- muscle_quadratus_lumborum
+
+nc: 5
+
+# path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/knee_yolo
+path: /data/mskscratch/users/ghoyer/spine_t1ax_pipeline/standardized_spine/BACPAC_UH2/lumbar_spine/T1_ax/npy/YOLO
+
+train: train/images
+# val: val/images
+val: train/images
+test: test/images
+
+meta_path: /data/mskscratch/users/ghoyer/spine_t1ax_pipeline/standardized_spine/BACPAC_UH2/lumbar_spine/T1_ax/metadata/volume_metadata_for_ml.json
+

@@ -1,0 +1,61 @@
+data:
+  # data_dir: standardized_data/challenging_cases/knee_test
+  data_dir: /data/mskscratch/users/ghoyer/shoulder_pipeline/standardized_shoulder/DHAL/shoulder/T2/single_test_case
+  # data_dir: /data/mskscratch/users/ghoyer/shoulder_pipeline/standardized_shoulder/DHAL/shoulder/T2/test_cases
+  
+  mask_labels:
+    0: background
+    1: scapula
+
+preprocessing_cfg:
+  image_size: 1024
+  voxel_num_thre2d: 100
+  voxel_num_thre3d: 1000
+  remove_label_ids: []
+  instance_bbox: True
+  make_square: False
+
+device: cuda:0
+models:
+  obj_det:
+    # model_path: work_dir/obj_detection/DHAL_Shoulder/runs/train/weights/best.pt
+    # model_weights: shouler_YOLO8_100epoch
+    model_path: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/model_weights/finetuned/shoulder/best.pt
+    model_weights: shouler_YOLO8_200epoch
+    model_type: YOLO
+    conf: 0.25
+    post_processing: True
+  segmentation:
+    # base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    # base_model: work_dir/model_weights/MedSAM/medsam_vit_b.pth
+    base_model: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
+    
+    # model_path: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/DHAL_Shoulder/no_aug_bbox_shift_0/img_enc_True/early_stop_patience_10/subject_full/20240519-0530_finetuned_model_best.pth
+    
+    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    # model_path: work_dir/model_weights/MedSAM/medsam_vit_b.pth
+    model_path: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
+    
+    
+    # model_weights: mskSAM_DHAL_Shoulder
+
+    # model_weights: SAM
+    # model_weights: MedSAM
+    model_weights: SAM2
+
+
+    # model_type: vit_b
+    model_type: sam2_hiera_b+.yaml
+
+    trainable:
+      prompt_encoder: False
+      image_encoder: True
+      mask_decoder: True
+
+output_cfg:
+  base_output_dir: work_dir/inference
+  task_name: DHAL_Shoulder
+  output_ext: nii.gz
+  visualize: True
+  img_clim: False
+  logging_level: DEBUG

@@ -20,12 +20,15 @@ root = pyrootutils.setup_root(
 
 import src.finetuning.utils.gpu_setup as GPUSetup
 from src.finetuning.utils.logging import log_info
-from src.finetuning.engine.models.sam import finetunedSAM
+# from src.finetuning.engine.models.sam import finetunedSAM
+from src.finetuning.engine.models.sam2 import finetunedSAM2
 from src.finetuning.utils.utils import determine_run_directory
-from src.finetuning.engine.finetune_engine_eval_biomarker import Tester 
+from src.finetuning.engine.finetune_engine_eval_biomarker_sam2 import Tester 
 from src.utils.file_management.config_handler import load_evaluation, summarize_config
-from src.finetuning.datamodule.eval_dataset_loader_biomarker import get_dataset_info, process_dataset, create_dataloader
- 
+from src.finetuning.datamodule.eval_dataset_loader_biomarker_sam2 import get_dataset_info, process_dataset, create_dataloader
+from src.sam2.build_sam import build_sam2
+
+
 # Retrieve a logger for the module
 logger = logging.getLogger(__name__)
 
@@ -79,20 +82,19 @@ def datamodule(cfg, run_path=None):
     return sampled_test_loader, full_test_loader
 
 
-def prepare_training_base(comp_cfg, model_type:str, initial_weights:str, finetuned_weights:str, device):
+def prepare_training_base(comp_cfg, sam2_model_cfg:str, initial_weights:str, finetuned_weights:str, device):
     log_info(f"Preparing training base on {device}")
 
     start_epoch = 0  # Default to starting from scratch
 
-    sam_model = sam_model_registry[model_type](checkpoint=initial_weights)
+    sam2_checkpoint = initial_weights
+    sam2_model = build_sam2(sam2_model_cfg, sam2_checkpoint, device=device, apply_postprocessing=True)
 
-    # Model finetuning setup
-    finetuned_model = finetunedSAM(
-        image_encoder=sam_model.image_encoder,
-        mask_decoder=sam_model.mask_decoder,
-        prompt_encoder=sam_model.prompt_encoder,
+    finetuned_model = finetunedSAM2(
+        model=sam2_model,
         config=comp_cfg
     ).to(device)
+
 
     # Check if finetuned_weights are the same as initial_weights
     if finetuned_weights == initial_weights:
@@ -164,7 +166,7 @@ def finetune_evaluate(cfg):
     # Initialize model, optimizer, loss functions, and potentially load checkpoint
     model = prepare_training_base(
             comp_cfg = model_cfg.get('trainable', {}),
-            model_type = model_cfg.get('model_type'), 
+            sam2_model_cfg = model_cfg.get('sam2_model_cfg'), 
             initial_weights = cfg.get('base_model'),
             finetuned_weights = model_cfg.get('finetuned_model'),
             device = device, 
@@ -182,22 +184,22 @@ def finetune_evaluate(cfg):
     summarize_config(cfg, path=os.path.join(root, run_path, cfg.get('output_configuration').get('save_path')))
 
     # Instantiate the Tester and run tests depending on available data loaders
-    if sampled_test_loader is not None:
-        # Testing with sampled data
-        sampled_tester = Tester(
-            model=model,
-            test_loader=sampled_test_loader,
-            eval_cfg=model_cfg,
-            module_cfg=cfg.get('module'),
-            datamodule_cfg=cfg.get('datamodule'),
-            experiment_cfg=cfg.get('evaluation'),
-            run_path=run_path,
-            device=device,
-            data_type='sampled',
-            visualize=cfg.get('module').get('visualize')
-        )
-        logger.info(f"Local Rank {local_rank}: Starting testing phase with sampled data...")
-        sampled_tester.test()
+    # if sampled_test_loader is not None:
+    #     # Testing with sampled data
+    #     sampled_tester = Tester(
+    #         model=model,
+    #         test_loader=sampled_test_loader,
+    #         eval_cfg=model_cfg,
+    #         module_cfg=cfg.get('module'),
+    #         datamodule_cfg=cfg.get('datamodule'),
+    #         experiment_cfg=cfg.get('evaluation'),
+    #         run_path=run_path,
+    #         device=device,
+    #         data_type='sampled',
+    #         visualize=cfg.get('module').get('visualize')
+    #     )
+    #     logger.info(f"Local Rank {local_rank}: Starting testing phase with sampled data...")
+    #     sampled_tester.test()
 
     # Testing with full data
     full_tester = Tester(

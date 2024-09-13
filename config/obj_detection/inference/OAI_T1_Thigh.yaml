@@ -1,6 +1,10 @@
 data:
+  # data_dir: /data/bigbone3/ghoyer/48m_manualClean
+  data_dir: /data/bigbone3/ghoyer/working_folders/challenging_cases/dicom_images/48m/9917307  #   #9948016   #9041458  #9805712 
+  # data_dir: /data/bigbone3/ghoyer/working_folders/challenging_cases/dicom_images/48m/9559476
+  # data_dir: standardized_data/challenging_cases/nifti_image_sample/00m/OAI_9015402.nii.gz
   # data_dir: standardized_data/challenging_cases/00m_active/9046012
-  data_dir: standardized_data/challenging_cases/00m_active2
+  # data_dir: standardized_data/challenging_cases/00m_active2
   # data_dir: standardized_data/challenging_cases/single_challenging_case/OAI_9744444.nii.gz
   # data_dir: standardized_data/challenging_cases/more_challenging_cases
   # data_dir: standardized_data/challenging_cases/rand_sample/images # works with locate_files, load_data
@@ -26,29 +30,55 @@ preprocessing_cfg:
   voxel_num_thre2d: 100
   voxel_num_thre3d: 200
   remove_label_ids: []
-  instance_bbox: True
-  make_square: True
+  instance_bbox: True   # maybe do again but squeezed?
+  make_square: True     # maybe do again but squeezed?
+  # sam2:
+  #   image_size: 256
+  #   image_size: 256
 
 device: cuda:0
 models:
   obj_det:
-    model_path: work_dir/obj_detection/OAI_Thigh/runs/train30/weights/best.pt
+    model_path: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/model_weights/finetuned/thigh/best.pt
     model_weights: thighYOLO8_100epoch_square_resize
     model_type: YOLO
-    conf: 0.2
+    conf: 0.25
     post_processing: True
   segmentation:
     base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_path: work_dir/finetuning/OAI_Thigh_SAM_YOLO/SAM_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_6/20240706-1605_finetuned_model_best_converted.pth  # had the early stopping of 10 epochs
-    model_weights: multiclass_Thigh_SAM_with_fascia_square_resize
+    # base_model: work_dir/model_weights/MedSAM/medsam_vit_b.pth
+    # base_model: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
+    
+    # model_path: work_dir/finetuning/OAI_Thigh_SAM_YOLO/SAM_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_6/20240706-1605_finetuned_model_best_converted.pth  # had the early stopping of 10 epochs
+    model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    # model_path: work_dir/model_weights/MedSAM/medsam_vit_b.pth
+    # model_path: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
+    
+    # model_weights: multiclass_Thigh_SAM_with_fascia_square_resize
+    model_weights: SAM
+    # model_weights: MedSAM
+
+    # model_weights: SAM2
+
     model_type: vit_b
+    # model_type: sam2_hiera_b+.yaml
+
     trainable:
       prompt_encoder: False
       image_encoder: True
       mask_decoder: True
 
 
-  # obj_det:
+output_cfg:
+  base_output_dir: work_dir/inference/thigh_comparison
+  task_name: OAI_Thigh
+  output_ext: nii.gz
+  visualize: True
+  logging_level: DEBUG
+
+
+
+    # obj_det:
   #   # model_path: work_dir/model_weights/finetuned/thighYOLO/best.pt
   #   model_path: work_dir/obj_detection/runs/detect/train6/weights/best.pt
   #   model_weights: thighYOLO8_100epoch
@@ -77,12 +107,3 @@ models:
   #     prompt_encoder: False
   #     image_encoder: True
   #     mask_decoder: True
-
-
-
-output_cfg:
-  base_output_dir: work_dir/inference
-  task_name: OAI_Thigh
-  output_ext: nii.gz
-  visualize: True
-  logging_level: DEBUG

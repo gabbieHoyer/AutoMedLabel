@@ -33,7 +33,7 @@ from src.finetuning.datamodule.experiment_summary import (
     extract_paths_and_count_slices,
     filter_subjects_by_max_number,
 )
-from src.finetuning.datamodule.npy_dataset import MultiClassSAMDataset
+from src.finetuning.datamodule.npy_dataset import MultiClassSAM2Dataset
 
 # Retrieve a logger for the module
 logger = logging.getLogger(__name__)
@@ -128,7 +128,7 @@ def process_dataset(dataset_info:list[tuple], bbox_shift:int, max_subjects:Optio
                 logger.info(f"Rank {rank}: Processing {split_name} split")
                 paths, slice_count, subject_ids = extract_paths_and_count_slices(splits[split_name], parquet_folder, downsampling_factor)
                 
-                dataset = MultiClassSAMDataset(
+                dataset = MultiClassSAM2Dataset(
                     paths['root_paths'],
                     paths['gt_paths'],
                     paths['img_paths'],
@@ -160,6 +160,8 @@ def process_dataset(dataset_info:list[tuple], bbox_shift:int, max_subjects:Optio
 
 
 def collate_fn(batch):
+
+    # import pdb; pdb.set_trace()
     images = [item['image'] for item in batch]
     gt2D = [item['gt2D'] for item in batch]
     boxes = [item['boxes'] for item in batch]

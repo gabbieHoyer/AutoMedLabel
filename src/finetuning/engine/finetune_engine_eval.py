@@ -73,10 +73,11 @@ class Tester:
             wandb.login()
             wandb.init(project=self.module_cfg['task_name'], 
                     config={
-                        "model_type": self.eval_cfg['model_type'],
+                        "model_type": self.eval_cfg['sam2_model_cfg'],
                         "description": self.experiment_cfg['description'],
                         "finetuned_weights": self.eval_cfg['model_weights'],
-                        "model_ID": self.eval_cfg['finetuned_model'],
+                        "model_path": self.eval_cfg['finetuned_model'],
+                        "model_ID": os.path.basename(self.eval_cfg['finetuned_model']).split('_')[0],
                         "balanced": self.eval_cfg['model_details']['balanced'],
                         "subject_subject_set": self.eval_cfg['model_details']['subject'],
                         "image_encoder": self.eval_cfg['trainable']['image_encoder'],
@@ -90,15 +91,17 @@ class Tester:
                     }, 
                     settings=wandb.Settings(_service_wait=300),
                     tags=['test', self.experiment_cfg['name'], self.datamodule_cfg['dataset_name'], self.eval_cfg['model_weights']],
-                    name="{}_{}_{}".format(self.datamodule_cfg['dataset_name'], self.eval_cfg['model_weights'], run_id)
+                    name=run_id
                     )
+                    # name="{}_{}_{}".format(self.datamodule_cfg['dataset_name'], self.eval_cfg['model_weights'], run_id)
+
         return model_save_path, run_id
     
 
     def evaluate_multilabel_test_set(self):
         """ for datasets with multiple instances of labels """
 
-        if self.module_cfg['visualize'] and self.data_type == 'sampled':
+        if self.module_cfg['visualize']: # and self.data_type == 'sampled':
             quality_check(self.test_loader, self.model_save_path)
 
         self.model.eval()
@@ -117,7 +120,9 @@ class Tester:
                 # Determine the number of present classes for the current subject
                 present_labels = torch.unique(gt2D[gt2D != 0]).tolist()  # Exclude background
 
-                batch_size, height, width = images.size(0), images.size(2), images.size(3)
+                # batch_size, height, width = images.size(0), images.size(2), images.size(3)
+                batch_size, height, width = gt2D.size(0), gt2D.size(2), gt2D.size(3)
+
                 combined_mask = torch.zeros((batch_size, height, width), device=self.device, dtype=torch.int64)
 
                 for img_idx in range(batch_size):
@@ -384,7 +389,9 @@ class Tester:
     def save_metric_scores_to_csv(self, metric_name, slice_metric):
         # Convert the list of dictionaries to a DataFrame
         df = pd.DataFrame(slice_metric)
-        slice_csv_path = os.path.join(self.run_path, 'test_eval', f"{self.run_id}_data_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}_slice_{metric_name}.csv")
+        # slice_csv_path = os.path.join(self.run_path, 'test_eval', f"{self.run_id}_data_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}_slice_{metric_name}.csv")
+        slice_csv_path = os.path.join(self.run_path, 'test_eval', f"slice_{metric_name}.csv")
+
         df.to_csv(slice_csv_path, index=False)
         print(f'Saved slice-level {metric_name} scores to {slice_csv_path}')
 
@@ -406,7 +413,9 @@ class Tester:
         aggregated_df.reset_index(inplace=True)
         
         # Save to new CSV
-        volume_csv_path = os.path.join(self.run_path, 'test_eval', f"{self.run_id}_data_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}_volume_{metric_name}.csv")
+        # volume_csv_path = os.path.join(self.run_path, 'test_eval', f"{self.run_id}_data_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}_volume_{metric_name}.csv")
+        volume_csv_path = os.path.join(self.run_path, 'test_eval', f"volume_{metric_name}.csv")
+
         aggregated_df.to_csv(volume_csv_path, index=False)
         print(f'Saved volume-level {metric_name} scores to {volume_csv_path}')
 
@@ -429,7 +438,8 @@ class Tester:
         result_df[f'overall_global_{metric_name}'] = overall_global_metric
 
         # Save to new CSV
-        global_csv_path = os.path.join(self.run_path, 'test_eval', f"{self.run_id}_data_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}_global_{metric_name}.csv")
+        # global_csv_path = os.path.join(self.run_path, 'test_eval', f"{self.run_id}_data_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}_global_{metric_name}.csv")
+        global_csv_path = os.path.join(self.run_path, 'test_eval', f"global_{metric_name}.csv")
         result_df.to_csv(global_csv_path, index=False)
         print(f'Saved global-level {metric_name} scores to {global_csv_path}')
 
@@ -437,9 +447,9 @@ class Tester:
         if self.module_cfg.get('use_wandb', False):
             # Create the wandb_log_data dictionary at the bottom
             wandb_log_data = {
-                "slice_csv_path": slice_csv_path,
-                "volume_csv_path": volume_csv_path,
-                "global_csv_path": global_csv_path
+                f"{metric_name}_slice_csv_path": os.path.join(root, slice_csv_path),
+                f"{metric_name}_volume_csv_path": os.path.join(root, volume_csv_path),
+                f"{metric_name}_global_csv_path": os.path.join(root, global_csv_path)
             }
             wandb_log(wandb_log_data)
 

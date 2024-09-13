@@ -1,8 +1,8 @@
 data:
   # data_dir: standardized_data/KICK_thigh/K004_OPC.nii.gz
-  # data_dir: standardized_data/KICK_thigh/standardized_K004_OPC.nii.gz
+  data_dir: standardized_data/KICK_thigh/standardized_K004_OPC.nii.gz
   # data_dir: standardized_data/KICK_thigh/standardized_K004_Fat.nii.gz
-  data_dir: standardized_data/KICK_thigh/standardized_K004_Water.nii.gz
+  # data_dir: standardized_data/KICK_thigh/standardized_K004_Water.nii.gz
 
   mask_labels:
     0: background

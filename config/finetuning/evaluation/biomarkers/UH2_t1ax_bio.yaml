@@ -1,0 +1,60 @@
+
+
+
+# ------------------------ Evaluation ------------------------ #
+evaluation:
+  name: "UH2_T1ax_Spine_biomarker"
+  description: "Evaluating models finetuned on MSK MRI dataset for potential in downstream biomarker computation."
+
+SEED: 42
+distributed: False
+
+dataset:
+  UH2-t1ax:
+    config: UH2_T1ax.yaml              # size_1024/
+    project: UH2_T1ax-Evaluation
+
+datamodule:
+  max_subject_set: 3
+  bbox_shift: 0
+  batch_size: 1  
+  num_workers: 1
+  metric:
+    func:
+      tissuevolume: true
+    tissues: [1, 2, 3, 4]
+    dicom_fields: ['pixel_spacing', 'slice_thickness', 'rows', 'columns']
+    representative_slice: True #False
+
+module:
+  work_dir: "work_dir/evaluation"
+  task_name: UH2_T1ax-Evaluation
+  visualize: False #True
+  use_wandb: False #True
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${evaluation.name}_data_summary.csv
+  logging_level: INFO 
+
+# base_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
+base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+# base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
+
+models:
+    # best for muscle
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/mskSAM/no_aug_bbox_shift_0/not_balanced/img_enc_True/early_stop_patience_10/subject_full/20240618-0018_finetuned_model_best.pth
+
+    model_weights: mskSAM
+    # sam2_model_cfg: sam2_hiera_b+.yaml
+    model_type: vit_b
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: true
+      mask_decoder: true

@@ -1,0 +1,76 @@
+model: YOLO8/yolov8n.pt
+model_type: YOLO
+data_yaml: spine_t1ax_data.yaml
+imgsz: 1024
+epochs: 200
+batch: 8 #2 #1 #2 #4 #8 #16
+rect: False
+workers: 8 #4 # 4 #1 
+run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/UH2_Spine_T1ax/runs
+
+# add these in to improve symmetry - overcome fact that there are missing labels in ground truth for one side
+fliplr: 1.0
+translate: 0.05
+scale: 0.4
+copy_paste: 0.1
+
+# Augmentation options - default settings:
+# multi_scale: False # (bool) Whether to use multi-scale during training
+# degrees: 0.0 # (float) image rotation (+/- deg)
+# translate: 0.1 # (float) image translation (+/- fraction)
+# scale: 0.5 # (float) image scale (+/- gain)
+# shear: 0.0 # (float) image shear (+/- deg)
+# perspective: 0.0 # (float) image perspective (+/- fraction), range 0-0.001
+# flipud: 0.0 # (float) image flip up-down (probability)
+# fliplr: 0.5 # (float) image flip left-right (probability)
+# mosaic: 1.0 # (float) image mosaic (probability)
+# mixup: 0.0 # (float) image mixup (probability)
+# copy_paste: 0.0 # (float) segment copy-paste (probability)
+
+# best_weights: runs/detect/train/weights/best.pt
+
+# for testing inference
+data: /data/mskscratch/users/ghoyer/spine_t1ax_pipeline/dicom_cases/
+
+
+
+### Notes for improvement - implement flip transforms in yolo to build robustness where
+### there was inconsistency in ground truth (e.g. one side of muscle missing) - would be valuable for thigh also
+
+### also should implement some coil correction option in the preprocessing step to help in cases like UH3 t1ax 
+### where it is super dark
+
+
+
+
+# To address the issue with mirrored cases across the y-axis and skewed predictions in your YOLOv8 model, you can adjust the augmentation settings to encourage symmetry in the predictions. Here’s how you can tune each setting:
+
+# fliplr: 0.5 → 1.0
+
+# Adjustment: Increase the probability of flipping the images left-right to 1.0. This ensures that every image is flipped during training, helping the model learn symmetry between the two sides.
+# Rationale: This will force the model to see both mirrored versions of the images, promoting the learning of symmetrical features and reducing the chances of predicting boxes on only one side.
+# flipud: 0.0 → 0.0
+
+# Adjustment: Keep the up-down flip probability at 0.0.
+# Rationale: Since your problem is with left-right symmetry, flipping up-down might not contribute positively and could add unnecessary variation.
+# translate: 0.1 → 0.05
+
+# Adjustment: Slightly reduce translation to 0.05.
+# Rationale: While translation helps the model generalize, too much could exacerbate the problem of missing masks on one side. A lower value will help maintain the relative positions of objects without too much disruption.
+# scale: 0.5 → 0.4
+
+# Adjustment: Reduce the scaling factor slightly.
+# Rationale: Scaling can alter the size of objects and potentially cause them to move out of one side, which may not help with symmetry. Reducing the scale could help maintain more consistent object sizes and positions.
+# mosaic: 1.0 → 1.0
+
+# Adjustment: Keep mosaic at 1.0.
+# Rationale: Mosaic augmentation can help with data diversity, but since it doesn’t directly address symmetry, no change is necessary.
+# shear, perspective, degrees: Keep as is
+
+# Adjustment: These parameters (shear, perspective, degrees) can stay at their default values.
+# Rationale: These augmentations don't directly influence the left-right symmetry and may add unnecessary complexity.
+# copy_paste: 0.0 → 0.1
+
+# Adjustment: Introduce a low probability for copy-paste.
+# Rationale: Copy-paste can help augment underrepresented objects, potentially balancing out the missing masks issue if you carefully control what gets copied and where.
+# With these adjustments, your model should become more sensitive to symmetry, which may reduce the skew in predictions and improve overall performance.

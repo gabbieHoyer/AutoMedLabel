@@ -289,7 +289,7 @@ def create_relevant_metadata_with_splits(nifti_image_dir:str, nifti_mask_dir:str
 
     return dataset_metadata
 
-def create_slice_path_metadata(npy_image_dir:str, npy_mask_dir:str, txt_label_dir, dataset_info):
+def create_slice_path_metadata(npy_image_dir:str, npy_mask_dir:str, npy_mask256_dir:str, txt_label_dir, dataset_info):
     """
     Function to create "slices metadata" for every subject in dataset. "Slices metadata" summarizes 
     file path information for all slices in the subject's volume.
@@ -318,10 +318,17 @@ def create_slice_path_metadata(npy_image_dir:str, npy_mask_dir:str, txt_label_di
         img_file_paths = volume_id_file_paths_in_dir(npy_image_dir, subject_id)
         img_file_paths = [f for f in img_file_paths if any([f.endswith(ext) for ext in allowed_extensions])]
         mask_file_paths = [f.replace(npy_image_dir, npy_mask_dir) for f in img_file_paths]
+        mask256_file_paths = [f.replace(npy_image_dir, npy_mask256_dir) for f in img_file_paths]
 
         # Verify files exist
         for mask_file in mask_file_paths:
             if not os.path.exists(mask_file) and os.path.isfile(mask_file):
+                print(f"Files for subject {subject_id} not found.")
+                subject_processed[subject_id] = False
+                continue
+
+        for mask256_file in mask256_file_paths:
+            if not os.path.exists(mask256_file) and os.path.isfile(mask256_file):
                 print(f"Files for subject {subject_id} not found.")
                 subject_processed[subject_id] = False
                 continue
@@ -331,7 +338,7 @@ def create_slice_path_metadata(npy_image_dir:str, npy_mask_dir:str, txt_label_di
         else:
             label_file_paths = None
 
-        subject_dataframes[subject_id] = generate_slice_info_for_subject(img_file_paths, mask_file_paths, label_file_paths, dataset_info)
+        subject_dataframes[subject_id] = generate_slice_info_for_subject(img_file_paths, mask_file_paths, mask256_file_paths, label_file_paths, dataset_info)
         subject_processed[subject_id] = True
     
     return subject_dataframes, subject_processed
@@ -382,13 +389,14 @@ def metadata_creation(config_name, operation):
         }
 
         if cfg.get('preprocessing_cfg').get('yolo_compatible'):
-            txt_label_dir = os.path.join(cfg.get("npy_dir", ""), 'labels')
+            txt_label_dir = os.path.join(cfg.get("npy_dir", ""), 'labels_256')
         else:
             txt_label_dir = None
 
         subject_dataframes_dict, subject_processed = create_slice_path_metadata(
             os.path.join(cfg.get("npy_dir", ""), 'imgs'),
-            os.path.join(cfg.get("npy_dir", ""), 'gts'),
+            # os.path.join(cfg.get("npy_dir", ""), 'gts'),
+            os.path.join(cfg.get("npy_dir", ""), 'gts_256'),
             txt_label_dir,
             dataset_info,
         )

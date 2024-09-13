@@ -1,0 +1,16 @@
+names:
+- background
+- scapula
+
+nc: 2
+
+# path: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/knee_yolo
+path: /data/mskscratch/users/ghoyer/shoulder_pipeline/standardized_shoulder/DHAL/shoulder/T2/npy/YOLO
+
+train: train/images
+# val: val/images
+val: train/images
+test: test/images
+
+meta_path: /data/mskscratch/users/ghoyer/shoulder_pipeline/standardized_shoulder/DHAL/shoulder/T2/metadata/volume_metadata_for_ml.json
+

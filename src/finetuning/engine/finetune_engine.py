@@ -83,7 +83,7 @@ class Trainer:
                         "lr": self.module_cfg['optimizer']['lr'],
                         "batch_size": self.datamodule_cfg['batch_size'],
                         "grad_accum": self.module_cfg['grad_accum'],
-                        "model_type": self.module_cfg['model_type'],
+                        "model_type": self.module_cfg['sam2_model_cfg'],  #self.module_cfg['model_type'],
                         "description": self.experiment_cfg['description'],
                         "pretrained_weights": self.experiment_cfg['pretrained_weights'],
                         "image_encoder": self.module_cfg['trainable']['image_encoder'],
@@ -122,6 +122,8 @@ class Trainer:
             accumulate_steps = self.module_cfg.get('grad_accum', 1)  # Get accumulation steps from config, default is 1
             if self.current_step % accumulate_steps == 0:  # Only zero gradients on the correct accumulation step
                 self.optimizer.zero_grad()
+
+            # import pdb; pdb.set_trace()
 
             with autocast(enabled=self.use_amp):  # Conditional AMP
                 # https://github.com/facebookresearch/segment-anything/issues/277 -> # RuntimeError: The size of tensor a (4) must match the size of tensor b (2) at non-singleton dim 0

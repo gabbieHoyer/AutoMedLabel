@@ -1,0 +1,57 @@
+
+# ------------------------ Evaluation ------------------------ #
+evaluation:
+  name: "KICK_biomarker"
+  description: "Evaluating models finetuned on MSK MRI dataset for potential in downstream biomarker computation."
+
+SEED: 42
+distributed: False 
+
+dataset:
+  KICK-hip: #done
+    config: KICK_cube.yaml          
+    project: KICK-Evaluation
+
+datamodule:
+  max_subject_set: full
+  bbox_shift: 0
+  batch_size: 1  
+  num_workers: 1
+  metric:
+    func:
+      tissuevolume: true
+    tissues: [1]
+    dicom_fields: ['pixel_spacing', 'slice_thickness', 'rows', 'columns']
+    representative_slice: True
+
+module:
+  work_dir: "work_dir/evaluation"
+  task_name: Placeholder-Evaluation
+  use_wandb: True
+  visualize: True
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${evaluation.name}_data_summary.csv
+  logging_level: INFO 
+
+# base_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
+# base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
+
+models:
+    # best for bone:
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/mskSAM/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_9/20240819-1329_finetuned_model_best_converted.pth
+
+    model_weights: mskSAM2
+    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: true
+      mask_decoder: true

@@ -1,0 +1,113 @@
+
+
+
+# ------------------------ Evaluation ------------------------ #
+evaluation:
+  name: "OAI_T1_Thigh_multiclass_SAM2_mem"
+  description: "Evaluating multiclass models finetuned on the OAI thigh muscle MRI dataset."
+
+SEED: 42
+distributed: False 
+
+dataset:
+  OAI-thigh:
+    config: OAI_T1_Thigh.yaml       
+    project: multiclass_Thigh-Evaluation
+
+datamodule:
+  max_subject_set: 5
+  bbox_shift: 0
+  batch_size: 1  
+  num_workers: 1
+
+module:
+  work_dir: "work_dir/evaluation"
+  task_name: multiclass_Thigh-Evaluation
+  use_wandb: True
+  visualize: True
+
+output_configuration:
+  save_path: Run_Summaries
+  viz_eval_path: ${output_configuration.save_path}/figs
+  summary_file: ${evaluation.name}_data_summary.csv
+  logging_level: INFO 
+
+# base_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
+# "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+
+base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
+# base_model: "work_dir/model_weights/SAM2/sam2_hiera_tiny.pt"
+# base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
+
+# note: these are all no-fascia
+
+models:
+
+  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/mskSAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240903-2127_finetuned_model_best_converted.pth
+    model_weights: Thigh_multiclass_SAM2_mem-bal_False-sub_set_full-bbox_shift_0
+    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_details:
+      balanced: false
+      subject: full
+      bbox_shift: 0
+    trainable:
+      prompt_encoder: false
+      image_encoder: true
+      mask_decoder: true
+
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_3/20240816-0220_finetuned_model_best_converted.pth
+  #   model_weights: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_0
+  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_details:
+  #     balanced: false
+  #     subject: full
+  #     bbox_shift: 0
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: false
+  #     mask_decoder: true
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_4/20240816-2250_finetuned_model_best_converted.pth
+  #   model_weights: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_5
+  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_details:
+  #     balanced: false
+  #     subject: full
+  #     bbox_shift: 5
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: false
+  #     mask_decoder: true
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_18/20240818-2212_finetuned_model_best_converted.pth
+  #   model_weights: Thigh_multiclass_SAM2_mem-bal_False-sub_set_full-bbox_shift_0
+  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_details:
+  #     balanced: false
+  #     subject: full
+  #     bbox_shift: 0
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: true
+  #     mask_decoder: true
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_16/20240815-2251_finetuned_model_best_converted.pth
+  #   model_weights: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_0
+  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_details:
+  #     balanced: false
+  #     subject: full
+  #     bbox_shift: 0
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: true
+  #     mask_decoder: true
+  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_17/20240816-1344_finetuned_model_best_converted.pth
+  #   model_weights: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_5
+  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_details:
+  #     balanced: false
+  #     subject: full
+  #     bbox_shift: 5
+  #   trainable:
+  #     prompt_encoder: false
+  #     image_encoder: true
+  #     mask_decoder: true

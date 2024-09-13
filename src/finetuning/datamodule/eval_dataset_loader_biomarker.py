@@ -4,7 +4,6 @@ Finetuning Evaluation Script for 2D,
 class-based dice computation on Test sets
 """
 
-
 import os
 import json
 import random
@@ -32,7 +31,7 @@ from src.finetuning.datamodule.experiment_summary import (
     extract_paths_and_count_slices,
     filter_subjects_by_max_number,
 )
-from src.finetuning.datamodule.npy_dataset import MultiClassSAMDataset #MultiClassBiomarkerSAMDataset
+from src.finetuning.datamodule.npy_dataset import MultiClassSAM2Dataset 
 from src.finetuning.datamodule.components.collation_func import collate_fn
 
 # Retrieve a logger for the module
@@ -156,7 +155,7 @@ def process_dataset(dataset_info:list[tuple], bbox_shift:int, max_subjects:Optio
                     })
 
                 # Initialize the dataset
-                dataset = MultiClassSAMDataset(**dataset_args)
+                dataset = MultiClassSAM2Dataset(**dataset_args)
                 
                 if split_name == 'test':
                     if is_sampled:

@@ -345,7 +345,7 @@ class LoadImages:
             self.count += 1
             if path.endswith(".npy"):
 
-                import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
 
                 im0 = np.load(path)  # Load .npy file
 
