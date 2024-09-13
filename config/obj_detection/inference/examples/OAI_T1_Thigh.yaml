@@ -1,17 +1,6 @@
 data:
-  # data_dir: /data/bigbone3/ghoyer/48m_manualClean
-  data_dir: /data/bigbone3/ghoyer/working_folders/challenging_cases/dicom_images/48m/9917307  #   #9948016   #9041458  #9805712 
-  # data_dir: /data/bigbone3/ghoyer/working_folders/challenging_cases/dicom_images/48m/9559476
-  # data_dir: standardized_data/challenging_cases/nifti_image_sample/00m/OAI_9015402.nii.gz
-  # data_dir: standardized_data/challenging_cases/00m_active/9046012
-  # data_dir: standardized_data/challenging_cases/00m_active2
-  # data_dir: standardized_data/challenging_cases/single_challenging_case/OAI_9744444.nii.gz
-  # data_dir: standardized_data/challenging_cases/more_challenging_cases
-  # data_dir: standardized_data/challenging_cases/rand_sample/images # works with locate_files, load_data
-  # data_dir: standardized_data/full_thigh_nifti/train/images/OAI_9437407.nii.gz  # works with locate_files, load_data
-  # data_dir: standardized_data/challenging_cases/dicom_image_sample/00m/9015402    # dicom folder   # works
-  # data_dir: standardized_data/challenging_cases/nifti_image_sample/00m/OAI_9015402.nii.gz  
-  # data_dir: standardized_data/challenging_cases/dicom_image_sample/00m   # works with locate_files, load_data/load_dcm
+  data_dir: standardized_data/challenging_cases/more_challenging_cases
+
   mask_labels:
     0: background
     1: sc_fat

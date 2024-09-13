@@ -1,6 +1,4 @@
 data:
-  # data_dir: data/mskscratch/users/ghoyer/spine_t1ax_pipeline/standardized_spine/BACPAC_UH2/lumbar_spine/T1_ax/UH3_test_cases/BACPAC0101003_02-20211209.nii.gz
-  # data_dir: data/mskscratch/users/ghoyer/spine_t1ax_pipeline/standardized_spine/BACPAC_UH2/lumbar_spine/T1_ax/UH3_test_cases/
   data_dir: /data/mskscratch/users/ghoyer/spine_t1ax_pipeline/standardized_spine/BACPAC_UH2/lumbar_spine/T1_ax/UH3_test_cases/group1/
 
   mask_labels:

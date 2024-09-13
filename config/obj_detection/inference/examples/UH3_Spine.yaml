@@ -48,7 +48,7 @@ output_cfg:
 
 
 data:
-  data_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/challenging_cases/spine_test  #BACPAC0101001_01-20210818.nii.gz
+  data_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/challenging_cases/spine_test  
   # data_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/challenging_cases/spine_UH2
 
   mask_labels:

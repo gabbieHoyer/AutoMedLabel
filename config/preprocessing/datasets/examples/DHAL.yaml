@@ -5,7 +5,6 @@
 ##     3. sam_prep.py: SAM compatible npy data standardization and slice-level metadata creation
 ##     4. prompt_prediction.py: extended functionality for choosing prompt experimentation / zeroshot inference
 
-
 # ------------------ PARAMS FOR ALL ------------------
 dataset:
   name: DHAL
@@ -14,15 +13,9 @@ dataset:
 overwrite_existing_flag: True
 
 # --- OUTPUT (DEFAULT): uses default folder structure when output path is not specified (see load_config())
-# default_dataset_suffix_dirs: DHAL/shoulder/T2
-
-# general_data_dir: /data/mskdata/standardized/${default_dataset_suffix_dirs}
-# project_data_dir:  /data/mskscratch/standardized/${default_dataset_suffix_dirs} 
-
 default_output_dir: /data/mskscratch/users/ghoyer/shoulder_pipeline
 general_data_dir: ${default_output_dir}/standardized_shoulder/DHAL/shoulder/T2
      
-
 # ------------------ INFO FOR DATA STANDARDIZATION ------------------
 # Packaged MRI image and mask folder paths (can be dicom or other file type)
 image_data_paths:  /data/mskdata/notebooks/DHAL/shoulder/T2/DHAL_dcm_mask_data.csv
@@ -140,8 +133,6 @@ stats_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
 ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json
 # Operation C - location to parquet files for ML
 slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths   # might not be necessary right now; I really just want the yolo component
-# slice_info_parquet_dir: ${general_data_dir}/metadata/SAM2/slice_paths
-
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
 

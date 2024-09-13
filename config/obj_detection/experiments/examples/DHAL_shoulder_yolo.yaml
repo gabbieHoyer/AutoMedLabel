@@ -3,9 +3,9 @@ model_type: YOLO
 data_yaml: dhal_data.yaml
 imgsz: 1024
 epochs: 200
-batch: 8 #2 #1 #2 #4 #8 #16
+batch: 8 
 rect: False
-workers: 8 #4 # 4 #1 
+workers: 8 
 run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/DHAL_Shoulder/runs
 # multi_scale: True
 

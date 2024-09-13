@@ -1,8 +1,7 @@
 data:
   # data_dir: standardized_data/challenging_cases/knee_test
   data_dir: /data/mskscratch/users/ghoyer/shoulder_pipeline/standardized_shoulder/DHAL/shoulder/T2/single_test_case
-  # data_dir: /data/mskscratch/users/ghoyer/shoulder_pipeline/standardized_shoulder/DHAL/shoulder/T2/test_cases
-  
+
   mask_labels:
     0: background
     1: scapula

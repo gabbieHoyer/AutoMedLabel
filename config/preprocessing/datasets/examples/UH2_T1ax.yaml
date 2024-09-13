@@ -14,14 +14,7 @@ dataset:
 overwrite_existing_flag: True
 
 # --- OUTPUT (DEFAULT): uses default folder structure when output path is not specified (see load_config())
-# default_dataset_suffix_dirs: BACPAC_UH2/lumbar_spine/T1_ax
-
-# general_data_dir: /data/mskdata/standardized/${default_dataset_suffix_dirs}
-# project_data_dir:  /data/mskscratch/standardized/${default_dataset_suffix_dirs} 
-# project_output_dir: /data/mskscratch/mskSAM/prompting
-
 default_output_dir: /data/mskscratch/users/ghoyer/spine_t1ax_pipeline
-
 general_data_dir: ${default_output_dir}/standardized_spine/BACPAC_UH2/lumbar_spine/T1_ax
 
 # ------------------ INFO FOR DATA STANDARDIZATION ------------------
