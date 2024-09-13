@@ -29,3 +29,5 @@ notebooks/*.ipynb
 
 /scripts/prompting/
 
+.gitignore
+
