@@ -2,41 +2,51 @@
 
 ## Getting Started
 
-### Running the Auto Labeling Script
+### Configuring the Auto Labeling Script
 
-The `auto_label.py` script facilitates automatic image labeling by pairing an object detection model with a SAM-variant model (e.g., SAM, MedSAM, SAM2, or a fine-tuned version). Follow the steps below to execute the script:
+The `auto_label.py` script automates image labeling by integrating an object detection model with a SAM-variant model (such as SAM, MedSAM, SAM2, or a fine-tuned version). To efficiently utilize this script, follow the structured steps below:
 
-#### 1. Navigate to the Root Directory
+#### 1. Configure Your YAML File
 
-Ensure you are in the root directory of the codebase:
+Before running the script, you must specify your settings in a YAML configuration file. This file contains critical parameters for the script, including:
+
+- **Object Detection Model Settings**
+- **Segmentation Model Settings**
+- **Data Paths**
+- **Inference Parameters**
+
+Create or modify a YAML configuration file and ensure it is located in the following directory:
+
+```plaintext
+config/obj_detection/inference/your_config_name.yaml
+```
+
+Replace your_config_name with the actual name of your configuration file.
+
+#### 2. Navigate to the Root Directory
+After configuring your YAML file, navigate to the root directory of the codebase:
 
 ```bash
 $ cd AutoMedLabel
 ```
 
-#### 2. Run the Script
-If a GPU is already in use and SLURM is not required or available, you can run the script using a single GPU:
-
-```bash
-$ python src/obj_detection/auto_label.py OAI_T1_Thigh
-```
-
-Note: OAI_T1_Thigh refers to a YAML configuration file. This file must be located at config/obj_detection/inference/OAI_T1_Thigh.yaml within the root directory.
-
-#### 3. Customize Configuration
-Should you need to use a different configuration file, replace OAI_T1_Thigh with the name of your YAML file (excluding the .yaml extension):
+#### 3. Run the Script
+Once in the root directory, execute the script by referring to your specific configuration file:
 
 ```bash
 $ python src/obj_detection/auto_label.py your_config_name
 ```
 
-Make sure your configuration file is positioned within the config/obj_detection/inference/ directory.
+Replace your_config_name with the name of your configuration file, omitting the .yaml extension.
 
-Understanding the Configuration File
-The YAML configuration file houses parameters critical for:
+**Note**:
+The script is optimized for single GPU use only at this time
 
-- Object Detection Model Settings
-- Segmentation Model Settings
-- Data Paths
-- Inference Parameters
-- Modify these parameters as necessary before running the script.
+#### Example
+Here is an example of how to run the script with a sample configuration file named OAI_T1_Thigh:
+
+```bash
+$ python src/obj_detection/auto_label.py examples/OAI_T1_Thigh
+```
+
+**Note**: This assumes OAI_T1_Thigh.yaml is properly placed within the config/obj_detection/inference/ directory.
