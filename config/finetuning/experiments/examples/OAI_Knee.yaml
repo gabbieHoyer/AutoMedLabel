@@ -4,7 +4,7 @@
 experiment:
   name: "OAI-Knee_mskSAM2"
   pretrained_weights: mskSAM2
-  description: "Fine-tuning model XYZ on combined Knee MRI datasets."
+  description: "Fine-tuning ${experiment.pretrained_weights} on combined Knee MRI datasets."
 
 dataset:
   OAI-imorphics:
@@ -17,33 +17,23 @@ datamodule:
   max_subject_set: full
   balanced: False
   bbox_shift: 0
-  batch_size: 4  # 4, 6, 8 - errors :/ cuda memory
+  batch_size: 4  
   num_workers: 1
   # augmentation_pipeline: 
   #   config: simple.yaml
 
 module:
   work_dir: "work_dir/finetuning"
-  # pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_tiny.pt"
-  # pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_small.pt"
   pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
-
-  # pretrain_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
-  # pretrain_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
-
-  checkpoint: "/data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/mskSAM/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_9/20240819-1329_finetuned_model_best_converted.pth"
-  #"/data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_2/20240816-2326_finetuned_model_latest_epoch_35_converted.pth"
+  checkpoint: "/work_dir/finetuning/mskSAM/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_2/20240819-1329_finetuned_model_best_converted.pth"
 
   trainable:
     prompt_encoder: False   # Frozen
     image_encoder: True       
     mask_decoder: True      # Trainable
 
-  task_name: OAI-Knee
+  task_name: OAI-Knee  # W&B project name
   group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
-  # model_type: vit_b
-  # sam2_model_cfg: sam2_hiera_t.yaml
-  # sam2_model_cfg: sam2_hiera_s.yaml
   sam2_model_cfg: sam2_hiera_b+.yaml
 
   use_wandb: True
@@ -53,12 +43,10 @@ module:
 
   optimizer:
     weight_decay: 0.01
-    lr: 0.0001  #0.0001  #0.0004
+    lr: 0.0001  
 
   scheduler:
     eta_min: 0.00001
-    # T_max: 20
-    # eta_min: 0.00001
 
   use_amp: True
   clip_grad: 1.0
@@ -67,22 +55,13 @@ module:
   early_stopping:
     enabled: True
     patience: 10
-    min_delta: 0.0001   #0.001
+    min_delta: 0.0001   
 
 output_configuration:
   save_path: Run_Summaries
   viz_eval_path: ${output_configuration.save_path}/figs
   summary_file: ${experiment.name}_data_summary.csv
-  logging_level: INFO # as default; DEBUG #
-
-# ------------------ Prompting Test Set Evaluation ------------------
-prompt_experiment: 
-  config: finetuned_prompt.yaml
-  finetuned_model:
-    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_path: ${module.work_dir}/${module.task_name}/${module.group_name}/PLACEHOLDER_RUN_ID_finetuned_model_best.pth
-    model_weights: ${experiment.name}_weights_name 
-    model_type: ${module.model_type}
+  logging_level: INFO # as default; DEBUG 
 
 # ------------------ Dataset Evaluation ------------------
 visualizations:

@@ -6,13 +6,13 @@ epochs: 200
 batch: 8 
 rect: False
 workers: 8 
-run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/DHAL_Shoulder/runs
+run_dir: /correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/DHAL_Shoulder/runs
 # multi_scale: True
 
 # best_weights: runs/detect/train/weights/best.pt
 
 # for testing inference
-data: /data/mskscratch/users/ghoyer/shoulder_pipeline/dicom_cases/
+data: /shoulder_pipeline/dicom_cases/
 
 
 

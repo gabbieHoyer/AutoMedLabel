@@ -9,11 +9,12 @@ names:
 
 nc: 7
 
-path: /data/mskscratch/users/ghoyer/knee_pipeline/standardized_knee/OAI/knee/3D_DESS/Imorphics/npy/YOLO
+path: /knee_pipeline/standardized_knee/OAI/knee/3D_DESS/Imorphics/npy/YOLO
 
 train: train/images
 val: val/images
 test: test/images
 
-meta_path: /data/bigbone3/ghoyer/standardized_knee/OAI/knee/3D_DESS/Imorphics/metadata/volume_metadata_for_ml.json 
+# in development
+# meta_path: /standardized_knee/OAI/knee/3D_DESS/Imorphics/metadata/volume_metadata_for_ml.json 
 

@@ -1,0 +1,153 @@
+## Dataset Pre-Processing Configuration Template
+## This configuration file is used for:
+##     1. data_standardization.py: Standardization of input images and masks.
+##     2. metadata_extraction.py: Extraction and standardization of metadata.
+##     3. model_prep.py: Preparation of SAM-compatible data and slice-level metadata creation.
+##     4. prompt_prediction.py: Configuration for prompt experimentation and zero-shot inference.
+
+# ------------------ GLOBAL PARAMETERS ------------------
+dataset:
+  name: <DATASET_NAME>  # e.g., 'DHAL', 'OAI_imorphics'
+  description: "<DATASET_DESCRIPTION>"  # Brief description of the dataset.
+
+overwrite_existing_flag: <True/False>  # Whether to overwrite existing processed data.
+
+# If your DICOM files lack extensions (set to True if needed)
+no_dicom_extension_flag: <True/False>
+
+# --- OUTPUT DIRECTORIES ---
+default_output_dir: <DEFAULT_OUTPUT_DIRECTORY>  # Base directory for outputs.
+general_data_dir: ${default_output_dir}/<SPECIFIC_DATA_PATH>  # General data directory for the dataset.
+
+# ------------------ DATA STANDARDIZATION ------------------
+# Paths to the image and mask data files (can be DICOM or other formats)
+image_data_paths: <IMAGE_DATA_PATH>  # Path to CSV or directory containing image data.
+mask_data_paths: <MASK_DATA_PATH>    # Path to CSV or directory containing mask data.
+
+image_column: <IMAGE_COLUMN_NAME>  # Column name in CSV containing image paths.
+mask_column: <MASK_COLUMN_NAME>    # Column name in CSV containing mask paths.
+
+image_config:
+  key: <KEY>  # Key for specific processing, if any.
+  transforms:
+    # List of transformations to apply to images.
+  data_properties:
+    finite_values: <True/False>  # Enforce finite values in the images.
+    # Additional data properties if needed.
+
+mask_config:
+  key: <KEY>  # Key for specific processing, if any.
+  transforms:
+    # List of transformations to apply to masks.
+    dtype: <DATA_TYPE>  # e.g., 'np.uint8'
+    # Additional transforms if needed.
+  data_properties:
+    finite_values: <True/False>
+    type: <DATA_TYPE>  # e.g., 'int8'
+    number_unique_values: <NUMBER_OF_UNIQUE_VALUES>  # Expected unique values in masks.
+
+# Define mask labels (map label IDs to anatomical structures)
+mask_labels:
+  0: background
+  1: <LABEL_1_NAME>  # e.g., 'scapula', 'femoral cartilage'
+  2: <LABEL_2_NAME>  # Add as many labels as needed.
+
+# --- OUTPUT DIRECTORIES FOR NIFTI FILES ---
+nifti_image_dir: ${general_data_dir}/nifti/imgs  # Directory for standardized image files.
+nifti_mask_dir: ${general_data_dir}/nifti/masks  # Directory for standardized mask files.
+
+# ------------------ NIFTI VISUALIZATION ------------------
+nifti_fig_cfg:
+  fig_type: <FIGURE_TYPE>  # Options: '2D_overlay', 'gif', or a list like ['2D_overlay', 'gif'].
+  num_figs: <NUMBER_OF_FIGURES>  # Number of figures to generate.
+  slice_selection: <SLICE_SELECTION>  # Options: 'any', 'with_segmentation'.
+  fig_path: ${general_data_dir}/nifti/figs  # Output directory for figures.
+
+# ------------------ SAM PREPARATION ------------------
+preprocessing_cfg:
+  image_size: <IMAGE_SIZE>  # e.g., 1024
+  voxel_num_thre2d: <VOXEL_THRESHOLD_2D>  # Minimum voxel count per 2D slice.
+  voxel_num_thre3d: <VOXEL_THRESHOLD_3D>  # Minimum voxel count per 3D volume.
+  remove_label_ids: []  # List of label IDs to remove from masks.
+  target_label_id: null  # Specific label ID for instance segmentation; set to null if not applicable.
+  instance_bbox: <True/False>  # Whether to use instance bounding boxes.
+  yolo_compatible: <True/False>  # Whether to prepare data compatible with YOLO format.
+
+# --- OUTPUT DIRECTORY FOR SAM-COMPATIBLE DATA ---
+npy_dir: ${general_data_dir}/npy/SAM  # Directory for SAM-compatible .npy files.
+
+# ------------------ NPY VISUALIZATION ------------------
+npy_fig_cfg:
+  fig_type: <FIGURE_TYPE>  # Options: '2D_overlay', 'gif', or a list.
+  num_figs: <NUMBER_OF_FIGURES>
+  slice_selection: <SLICE_SELECTION>  # 'any' or 'with_segmentation'.
+  fig_path: ${npy_dir}/figs  # Output directory for figures.
+
+# ------------------ METADATA EXTRACTION ------------------
+# Original MRI DICOM image directory
+mri_dicom_dir: <MRI_DICOM_DIRECTORY>  # Directory containing original MRI DICOM images.
+dicom_column: <DICOM_COLUMN_NAME>  # Column name in CSV containing DICOM paths.
+
+metadata_cfg:
+  dataset_name: ${dataset.name}
+  anatomy: '<ANATOMY>'  # e.g., 'shoulder', 'knee'
+  field_strength: '<FIELD_STRENGTH>'  # e.g., '3.0'
+  mri_sequence: '<MRI_SEQUENCE>'  # e.g., '3D_DESS', 'T2'
+
+  # DICOM header fields to extract (standardized name: DICOM tag)
+  dicom_values:
+    AccessionNumber: AccessionNumber
+    SOPInstanceUID: SOPInstanceUID
+    StudyInstanceUID: StudyInstanceUID
+    SeriesInstanceUID: SeriesInstanceUID
+    series_desc: SeriesDescription
+    study_desc: StudyDescription
+    TE: EchoTime
+    TR: RepetitionTime
+    flip_angle: FlipAngle
+    ETL: EchoTrainLength
+    field_strength: MagneticFieldStrength
+    receive_coil: ReceiveCoilName
+    scanner_name: StationName
+    scanner_model: ManufacturerModelName
+    slice_thickness: SliceThickness
+    slice_spacing: SpacingBetweenSlices
+    pixel_spacing: PixelSpacing
+    rows: Rows
+    columns: Columns
+    Age: PatientAge
+    Sex: PatientSex
+    Weight: PatientWeight
+    # Add additional DICOM fields as needed.
+
+# --- OPTIONAL EXTRA METADATA ---
+# If you have additional metadata from a CSV file:
+extra_metadata_cfg:
+  csv_file_path: <CSV_FILE_PATH>  # Path to the CSV file with extra metadata.
+  subject_id_col: <SUBJECT_ID_COLUMN>  # Column that uniquely identifies subjects.
+  column_mapping:
+    <STANDARDIZED_FIELD>: <CSV_COLUMN_NAME>
+    # Map standardized field names to your CSV column names.
+    # e.g., Age: 'age', Sex: 'gender'
+
+# Path to a JSON file with supplementary metadata (optional)
+additional_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
+
+# --- OUTPUT PATHS FOR METADATA ---
+stats_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json  # For statistics.
+ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json  # For machine learning models.
+slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths  # For ML data in Parquet format.
+dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv  # Summary of DICOM metadata.
+
+# ------------------ YOLO PREPARATION ------------------
+yolo_preprocessing_cfg:
+  image_size: [<WIDTH>, <HEIGHT>]  # e.g., [1024, 1024]
+  voxel_num_thre2d: <VOXEL_THRESHOLD_2D>
+  voxel_num_thre3d: <VOXEL_THRESHOLD_3D>
+  remove_label_ids: []  # Labels to remove from masks.
+  target_label_id: null  # Specific label ID; null if not applicable.
+  instance_bbox: <True/False>  # Use instance bounding boxes.
+
+# --- OUTPUT DIRECTORY FOR YOLO-COMPATIBLE DATA ---
+yolo_npy_dir: ${general_data_dir}/npy/YOLO  # Directory for YOLO-compatible data.
+

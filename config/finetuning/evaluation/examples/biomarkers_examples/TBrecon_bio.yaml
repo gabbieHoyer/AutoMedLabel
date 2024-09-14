@@ -1,19 +1,16 @@
 
 # ------------------------ Evaluation ------------------------ #
 evaluation:
-  name: "K2S_Knee_biomarker"
+  name: "TBrecon_Knee_biomarker"
   description: "Evaluating models finetuned on MSK MRI dataset for potential in downstream biomarker computation."
 
 SEED: 42
 distributed: False
 
 dataset:
-  # TBrecon:
-  #   config: TBrecon.yaml            
-  #   project: TBrecon-Evaluation2
-  K2S-cube:
-    config: K2S.yaml              
-    project: K2S-Evaluation
+  TBrecon:
+    config: TBrecon.yaml            
+    project: TBrecon-Evaluation2
 
 datamodule:
   max_subject_set: 3
@@ -23,7 +20,7 @@ datamodule:
   metric:
     func:
       cartilagethickness: true
-    tissues: [1, 2, 3]  # tbrecon
+    tissues: [1, 2, 3]  
     dicom_fields: ['pixel_spacing', 'slice_thickness', 'rows', 'columns']
     representative_slice: True
   # metric:
@@ -45,17 +42,14 @@ output_configuration:
   summary_file: ${evaluation.name}_data_summary.csv
   logging_level: INFO 
 
-base_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
+base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
 # base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
-
-# base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
 
 models:
     # Cartilage best model
-  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/finetuning/TBrecon-Knee/MedSAM_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240807-0112_finetuned_model_best_converted.pth
-    model_weights: TBrecon_Knee_MedSAM
-    # sam2_model_cfg: sam2_hiera_b+.yaml
-    model_type: vit_b
+  - finetuned_model: /work_dir/finetuning/TBrecon-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240816-0030_finetuned_model_best_converted.pth
+    model_weights: TBrecon_Knee_SAM2-bal_False-sub_set_full-bbox_shift_0
+    sam2_model_cfg: sam2_hiera_b+.yaml
     model_details:
       balanced: false
       subject: full
@@ -66,7 +60,7 @@ models:
       mask_decoder: true
 
     # bone best model
-  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/mskSam/work_dir/model_weights/Finetuned/TBrecon_Knee/no_aug_bbox_shift_0/img_enc_True/early_stop_patience_10/subject_full/20240622-0130_finetuned_model_best.pth
+  # - finetuned_model: /work_dir/model_weights/Finetuned/TBrecon_Knee/no_aug_bbox_shift_0/img_enc_True/early_stop_patience_10/subject_full/20240622-0130_finetuned_model_best.pth
   #   model_weights: TBrecon_Knee_SAM-bal_False-sub_set_full-bbox_shift_0
   #   model_type: vit
   #   model_details:

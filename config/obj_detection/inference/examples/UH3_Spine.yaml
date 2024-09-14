@@ -11,11 +11,12 @@ device: cuda:0
 models:
   obj_det:
     # model_path: work_dir/obj_detection/UH3_Spine/runs/train3/weights/best.pt
-    model_path: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/model_weights/finetuned/UH3_spine_t1sag/best.pt
+    model_path: work_dir/model_weights/finetuned/UH3_spine_t1sag/best.pt
     model_weights: spineYOLO8_100epoch
     model_type: YOLO
     conf: 0.25 #0.5
     post_processing: True
+    
   segmentation:
     # base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
     # base_model: work_dir/model_weights/MedSAM/medsam_vit_b.pth
@@ -46,10 +47,9 @@ output_cfg:
   visualize: True
   logging_level: DEBUG
 
-
 data:
-  data_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/challenging_cases/spine_test  
-  # data_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/challenging_cases/spine_UH2
+  data_dir: /correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/challenging_cases/spine_test  
+  # data_dir: /correcting_rad_workflow/det2seg/AutoMedLabel/standardized_data/challenging_cases/spine_UH2
 
   mask_labels:
     0: background

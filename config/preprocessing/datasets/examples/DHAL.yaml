@@ -2,7 +2,7 @@
 ## Params for:
 ##     1. data_standardization.py: data standardization of input image and mask file
 ##     2. metadata_extraction.py: standardize metadata for statistics
-##     3. sam_prep.py: SAM compatible npy data standardization and slice-level metadata creation
+##     3. model_prep.py: SAM compatible npy data standardization and slice-level metadata creation
 ##     4. prompt_prediction.py: extended functionality for choosing prompt experimentation / zeroshot inference
 
 # ------------------ PARAMS FOR ALL ------------------
@@ -13,12 +13,12 @@ dataset:
 overwrite_existing_flag: True
 
 # --- OUTPUT (DEFAULT): uses default folder structure when output path is not specified (see load_config())
-default_output_dir: /data/mskscratch/users/ghoyer/shoulder_pipeline
+default_output_dir: /users/user1/shoulder_pipeline
 general_data_dir: ${default_output_dir}/standardized_shoulder/DHAL/shoulder/T2
      
 # ------------------ INFO FOR DATA STANDARDIZATION ------------------
 # Packaged MRI image and mask folder paths (can be dicom or other file type)
-image_data_paths:  /data/mskdata/notebooks/DHAL/shoulder/T2/DHAL_dcm_mask_data.csv
+image_data_paths:  /shoulder/T2/DHAL_dcm_mask_data.csv
 mask_data_paths: ${image_data_paths}
 
 image_column: imgs_dcms
@@ -42,7 +42,6 @@ mask_config:
 mask_labels:
   0: background
   1: scapula
-  #2: humerous
 
 # --- OUTPUT (OVERRIDE DEFAULT): location to Output/locate nifti files for MRI images and masks
 nifti_image_dir: ${general_data_dir}/nifti/imgs
@@ -67,7 +66,6 @@ preprocessing_cfg:
   target_label_id: null  # No specific label targeted for instance segmentation
   instance_bbox: True
   yolo_compatible: True
-
 
 # --- OUTPUT (OVERRIDE DEFAULT): Location to output SAM-compatible .npy files
 npy_dir: ${general_data_dir}/npy/SAM
@@ -135,22 +133,4 @@ ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json
 slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths   # might not be necessary right now; I really just want the yolo component
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
-
-
-# ------------------ Prompting Experimentation ------------------
-prompt_experiment: 
-  config: baseline_prompt.yaml
-
-# # ------------------ INFO FOR YOLO PREP ------------------
-# ## YOLO compatible npy data standardization, txt label creation
-# # Values for image preprocessing script
-yolo_preprocessing_cfg:
-  image_size: [1024, 1024]
-  voxel_num_thre2d: 100
-  voxel_num_thre3d: 1000
-  remove_label_ids: []  
-  target_label_id: null  # No specific label targeted for instance segmentation
-  instance_bbox: True
-
-yolo_npy_dir: ${general_data_dir}/npy/YOLO
 

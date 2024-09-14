@@ -1,0 +1,83 @@
+## Model Evaluation Configuration for Biomarker Computation
+## This configuration file is used for evaluating models that compute downstream biomarker metrics (e.g., cartilage thickness, tissue volume).
+## It is structured for custom metric evaluation based on specific datasets and DICOM metadata fields.
+
+# ------------------------ EVALUATION SETUP ------------------------ #
+evaluation:
+  name: <EVALUATION_NAME>  # Name of the evaluation task (e.g., 'OAI_Knee_biomarker').
+  description: "<DESCRIPTION>"  # Brief description of the evaluation (e.g., 'Evaluating MSK MRI dataset for biomarker computation.').
+
+SEED: <SEED_VALUE>  # Random seed for reproducibility (e.g., 42).
+distributed: <True/False>  # Whether to use distributed evaluation (default is False - typical of evaluation, single gpu use).
+
+# ------------------------ DATASET CONFIGURATION ------------------------ #
+dataset:
+  <DATASET_KEY>:
+    config: <DATASET_CONFIG_FILE>  # Path to the dataset configuration file (e.g., 'OAI_imorphics.yaml').
+    project: <PROJECT_NAME>  # Optional: Weights and Biases project name (e.g., 'OAI-imorphics-Evaluation').
+
+# ------------------------ DATA MODULE CONFIGURATION ------------------------ #
+datamodule:
+  max_subject_set: <NUMBER_OR_FULL>  # Number of subjects for evaluation ('full' or a smaller subset like 5).
+  bbox_shift: <SHIFT_VALUE>  # Bounding box shift value (e.g., 0). Set to test model robustness to shifts.
+  batch_size: <BATCH_SIZE>  # Batch size for evaluation (e.g., 1).
+  num_workers: <NUM_WORKERS>  # Number of worker processes for data loading (e.g., 1).
+
+  # Custom metric evaluation (biomarkers)
+  metric:
+    func:
+      <BIOMARKER_1>: <True/False>  # Custom biomarker function (e.g., 'cartilagethickness': True, 'tissuevolume': True).
+      # <BIOMARKER_1>: <True/False> can conventiently have a second biomarker to compute if the tissues for eval are the same :D .... else not 
+    tissues: [<TISSUE_LABELS>]  # List of tissue labels (e.g., [1, 2, 3, 4]).
+    dicom_fields: ['<DICOM_FIELD_1>', '<DICOM_FIELD_2>', '<DICOM_FIELD_3>']  # DICOM metadata fields required for biomarker computation.
+    representative_slice: <True/False>  # Whether to use a representative slice for biomarker computation (e.g., True or False).
+
+# ------------------------ MODULE CONFIGURATION ------------------------ #
+module:
+  work_dir: <WORK_DIRECTORY>  # Directory where evaluation outputs will be saved (e.g., "work_dir/evaluation").
+  task_name: <TASK_NAME>  # Name of the task being evaluated (e.g., 'Knee-Evaluation').
+  use_wandb: <True/False>  # Whether to use Weights & Biases for tracking.
+  visualize: <True/False>  # Whether to generate visualizations during evaluation.
+
+# ------------------------ OUTPUT CONFIGURATION ------------------------ #
+output_configuration:
+  save_path: <SAVE_PATH>  # Directory where evaluation results will be saved (e.g., 'Run_Summaries').
+  viz_eval_path: ${output_configuration.save_path}/figs  # Path for saving visualizations.
+  summary_file: ${evaluation.name}_data_summary.csv  # Summary file for the evaluation.
+  logging_level: <LOGGING_LEVEL>  # Logging level (e.g., 'INFO', 'DEBUG').
+
+# ------------------------ BASE MODEL ------------------------ #
+# The base model is required to load and evaluate the model for biomarker computation.
+base_model: <BASE_MODEL_PATH>  # Path to the baseline or reference model (e.g., 'work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt').
+
+# ------------------------ FINETUNED MODELS AND EXPERIMENT DOCUMENTATION ------------------------ #
+# This section tracks the models used for evaluating biomarker metrics.
+# It links specific finetuned models to their evaluation rounds and records key experiment details such as model configurations and training conditions.
+models:
+  - finetuned_model: <FINETUNED_MODEL_PATH>  # Path to the finetuned model (e.g., 'path/to/finetuned_model.pth').
+    model_weights: <MODEL_WEIGHTS_NAME>  # Name or identifier for the model weights (e.g., 'OAI_Knee_SAM2_mem-bal_False').
+    sam2_model_cfg: <MODEL_CONFIG_FILE>  # Path to the model configuration (e.g., 'sam2_hiera_b+.yaml').
+
+    model_details:  # Document the training conditions to allow for thorough evaluation and tracking of experiments.
+      balanced: <True/False>  # Whether the model was trained on a balanced dataset (e.g., False).
+      subject: <SUBJECT_SET>  # Number of subjects used during training (e.g., 'full').
+      bbox_shift: <SHIFT_VALUE>  # Bounding box shift value used during training (e.g., 0).
+
+    trainable:  # Indicate which components of the model were trainable during finetuning.
+      prompt_encoder: <True/False>  # Whether the prompt encoder was trainable (e.g., False).
+      image_encoder: <True/False>  # Whether the image encoder was trainable (e.g., True).
+      mask_decoder: <True/False>  # Whether the mask decoder was trainable (e.g., True).
+
+  # Add more models if needed for evaluation:
+  # - finetuned_model: <FINETUNED_MODEL_PATH>
+  #   model_weights: <MODEL_WEIGHTS_NAME>
+  #   sam2_model_cfg: <MODEL_CONFIG_FILE>
+  #   model_details:
+  #     balanced: <True/False>
+  #     subject: <SUBJECT_SET>
+  #     bbox_shift: <SHIFT_VALUE>
+  #   trainable:
+  #     prompt_encoder: <True/False>
+  #     image_encoder: <True/False>
+  #     mask_decoder: <True/False>
+

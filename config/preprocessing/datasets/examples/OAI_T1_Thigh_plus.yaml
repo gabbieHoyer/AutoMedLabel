@@ -167,10 +167,6 @@ slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
 
-# ------------------ Prompting Experimentation ------------------
-prompt_experiment: 
-  config: baseline_prompt.yaml
-
 
 # # ------------------ INFO FOR YOLO PREP ------------------
 # ## YOLO compatible npy data standardization, txt label creation

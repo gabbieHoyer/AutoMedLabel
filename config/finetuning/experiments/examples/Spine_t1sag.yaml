@@ -2,9 +2,9 @@
 
 # ------------------------ Finetuning ------------------------ #
 experiment:
-  name: "BACPAC_T1_sagittal_mskSAM2_mem"
+  name: "Spine_T1_sagittal_mskSAM2_mem"
   pretrained_weights: mskSAM2_mem
-  description: "Fine-tuning model XYZ on combined BACPAC Lumbar Spine T1 and T2 MRI datasets."
+  description: "Fine-tuning ${experiment.pretrained_weights} on combined Lumbar Spine cohort MRI datasets."
 
 dataset:
   UH2-t1sag:
@@ -13,14 +13,6 @@ dataset:
     config: UH2_T1sag_vert.yaml
   UH3-t1sag:
     config: UH3_T1sag.yaml
-
-  # BEST-UCSD-t1ax:
-  #   config: BEST_UCSD_T1ax.yaml
-  # BEST-UCSD-t1sag:
-  #   config: BEST_UCSD_T1sag.yaml
-  # BEST-UCSD-t2ax:
-  #   config: BEST_UCSD_T2ax.yaml
-
 
 SEED: 42
 distributed: True 
@@ -36,14 +28,9 @@ datamodule:
 
 module:
   work_dir: "work_dir/finetuning"
-  # pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_tiny.pt"
-  # pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_small.pt"
   pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
 
-  # pretrain_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
-  # "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
   checkpoint: ""
-  # "/data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/mskSAM/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_9/20240819-1329_finetuned_model_best_converted.pth"  # Resuming training from checkpoint
 
   trainable:
     prompt_encoder: False   
@@ -52,11 +39,7 @@ module:
     
   task_name: Spine_T1sag
   group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
-  # model_type: vit_b
-  # sam2_model_cfg: sam2_hiera_t.yaml
-  # sam2_model_cfg: sam2_hiera_s.yaml
   sam2_model_cfg: sam2_hiera_b+.yaml
-
 
   use_wandb: True
   visualize: True
@@ -84,15 +67,6 @@ output_configuration:
   viz_eval_path: ${output_configuration.save_path}/figs
   summary_file: ${experiment.name}_data_summary.csv
   logging_level: INFO 
-
-# ------------------ Prompting Test Set Evaluation ------------------
-prompt_experiment: 
-  config: finetuned_prompt.yaml
-  finetuned_model:
-    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_path: ${module.work_dir}/${module.task_name}/${module.group_name}/PLACEHOLDER_RUN_ID_finetuned_model_best.pth
-    model_weights: ${experiment.name}_weights_name 
-    model_type: ${module.model_type}
 
 # ------------------ Dataset Evaluation ------------------
 visualizations:

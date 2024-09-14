@@ -4,21 +4,13 @@
 experiment:
   name: "BACPAC_t1_axial_mskSAM2"
   pretrained_weights: mskSAM2
-  description: "Fine-tuning model XYZ on combined BACPAC Lumbar Spine T1 and T2 MRI datasets."
+  description: "Fine-tuning ${experiment.pretrained_weights} on combined Lumbar Spine T1 Axial MRI datasets."
 
 dataset:
   UH2-t1ax:
     config: UH2_T1ax.yaml
-  # UH3-t1ax:
-  #   config: UH3_T1ax.yaml
-
-  # BEST-UCSD-t1ax:
-  #   config: BEST_UCSD_T1ax.yaml
-  # BEST-UCSD-t1sag:
-  #   config: BEST_UCSD_T1sag.yaml
-  # BEST-UCSD-t2ax:
-  #   config: BEST_UCSD_T2ax.yaml
-
+  UH3-t1ax:
+    config: UH3_T1ax.yaml
 
 SEED: 42
 distributed: True 
@@ -49,7 +41,7 @@ module:
     
   task_name: Spine_T1ax
   group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
-  # model_type: vit_b
+  # model_type: vit_b  # use for SAM and MedSAM models (based on the weights type available through META)
   # sam2_model_cfg: sam2_hiera_t.yaml
   # sam2_model_cfg: sam2_hiera_s.yaml
   sam2_model_cfg: sam2_hiera_b+.yaml
@@ -80,15 +72,6 @@ output_configuration:
   viz_eval_path: ${output_configuration.save_path}/figs
   summary_file: ${experiment.name}_data_summary.csv
   logging_level: INFO 
-
-# ------------------ Prompting Test Set Evaluation ------------------
-prompt_experiment: 
-  config: finetuned_prompt.yaml
-  finetuned_model:
-    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_path: ${module.work_dir}/${module.task_name}/${module.group_name}/PLACEHOLDER_RUN_ID_finetuned_model_best.pth
-    model_weights: ${experiment.name}_weights_name 
-    model_type: ${module.model_type}
 
 # ------------------ Dataset Evaluation ------------------
 visualizations:

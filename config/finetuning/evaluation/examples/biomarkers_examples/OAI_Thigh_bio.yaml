@@ -1,6 +1,4 @@
 
-
-
 # ------------------------ Evaluation ------------------------ #
 evaluation:
   name: "OAI_T1_Thigh_multiclass_biomarker"

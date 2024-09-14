@@ -7,12 +7,12 @@ names:
 
 nc: 5
 
-path: /data/mskscratch/users/ghoyer/spine_t1ax_pipeline/standardized_spine/BACPAC_UH2/lumbar_spine/T1_ax/npy/YOLO
+path: /lumbar_spine/T1_ax/npy/YOLO
 
 train: train/images
 # val: val/images
 val: train/images
 test: test/images
 
-meta_path: /data/mskscratch/users/ghoyer/spine_t1ax_pipeline/standardized_spine/BACPAC_UH2/lumbar_spine/T1_ax/metadata/volume_metadata_for_ml.json
+meta_path: /lumbar_spine/T1_ax/metadata/volume_metadata_for_ml.json
 

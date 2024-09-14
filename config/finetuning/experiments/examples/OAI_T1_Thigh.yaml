@@ -4,7 +4,7 @@
 experiment:
   name: OAI_Thigh
   pretrained_weights: SAM
-  description: "Fine-tuning model XYZ on single OAI axial T1 thigh muscle dataset."
+  description: "Fine-tuning ${experiment.pretrained_weights} on single OAI axial T1 thigh muscle dataset."
 
 dataset:
   OAI-thigh:
@@ -27,8 +27,7 @@ module:
   work_dir: "work_dir/finetuning"
   pretrain_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
   checkpoint: ""
-  # "work_dir/finetuning/OAI-Thigh/SAM_10_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_1/20240415-2302_finetuned_model_latest3.pth"
-  
+
   trainable:
     prompt_encoder: False   
     image_encoder: True  
@@ -63,15 +62,6 @@ output_configuration:
   viz_eval_path: ${output_configuration.save_path}/figs
   summary_file: ${experiment.name}_data_summary.csv
   logging_level: INFO 
-
-# ------------------ Prompting Test Set Evaluation ------------------
-prompt_experiment: 
-  config: finetuned_prompt.yaml
-  finetuned_model:
-    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_path: ${module.work_dir}/${module.task_name}/${module.group_name}/PLACEHOLDER_RUN_ID_finetuned_model_best.pth
-    model_weights: ${experiment.name}_weights_name 
-    model_type: ${module.model_type}
 
 # ------------------ Dataset Evaluation ------------------
 visualizations:

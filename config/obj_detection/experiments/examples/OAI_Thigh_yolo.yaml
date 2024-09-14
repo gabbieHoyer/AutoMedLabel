@@ -14,7 +14,6 @@ translate: 0.05
 scale: 0.4
 copy_paste: 0.1
 
-
 # multi_scale: True
 
 best_weights: work_dir/obj_detection/OAI_Thigh/runs/train30/weights/best.pt

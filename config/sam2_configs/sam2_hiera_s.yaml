@@ -1,5 +1,7 @@
 # @package _global_
 
+# slightly altered from META versions in order to be compatible with config directory design and overall codebase cleanliness :D
+
 # Model
 model:
   _target_: src.sam2.modeling.sam2_base.SAM2Base

@@ -1,0 +1,63 @@
+## Training Configuration Template for Object Detection (YOLO/DETR/etc.)
+## Note: Augmentation features and other fields are based on the Ultralytics default configuration file located at:
+## 'src/obj_detection/ultralytics/cfg/default.yaml'
+
+# ------------------------ MODEL CONFIGURATION ------------------------ #
+model: <MODEL_PATH>  # Path to the pre-trained model or model architecture to use (e.g., 'yolov8n.pt').
+model_type: <MODEL_TYPE>  # Type of the model architecture (e.g., 'YOLO', 'DETR').
+
+# ------------------------ DATASET CONFIGURATION ------------------------ #
+data_yaml: <DATA_YAML_FILE>  # Path to the dataset YAML configuration file (e.g., 'dhal_data.yaml').
+
+# ------------------------ TRAINING PARAMETERS ------------------------ #
+imgsz: <IMAGE_SIZE>  # Image size for training (e.g., 1024) - currently set to be compatible with SAM image size.
+epochs: <NUMBER_OF_EPOCHS>  # Total number of training epochs (e.g., 200).
+batch: <BATCH_SIZE>  # Batch size per training step (e.g., 8).
+rect: <True/False>  # Rectangular training (e.g., False).
+workers: <NUMBER_OF_WORKERS>  # Number of worker processes for data loading (e.g., 8).
+
+# ------------------------ RUN DIRECTORY ------------------------ #
+run_dir: <RUN_DIRECTORY>  # Directory where training runs and outputs are saved (e.g., '/path/to/run_dir').
+
+# ------------------------ DATA AUGMENTATION PARAMETERS ------------------------ #
+# Augmentation features are based on the Ultralytics default configuration file located at:
+# 'src/obj_detection/ultralytics/cfg/default.yaml'
+# You can adjust these parameters to customize data augmentation during training.
+
+# Data Augmentation Parameters (Default values from Ultralytics)
+# augmentation:
+degrees: 0.0          # Image rotation (+/- degrees)
+translate: 0.1        # Image translation (+/- fraction)
+scale: 0.5            # Image scale (+/- gain)
+shear: 0.0            # Image shear (+/- degrees)
+perspective: 0.0      # Image perspective (+/- fraction), range 0-0.001
+flipud: 0.0           # Image flip up-down (probability)
+fliplr: 0.5           # Image flip left-right (probability)
+mosaic: 1.0           # Image mosaic (probability)
+mixup: 0.0            # Image mixup (probability)
+copy_paste: 0.0       # Segment copy-paste (probability)
+
+# To customize augmentation, adjust the values above.
+
+# ------------------------ ADVANCED OPTIONS ------------------------ #
+# Advanced training options are also based on the Ultralytics default configuration.
+# Uncomment and set advanced training options as needed.
+
+# multi_scale: <True/False>   # Whether to use multi-scale training (e.g., False).
+# save_dir: <SAVE_DIRECTORY>  # Custom directory to save training outputs (e.g., '/path/to/save_dir').
+
+# ------------------------ BEST WEIGHTS ------------------------ #
+# Path to the best model weights file, useful for resuming training or inference.
+
+# best_weights: <BEST_WEIGHTS_PATH>  # e.g., 'runs/detect/train/weights/best.pt'
+
+# --------------- INFERENCE DATA - OPTIONAL VAL SET ------------------------ #
+# Specify data for testing inference after training.
+
+# data: <INFERENCE_DATA_PATH>  # e.g., '/path/to/inference_data'
+
+# ------------------------ NOTES ------------------------ #
+# Additional notes or comments can be added here.
+
+# This configuration file should be saved with a descriptive name, such as 'train_config.yaml',
+# and can be used to reproduce training runs or share configurations with others.

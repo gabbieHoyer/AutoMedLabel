@@ -2,9 +2,8 @@
 ## Params for:
 ##     1. data_standardization.py: data standardization of input image and mask file
 ##     2. metadata_extraction.py: standardize metadata for statistics
-##     3. sam_prep.py: SAM compatible npy data standardization and slice-level metadata creation
+##     3. model_prep.py: SAM compatible npy data standardization and slice-level metadata creation
 ##     4. prompt_prediction.py: extended functionality for choosing prompt experimentation / zeroshot inference
-
 
 # ------------------ PARAMS FOR ALL ------------------
 dataset:
@@ -14,7 +13,7 @@ dataset:
 overwrite_existing_flag: True
 
 # --- OUTPUT (DEFAULT): uses default folder structure when output path is not specified (see load_config())
-default_output_dir: /data/mskscratch/users/ghoyer/spine_t1ax_pipeline
+default_output_dir: /users/user1/spine_t1ax_pipeline
 general_data_dir: ${default_output_dir}/standardized_spine/BACPAC_UH2/lumbar_spine/T1_ax
 
 # ------------------ INFO FOR DATA STANDARDIZATION ------------------
@@ -147,22 +146,3 @@ slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
 
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
-
-
-# ------------------ Prompting Experimentation ------------------
-prompt_experiment: 
-  config: baseline_prompt.yaml
-
-
-# # ------------------ INFO FOR YOLO PREP ------------------
-# ## YOLO compatible npy data standardization, txt label creation
-# # Values for image preprocessing script
-yolo_preprocessing_cfg:
-  image_size: [1024, 1024]
-  voxel_num_thre2d: 100
-  voxel_num_thre3d: 400
-  remove_label_ids: []  
-  target_label_id: null  # No specific label targeted for instance segmentation
-  instance_bbox: True
-
-yolo_npy_dir: ${general_data_dir}/npy/YOLO

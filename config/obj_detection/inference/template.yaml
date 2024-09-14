@@ -1,0 +1,61 @@
+## AutoMedLabel Pipeline Configuration Template
+## This configuration file is used for the AutoMedLabel pipeline, which automates the process of medical image segmentation.
+## The pipeline can accept input data in the form of NIfTI volumes or DICOM image folders.
+## It performs inference using object detection and segmentation models, and outputs a NIfTI volume of the inferred segmentation masks.
+
+# ------------------------ DATA CONFIGURATION ------------------------ #
+data:
+  data_dir: <DATA_DIRECTORY>  # Path to the directory containing your input data (e.g., NIfTI volumes or DICOM folders).
+
+  # Mapping of label indices to tissue or structure names.
+  mask_labels:
+    0: background
+    1: <LABEL_1_NAME>  # e.g., 'scapula', 'femoral cartilage'
+    2: <LABEL_2_NAME>
+    # Add more labels as needed.
+
+# -------------------- IN-LINE PREPROCESSING CONFIGURATION ------------------------ #
+preprocessing_cfg:
+  image_size: <IMAGE_SIZE>         # Target image size (e.g., 1024).
+  voxel_num_thre2d: <VOXEL_THRESHOLD_2D>  # Minimum voxel count per 2D slice to include (e.g., 100).
+  voxel_num_thre3d: <VOXEL_THRESHOLD_3D>  # Minimum voxel count per 3D volume to include (e.g., 1000).
+  remove_label_ids: []             # List of label IDs to remove; leave empty if none.
+  instance_bbox: <True/False>      # Whether to use instance bounding boxes (e.g., True).
+  make_square: <True/False>        # Whether to resize images to square dimensions (e.g., False).
+
+# ------------------------ DEVICE CONFIGURATION ------------------------ #
+device: <DEVICE>  # Device for computation (e.g., 'cuda:0' for GPU or 'cpu' for CPU).
+
+# ------------------------ MODEL CONFIGURATION ------------------------ #
+models:
+  obj_det:
+    model_path: <OBJ_DET_MODEL_PATH>  # Path to the object detection model weights (e.g., 'path/to/best.pt').
+    model_weights: <MODEL_WEIGHTS_NAME>  # Identifier for the model (e.g., 'shoulder_YOLOv8_200epoch').
+    model_type: <MODEL_TYPE>  # Type of object detection model (e.g., 'YOLO').
+    conf: <CONFIDENCE_THRESHOLD>  # Confidence threshold for detection (e.g., 0.25).
+    post_processing: <True/False>  # Whether to apply post-processing (e.g., True).
+
+  segmentation:
+    base_model: <BASE_MODEL_PATH>  # Path to the base segmentation model weights (e.g., 'path/to/sam_vit_b.pth').
+    model_path: <MODEL_PATH>       # Path to the finetuned segmentation model weights; can be the same as base_model.
+    model_weights: <MODEL_WEIGHTS_NAME>  # Identifier for the segmentation model (e.g., 'SAM', 'SAM2').
+    model_type: <MODEL_TYPE>       # Type or configuration file of the segmentation model (e.g., 'vit_b', 'sam2_hiera_b+.yaml').
+
+    # Specify which components of the model are trainable or were trained.
+    trainable:
+      prompt_encoder: <True/False>  # Whether the prompt encoder is trainable.
+      image_encoder: <True/False>   # Whether the image encoder is trainable.
+      mask_decoder: <True/False>    # Whether the mask decoder is trainable.
+
+# ------------------------ OUTPUT CONFIGURATION ------------------------ #
+output_cfg:
+  base_output_dir: <OUTPUT_DIRECTORY>  # Base directory where outputs will be saved (e.g., 'work_dir/inference').
+  task_name: <TASK_NAME>               # Name of the task or dataset (e.g., 'DHAL_Shoulder').
+  output_ext: <OUTPUT_EXTENSION>       # File extension for the output masks (e.g., 'nii.gz').
+  visualize: <True/False>              # Whether to generate visualizations (e.g., True).
+  img_clim: <True/False>               # Optional color scaling for images (e.g., True for certain MRI sequences).
+  logging_level: <LOGGING_LEVEL>       # Logging level (e.g., 'DEBUG', 'INFO').
+
+# ------------------------ ADDITIONAL CONFIGURATION ------------------------ #
+# Add any additional configurations or comments as needed.
+

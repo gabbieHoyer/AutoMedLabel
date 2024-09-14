@@ -10,5 +10,5 @@ rect: True
 
 best_weights: work_dir/obj_detection/runs/detect/train7/weights/best.pt
 
-data: standardized_data/dpr/thigh_npy3_instance/test/images/OAI_9437407-003.npy
+data: standardized_data/dpr/thigh_npy3_instance/test/images/subject407-003.npy
 

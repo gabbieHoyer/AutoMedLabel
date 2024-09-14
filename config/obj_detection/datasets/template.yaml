@@ -1,0 +1,20 @@
+## Dataset Configuration Template for Object Detection (YOLO/DETR/etc.)
+
+# ------------------------ CLASS NAMES AND COUNT ------------------------ #
+names:
+  - <CLASS_NAME_1>  # e.g., 'background'
+  - <CLASS_NAME_2>  # e.g., 'scapula'
+  # Add more class names as needed.
+
+nc: <NUMBER_OF_CLASSES>  # e.g., 2
+
+# ------------------------ DATASET PATHS ------------------------ #
+path: <DATASET_BASE_PATH>  # e.g., '/data/path/to/dataset'
+
+train: <TRAIN_IMAGES_PATH>  # e.g., 'train/images'
+val: <VAL_IMAGES_PATH>      # e.g., 'val/images'
+test: <TEST_IMAGES_PATH>    # e.g., 'test/images'
+
+# Future development
+# # ------------------------ METADATA PATH ------------------------ #
+# meta_path: <METADATA_FILE_PATH>  # e.g., '/data/path/to/volume_metadata_for_ml.json'

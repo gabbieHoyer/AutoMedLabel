@@ -2,7 +2,7 @@
 ## Params for:
 ##     1. data_standardization.py: data standardization of input image and mask file
 ##     2. metadata_extraction.py: standardize metadata for statistics
-##     3. sam_prep.py: SAM compatible npy data standardization and slice-level metadata creation
+##     3. model_prep.py: SAM compatible npy data standardization and slice-level metadata creation
 ##     4. prompt_prediction.py: extended functionality for choosing prompt experimentation / zeroshot inference
 
 
@@ -14,7 +14,7 @@ dataset:
 overwrite_existing_flag: True
 
 # --- OUTPUT (DEFAULT): uses default folder structure when output path is not specified (see load_config())
-default_output_dir: /data/mskscratch/users/ghoyer/spine_pipeline
+default_output_dir: /users/user1/spine_pipeline
 general_data_dir: ${default_output_dir}/standardized_spine/BACPAC_UH3/lumbar_spine/T1_sag
         
 # ------------------ INFO FOR DATA STANDARDIZATION ------------------
@@ -154,7 +154,7 @@ metadata_cfg:
 # Operation A (Optional) 
 # Path to a table/dataframe for demographic or other info desired for metadata:
 # extra_metadata_cfg: 
-#   csv_file_path: /data/mskdata/notebooks/BACPAC_UH3/BACPAC_UH3_additional_info.csv
+#   csv_file_path: /data/spine_data/spine_additional_info.csv
 #   subject_id_col: 'subject_id'
 #   column_mapping: # Standardized: Actual
 #     Age: 'Age'  
@@ -162,7 +162,6 @@ metadata_cfg:
 #     Weight: 'Weight'
 #     # Add more mappings as needed
     
-
 # Operation B (Optional) 
 # JSON dictionary to provide supplementary info (demographics, imaging parameters) - default is our stats file
 additional_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
@@ -177,7 +176,3 @@ slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
 
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
-
-# ------------------ Prompting Experimentation ------------------
-prompt_experiment: 
-  config: baseline_prompt.yaml

@@ -4,7 +4,7 @@
 experiment:
   name: OAI_Thigh_mskSAM2_mem
   pretrained_weights: mskSAM2_mem
-  description: "Fine-tuning model XYZ on single OAI axial T1 thigh muscle dataset."
+  description: "Fine-tuning ${experiment.pretrained_weights} on single OAI axial T1 thigh muscle dataset."
 
 dataset:
   OAI-thigh:
@@ -18,7 +18,7 @@ datamodule:
   max_subject_set: full
   balanced: False
   bbox_shift: 0
-  batch_size: 4 #8  # 16 too big for b_plus model and hyperion; 8 also too big here
+  batch_size: 4
   num_workers: 1
   # augmentation_pipeline: 
   #   config: simple.yaml
@@ -29,11 +29,8 @@ module:
   # pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_small.pt"
   pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
 
-  #"work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
   checkpoint: ""
-  #"/data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/mskSAM/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_9/20240819-1329_finetuned_model_best_converted.pth"
-  # "work_dir/finetuning/OAI-Thigh/SAM_10_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_1/20240415-2302_finetuned_model_latest3.pth"
-  
+
   trainable:
     prompt_encoder: False   
     image_encoder: True   
@@ -48,7 +45,7 @@ module:
   use_wandb: True 
   visualize: True
 
-  num_epochs: 500 #0 #1000
+  num_epochs: 500 
 
   optimizer:
     weight_decay: 0.01
@@ -71,15 +68,6 @@ output_configuration:
   viz_eval_path: ${output_configuration.save_path}/figs
   summary_file: ${experiment.name}_data_summary.csv
   logging_level: INFO 
-
-# ------------------ Prompting Test Set Evaluation ------------------
-prompt_experiment: 
-  config: finetuned_prompt.yaml
-  finetuned_model:
-    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_path: ${module.work_dir}/${module.task_name}/${module.group_name}/PLACEHOLDER_RUN_ID_finetuned_model_best.pth
-    model_weights: ${experiment.name}_weights_name 
-    model_type: ${module.model_type}
 
 # ------------------ Dataset Evaluation ------------------
 visualizations:

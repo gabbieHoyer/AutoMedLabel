@@ -1,0 +1,74 @@
+## Model Evaluation Configuration Template
+## This configuration file is used for evaluating models (finetuned or baseline) on specific datasets using Dice and IoU metrics.
+## It is structured to facilitate experiment documentation and tracking by linking finetuned experiments to evaluation rounds.
+
+# ------------------------ EVALUATION SETUP ------------------------ #
+evaluation:
+  name: <EVALUATION_NAME>  # Name of the evaluation task (e.g., 'DHAL_Shoulder_SAM2_mem').
+  description: "<DESCRIPTION>"  # Brief description of the evaluation.
+
+SEED: <SEED_VALUE>  # Random seed for reproducibility (e.g., 42).
+distributed: <True/False>  # Whether to use distributed evaluation (set to False if not needed).
+
+# ------------------------ DATASET CONFIGURATION ------------------------ #
+dataset:
+  <DATASET_KEY>:
+    config: <DATASET_CONFIG_FILE>  # Path to the dataset configuration file (e.g., 'DHAL.yaml').
+    project: <PROJECT_NAME>  # Optional: Weights and Biases project name (e.g., 'DHAL-Evaluation').
+
+# ------------------------ DATA MODULE CONFIGURATION ------------------------ #
+datamodule:
+  max_subject_set: <NUMBER_OR_FULL>  # Number of subjects for evaluation ('full' or a smaller subset like 5).
+  bbox_shift: <SHIFT_VALUE>  # Bounding box shift value (e.g., 0). Set to test model robustness to shifts.
+  batch_size: <BATCH_SIZE>  # Batch size for evaluation (e.g., 1).
+  num_workers: <NUM_WORKERS>  # Number of worker processes for data loading (e.g., 1).
+
+# ------------------------ MODULE CONFIGURATION ------------------------ #
+module:
+  work_dir: <WORK_DIRECTORY>  # Directory where evaluation outputs will be saved (e.g., "work_dir/evaluation").
+  task_name: <TASK_NAME>  # Name of the task being evaluated (e.g., 'DHAL-Evaluation').
+  use_wandb: <True/False>  # Whether to use Weights & Biases for tracking.
+  visualize: <True/False>  # Whether to generate visualizations during evaluation.
+
+# ------------------------ OUTPUT CONFIGURATION ------------------------ #
+output_configuration:
+  save_path: <SAVE_PATH>  # Directory where evaluation results will be saved (e.g., 'Run_Summaries').
+  viz_eval_path: ${output_configuration.save_path}/figs  # Path for saving visualizations.
+  summary_file: ${evaluation.name}_data_summary.csv  # Summary file for the evaluation.
+  logging_level: <LOGGING_LEVEL>  # Logging level (e.g., 'INFO', 'DEBUG').
+
+# ------------------------ BASE MODEL ------------------------ #
+# The base model is required for distinguishing how the model is loaded and used for evaluation.
+base_model: <BASE_MODEL_PATH>  # Path to the baseline or reference model (e.g., 'work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt').
+
+# ------------------------ FINETUNED MODELS AND EXPERIMENT DOCUMENTATION ------------------------ #
+# This section is useful for documenting and tracking experiments.
+# It links specific finetuned models to their evaluation rounds and records key experiment details such as model configurations and training conditions.
+models:
+  - finetuned_model: <FINETUNED_MODEL_PATH>  # Path to the finetuned model (e.g., 'path/to/finetuned_model.pth').
+    model_weights: <MODEL_WEIGHTS_NAME>  # Name or identifier for the model weights (e.g., 'DHAL_SAM2_mem-bal_False-sub_set_full-bbox_shift_0').
+    sam2_model_cfg: <MODEL_CONFIG_FILE>  # Path to the model configuration (e.g., 'sam2_hiera_b+.yaml').
+    
+    model_details:  # Document the training conditions to allow for thorough evaluation and tracking of experiments.
+      balanced: <True/False>  # Whether the model was trained on a balanced dataset (e.g., False).
+      subject: <SUBJECT_SET>  # Number of subjects used during training (e.g., 'full').
+      bbox_shift: <SHIFT_VALUE>  # Bounding box shift value used during training (e.g., 0).
+
+    trainable:  # Indicate which components of the model were trainable during finetuning.
+      prompt_encoder: <True/False>  # Whether the prompt encoder was trainable (e.g., False).
+      image_encoder: <True/False>  # Whether the image encoder was trainable (e.g., True).
+      mask_decoder: <True/False>  # Whether the mask decoder was trainable (e.g., True).
+
+  # Add more models if needed for evaluation:
+  # - finetuned_model: <FINETUNED_MODEL_PATH>
+  #   model_weights: <MODEL_WEIGHTS_NAME>
+  #   sam2_model_cfg: <MODEL_CONFIG_FILE>
+  #   model_details:
+  #     balanced: <True/False>
+  #     subject: <SUBJECT_SET>
+  #     bbox_shift: <SHIFT_VALUE>
+  #   trainable:
+  #     prompt_encoder: <True/False>
+  #     image_encoder: <True/False>
+  #     mask_decoder: <True/False>
+

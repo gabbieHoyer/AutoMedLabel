@@ -4,12 +4,13 @@ names:
 
 nc: 2
 
-path: /data/mskscratch/users/ghoyer/shoulder_pipeline/standardized_shoulder/DHAL/shoulder/T2/npy/YOLO
+path: /shoulder_pipeline/standardized_shoulder/DHAL/shoulder/T2/npy/YOLO
 
 train: train/images
 # val: val/images
 val: train/images
 test: test/images
 
-meta_path: /data/mskscratch/users/ghoyer/shoulder_pipeline/standardized_shoulder/DHAL/shoulder/T2/metadata/volume_metadata_for_ml.json
+# Development to come
+# meta_path: /standardized_shoulder/DHAL/shoulder/T2/metadata/volume_metadata_for_ml.json
 

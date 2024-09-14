@@ -25,13 +25,15 @@ preprocessing_cfg:
   make_square: True
 
 device: cuda:0
+
 models:
   obj_det:
     model_path: work_dir/obj_detection/OAI_Thigh/runs/train30/weights/best.pt
     model_weights: thighYOLO8_100epoch_square_resize
     model_type: YOLO
     conf: 0.2
-    post_processing: False #True # lols realized this may not be used currently
+    post_processing: False 
+
   segmentation:
     base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
     model_path: work_dir/finetuning/OAI_Thigh_SAM_YOLO/SAM_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_6/20240706-1605_finetuned_model_best_converted.pth  # had the early stopping of 10 epochs
@@ -41,7 +43,6 @@ models:
       prompt_encoder: False
       image_encoder: True
       mask_decoder: True
-
 
 output_cfg:
   base_output_dir: work_dir/inference

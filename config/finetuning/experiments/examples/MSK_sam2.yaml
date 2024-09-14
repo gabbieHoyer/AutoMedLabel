@@ -32,9 +32,8 @@ dataset:
   UH3-t1sag:
     config: UH3_T1sag.yaml
 
-
   # K2S-cube:
-  #   config: K2S.yaml
+  #   config: K2S.yaml  # hold out for out-of-distribution evaluation
 
 SEED: 42
 distributed: True
@@ -53,9 +52,6 @@ module:
   # pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_tiny.pt"
   # pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_small.pt"
   pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
-
-  # pretrain_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
-  # pretrain_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
 
   checkpoint: ''
   
@@ -98,11 +94,3 @@ output_configuration:
   summary_file: ${experiment.name}_data_summary.csv
   logging_level: INFO 
 
-# ------------------ Prompting Test Set Evaluation ------------------
-prompt_experiment: 
-  config: finetuned_prompt.yaml
-  finetuned_model:
-    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_path: ${module.work_dir}/${module.task_name}/${module.group_name}/PLACEHOLDER_RUN_ID_finetuned_model_best.pth
-    model_weights: ${experiment.name}_weights_name 
-    model_type: ${module.model_type}

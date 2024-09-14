@@ -1,6 +1,4 @@
 
-
-
 # ------------------------ Evaluation ------------------------ #
 evaluation:
   name: "OAI_T1_Thigh_multiclass_SAM2_mem"
@@ -34,7 +32,6 @@ output_configuration:
 
 # base_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
 # "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
-
 
 base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
 # base_model: "work_dir/model_weights/SAM2/sam2_hiera_tiny.pt"

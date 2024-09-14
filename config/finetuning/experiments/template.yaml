@@ -1,0 +1,86 @@
+## Fine-Tuning Configuration Template
+## This configuration file is used for fine-tuning models on specific datasets.
+## It allows for experimentation with mixed datasets and sizes, or singular optimized fine-tuning.
+
+# ------------------------ EXPERIMENT SETUP ------------------------ #
+experiment:
+  name: <EXPERIMENT_NAME>  # Name of the experiment (e.g., 'DHAL_mskSAM2_mem').
+  pretrained_weights: <PRETRAINED_WEIGHTS_NAME>  # Name of the pretrained weights used (e.g., 'mskSAM2_mem').
+  description: "<DESCRIPTION>"  # Brief description of the experiment.
+
+# ------------------------ DATASETS ------------------------ #
+dataset:
+  <DATASET_KEY>:
+    config: <DATASET_CONFIG_FILE>  # Path to the dataset configuration file (e.g., 'DHAL.yaml').
+  # Add more datasets if needed:
+  # <DATASET_KEY_2>:
+  #   config: <DATASET_CONFIG_FILE_2>
+
+# ------------------------ GENERAL PARAMETERS ------------------------ #
+SEED: <SEED_VALUE>  # Random seed for reproducibility (e.g., 42).
+distributed: <True/False>  # Whether to use distributed training across multiple GPUs or nodes.
+
+# ------------------------ DATA MODULE CONFIGURATION ------------------------ #
+datamodule:
+  max_subject_set: <NUMBER_OR_FULL>  # Maximum number of subjects to use ('full' or a number, e.g., 'full', 40).
+  balanced: <True/False>  # Whether to balance the dataset (e.g., for class balance).
+  bbox_shift: <SHIFT_VALUE>  # Shift value for bounding boxes (e.g., 0).
+  batch_size: <BATCH_SIZE>  # Batch size for training (e.g., 4).
+  num_workers: <NUM_WORKERS>  # Number of worker processes for data loading (e.g., 1).
+  # instance: <True/False>  # Uncomment if instance segmentation is used.
+  # augmentation_pipeline: 
+  #   config: <AUGMENTATION_CONFIG_FILE>  # Path to data augmentation configuration (e.g., 'simple.yaml').
+
+# ------------------------ MODULE CONFIGURATION ------------------------ #
+module:
+  work_dir: <WORK_DIRECTORY>  # Directory where training outputs will be saved (e.g., "work_dir/finetuning").
+  
+  # Path to the pre-trained model weights.
+  pretrain_model: <PRETRAIN_MODEL_PATH>  # Path to the pre-trained model (e.g., "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt").
+
+  # Checkpoint file to resume training from (optional).
+  checkpoint: <CHECKPOINT_PATH>  # Path to a checkpoint to resume from (e.g., "", or "path/to/checkpoint.pth").
+
+  # Define which parts of the model are trainable.
+  trainable:
+    prompt_encoder: <True/False>   # Whether to train the prompt encoder.
+    image_encoder: <True/False>    # Whether to train the image encoder.
+    mask_decoder: <True/False>     # Whether to train the mask decoder.
+
+  # Task and group naming.
+  task_name: <TASK_NAME>  # Name of the task or dataset (e.g., 'DHAL-Shoulder').
+  group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
+  
+  # Model configuration.
+  model_type: <MODEL_TYPE>  # Type of the model architecture (e.g., 'vit_b').
+  sam2_model_cfg: <MODEL_CONFIG_FILE>  # Path to the model configuration file (e.g., 'sam2_hiera_b+.yaml').
+
+  # Additional settings.
+  use_wandb: <True/False>  # Whether to use Weights & Biases for experiment tracking.
+  visualize: <True/False>  # Whether to visualize training progress and results.
+
+  num_epochs: <NUMBER_OF_EPOCHS>  # Total number of training epochs (e.g., 500).
+
+  optimizer:
+    weight_decay: <WEIGHT_DECAY_VALUE>  # Weight decay (L2 regularization) coefficient (e.g., 0.01).
+    lr: <LEARNING_RATE>  # Initial learning rate (e.g., 0.0001).
+
+  scheduler:
+    eta_min: <MIN_LEARNING_RATE>  # Minimum learning rate for the scheduler (e.g., 0.00001).
+    # Additional scheduler parameters can be added if needed.
+
+  use_amp: <True/False>  # Whether to use Automatic Mixed Precision for training.
+  clip_grad: <GRADIENT_CLIP_VALUE>  # Maximum gradient norm for gradient clipping (e.g., 1.0).
+  grad_accum: <GRADIENT_ACCUMULATION_STEPS>  # Number of gradient accumulation steps (e.g., 4).
+
+  early_stopping:
+    enabled: <True/False>  # Whether to enable early stopping.
+    patience: <PATIENCE_EPOCHS>  # Number of epochs with no improvement after which training will be stopped (e.g., 10).
+    min_delta: <MIN_DELTA_VALUE>  # Minimum change in the monitored metric to qualify as an improvement (e.g., 0.0001).
+
+# ------------------------ OUTPUT CONFIGURATION ------------------------ #
+output_configuration:
+  save_path: <SAVE_PATH>  # Path where outputs will be saved (e.g., 'Run_Summaries').
+  viz_eval_path: ${output_configuration.save_path}/figs  # Path for saving visualizations.
+  summary_file: ${experiment.name}_data_summary.csv  # Summary file name.
+  logging_level: <LOGGING_LEVEL>  # Logging level (e.g., 'INFO', 'DEBUG').

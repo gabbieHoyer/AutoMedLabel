@@ -6,14 +6,14 @@ epochs: 100
 batch: 8 
 rect: False
 workers: 8
-run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/OAI_Knee/runs
-# save_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/knee/runs/
+run_dir: /correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/OAI_Knee/runs
+# save_dir: /correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/knee/runs/
 # multi_scale: True
 
 # best_weights: runs/detect/train/weights/best.pt
 
 # for testing inference
-data: /data/mskscratch/users/ghoyer/knee_pipeline/dicom_cases/9018389_SAG_3D_DESS_RIGHT
+data: /knee_pipeline/dicom_cases/subject089_SAG_3D_DESS_RIGHT
 
 
 

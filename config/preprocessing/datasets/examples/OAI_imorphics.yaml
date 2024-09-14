@@ -2,9 +2,8 @@
 ## Params for:
 ##     1. data_standardization.py: data standardization of input image and mask file
 ##     2. metadata_extraction.py: standardize metadata for statistics
-##     3. sam_prep.py: SAM compatible npy data standardization and slice-level metadata creation
+##     3. model_prep.py: SAM compatible npy data standardization and slice-level metadata creation
 ##     4. prompt_prediction.py: extended functionality for choosing prompt experimentation / zeroshot inference
-
 
 # ------------------ PARAMS FOR ALL ------------------
 dataset:
@@ -17,8 +16,7 @@ overwrite_existing_flag: True
 no_dicom_extension_flag: True
 
 # --- OUTPUT (DEFAULT): uses default folder structure when output path is not specified (see load_config())
-# default_output_dir: /data/bigbone3/ghoyer
-default_output_dir: /data/mskscratch/users/ghoyer/knee_pipeline
+default_output_dir: /users/user1/knee_pipeline
 general_data_dir: ${default_output_dir}/standardized_knee/OAI/knee/3D_DESS/Imorphics
         
 # ------------------ INFO FOR DATA STANDARDIZATION ------------------
@@ -154,6 +152,3 @@ slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
 
-# ------------------ Prompting Experimentation ------------------
-prompt_experiment: 
-  config: baseline_prompt.yaml

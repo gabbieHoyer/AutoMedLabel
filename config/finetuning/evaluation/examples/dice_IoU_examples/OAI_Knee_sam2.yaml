@@ -8,6 +8,11 @@ SEED: 42
 distributed: False
 
 dataset:
+  OAI-imorphics:
+    config: OAI_imorphics.yaml      
+    project: OAI-imorphics-Evaluation
+
+  # ** Can evaluate model on out-of-distribution knee sets not included in finetuning **:
   # TBrecon:
   #   config: TBrecon.yaml            
   #   project: TBrecon-Evaluation
@@ -17,9 +22,6 @@ dataset:
   # AFCL-MAPSS:
   #   config: AFACL_compart.yaml      
   #   project: AFACL-Evaluation
-  OAI-imorphics:
-    config: OAI_imorphics.yaml      
-    project: OAI-imorphics-Evaluation
   # K2S-cube:
   #   config: K2S.yaml              
   #   project: K2S-Evaluation
@@ -42,14 +44,11 @@ output_configuration:
   summary_file: ${evaluation.name}_data_summary.csv
   logging_level: INFO 
 
-# base_model: "work_dir/model_weights/MedSAM/medsam_vit_b.pth"
-# "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
 base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
 # base_model: "work_dir/model_weights/SAM2/sam2_hiera_tiny.pt"
-# base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
 
 models:
-  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_1/20240816-0253_finetuned_model_best_converted.pth
+  - finetuned_model: /work_dir/finetuning/OAI-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_1/20240816-0253_finetuned_model_best_converted.pth
     model_weights: OAI_Knee_SAM2-bal_False-sub_set_full-bbox_shift_0
     sam2_model_cfg: sam2_hiera_b+.yaml
     model_details:
@@ -60,7 +59,7 @@ models:
       prompt_encoder: false
       image_encoder: false
       mask_decoder: true
-  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_4/20240817-2208_finetuned_model_best_converted.pth
+  - finetuned_model: /work_dir/finetuning/OAI-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_4/20240817-2208_finetuned_model_best_converted.pth
     model_weights: OAI_Knee_SAM2-bal_False-sub_set_full-bbox_shift_5
     sam2_model_cfg: sam2_hiera_b+.yaml
     model_details:
@@ -71,7 +70,7 @@ models:
       prompt_encoder: false
       image_encoder: false
       mask_decoder: true
-  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI-Knee/SAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_2/20240819-0440_finetuned_model_best_converted.pth
+  - finetuned_model: /work_dir/finetuning/OAI-Knee/SAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_2/20240819-0440_finetuned_model_best_converted.pth
     model_weights: OAI_Knee_SAM2-bal_False-sub_set_full-bbox_shift_0
     sam2_model_cfg: sam2_hiera_b+.yaml
     model_details:
@@ -82,7 +81,7 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
-  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240815-2251_finetuned_model_best_converted.pth
+  - finetuned_model: /work_dir/finetuning/OAI-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240815-2251_finetuned_model_best_converted.pth
     model_weights: OAI_Knee_SAM2-bal_False-sub_set_full-bbox_shift_0
     sam2_model_cfg: sam2_hiera_b+.yaml
     model_details:
@@ -93,7 +92,7 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
-  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_2/20240816-1438_finetuned_model_best_converted.pth
+  - finetuned_model: /work_dir/finetuning/OAI-Knee/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_2/20240816-1438_finetuned_model_best_converted.pth
     model_weights: OAI_Knee_SAM2-bal_False-sub_set_full-bbox_shift_5
     sam2_model_cfg: sam2_hiera_b+.yaml
     model_details:
