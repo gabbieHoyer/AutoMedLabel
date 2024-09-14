@@ -30,7 +30,9 @@ def val_model(config):
     ModelClass = load_model(config)
     model = ModelClass(config['best_weights'])
 
-    metrics = model.val(plots=True)  # Perform validation
+    # import pdb; pdb.set_trace()
+
+    metrics = model.val(data=config['data_yaml'], plots=True, conf=config.get('conf', 0.5), max_det=config.get('max_det', 20), save_json=config.get('save_json', False), save_hybrid=config.get('save_hybrid', False), run_dir=config.get('run_dir', None))  # Perform validation
     
     # Print metrics for insight
     print(f"mAP50-95: {metrics.box.map}, mAP50: {metrics.box.map50}, mAP75: {metrics.box.map75}")

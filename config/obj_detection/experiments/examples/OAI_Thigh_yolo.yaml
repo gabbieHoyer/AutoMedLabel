@@ -5,7 +5,7 @@ imgsz: 1024
 epochs: 1 #100
 batch: 8 
 rect: False
-workers: 8 
+workers: 6 #8 
 run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/OAI_Thigh/runs
 
 # add these in to improve symmetry - overcome fact that there are missing labels in ground truth for one side
@@ -16,7 +16,15 @@ copy_paste: 0.1
 
 # multi_scale: True
 
+# ------ ULTRALYTICS Validation CONFIG ------- # 
+save_json: True
+save_hybrid: True
+conf: 0.7
+
+# ------ ULTRALYTICS PREDICT CONFIG ------- # 
 best_weights: work_dir/obj_detection/OAI_Thigh/runs/train30/weights/best.pt
+classes: [4, 5, 6, 7, 8, 9]
+max_det: 10
 
 data: standardized_data/yolo_not_resized_npy/test/images/OAI_9004175-007.npy 
 

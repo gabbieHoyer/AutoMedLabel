@@ -33,7 +33,7 @@ def predict(config):
     ModelClass = load_model(config)
     model = ModelClass(config['best_weights'])
 
-    results = model(source=config['data'], conf=config.get('conf', 0.5), save=True, save_txt=True)
+    results = model(source=config['data'], conf=config.get('conf', 0.75), classes=config.get('classes', None), max_det=config.get('max_det', 20), save=True, save_txt=True,  run_dir=config.get('run_dir', None))
     print(f"Prediction results saved: {results}")
 
 if __name__ == "__main__":

@@ -39,7 +39,7 @@ def save_prediction_for_ITK(seg_3D, save_dir, filename, output_ext):
     output_dir = os.path.join(save_dir, 'pred')
     os.makedirs(output_dir, exist_ok=True)
 
-    nifti_output_path = os.path.join(output_dir, f"{filename}_itk10.nii.gz")
+    nifti_output_path = os.path.join(output_dir, f"{filename}_itk.nii.gz")
 
     # Transpose the numpy array to get the desired dimensions (512, 256, 15)
     seg_3D_transposed = np.transpose(seg_3D, (2, 1, 0))
@@ -49,8 +49,6 @@ def save_prediction_for_ITK(seg_3D, save_dir, filename, output_ext):
 
     # Flip along the y-axis to correct orientation for ITK-SNAP
     seg_3D_flipped = np.flip(seg_3D_reversed, axis=0)
-
-    # gh_rev = seg_3D_flipped[:,:, ::-1]
 
     # Create a new NIfTI image using an identity affine transformation matrix 
     new_nii = nib.Nifti1Image(seg_3D_flipped, np.eye(4))

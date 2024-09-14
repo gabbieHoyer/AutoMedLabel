@@ -50,3 +50,8 @@ $ python src/obj_detection/auto_label.py examples/OAI_T1_Thigh
 ```
 
 **Note**: This assumes OAI_T1_Thigh.yaml is properly placed within the config/obj_detection/inference/ directory.
+
+```css
+This revised version separates configuration from execution, emphasizes setting up the YAML file first, and simplifies the instructions for better clarity.
+```
+

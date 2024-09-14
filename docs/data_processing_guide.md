@@ -5,7 +5,7 @@ This document provides detailed instructions on preparing your musculoskeletal M
 The `data_processing` module in the mskSAM project includes several scripts designed to process musculoskeletal MRI data for use with machine learning models. This guide focuses on three primary scripts:
 
 - `data_standardization.py`: Converts medical images and segmentation masks to NIfTI format.
-- `sam_prep.py`: Converts images to a 2D slice `.npy` format compatible with the SAM model.
+- `model_prep.py`: Converts images to a 2D slice `.npy` format compatible with the SAM model.
 - `slice_standardization.py`: Generates three forms of metadata for each dataset.
 
 Each step requires specific configuration files for the datasets you are working with. These .yaml files should be located in the `root/config` directory.
@@ -61,11 +61,11 @@ Replace {dataset_name} with the name of your dataset without the .yaml extension
     ```
 
 ### Step 2: Preparing Data for SAM
-1. To prepare your data for the Segment Anything Model (SAM), use the `data_sam_prep.py` script. This will convert your images into a 2D slice 
+1. To prepare your data for the Segment Anything Model (SAM), use the `model_prep.py` script. This will convert your images into a 2D slice 
 `.npy` format that is compatible with SAM.
 
     ```bash
-    $ python sam_prep.py {dataset_name}
+    $ python model_prep.py {dataset_name}
     ```
 
 ### Step 3: Metadata Creation

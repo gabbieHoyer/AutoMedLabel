@@ -125,7 +125,7 @@ def autoLabel(
         # Convert combined_mask to the final integer mask
         mask_3D_orig_size[slice_idx] = combined_mask.cpu().numpy().astype(np.uint8)
         
-        if visualize and slice_idx % 2 == 0:  
+        if visualize and slice_idx % 5 == 0:  
             visualize_full_pred(image=img_3D_unprocessed[slice_idx,...],
                             pred_mask=mask_3D_orig_size[slice_idx,...],
                             mask_labels=mask_labels,
@@ -198,8 +198,9 @@ def setup_system(data_cfg, preprocessing_cfg, detection_cfg, segmentation_cfg, o
             device
         )
 
-        # save_prediction(pred_volume, run_dir, filename=img_name, output_ext=output_cfg['output_ext'])
-
+        save_prediction(pred_volume, run_dir, filename=img_name, output_ext=output_cfg['output_ext'])
+        # save_prediction_for_ITK(pred_volume, run_dir, filename=img_name, output_ext=output_cfg['output_ext'])
+        
         # # Check condition after the third iteration
         # if i == 2 and visualize_enabled:
         #     visualize_enabled = False  # Disable visualization from this point onwards

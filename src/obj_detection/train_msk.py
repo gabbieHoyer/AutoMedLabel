@@ -2,7 +2,6 @@ import os
 import yaml
 import argparse
 from string import Template
-#from ultralytics import YOLO, RTDETR, NAS
 from ultralytics import YOLO, RTDETR, NAS
 
 def load_config(config_file_name, base_dir):
