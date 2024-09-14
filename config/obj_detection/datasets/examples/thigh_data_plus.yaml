@@ -19,7 +19,8 @@ train: train/images
 val: val/images
 test: test/images
 
-meta_path: /data/bigbone3/ghoyer/standardized/OAI/thigh/T1_ax/metadata/volume_metadata_for_ml_thigh_plus.json 
+# future development
+# meta_path: /data/bigbone3/ghoyer/standardized/OAI/thigh/T1_ax/metadata/volume_metadata_for_ml_thigh_plus.json 
 
 
 

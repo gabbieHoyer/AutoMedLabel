@@ -1,5 +1,5 @@
 data:
-  data_dir: standardized_data/challenging_cases/more_challenging_cases
+  data_dir: standardized_data/challenging_cases/more_challenging_cases/OAI_9324211.nii.gz
 
   mask_labels:
     0: background
@@ -24,19 +24,34 @@ preprocessing_cfg:
 
 device: cuda:0
 
+# include the '/' before the path name if the model path is not located in the root directory, else the file location is incorrectly combined to root directory path
 models:
   obj_det:
     model_path: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/model_weights/finetuned/thigh/best.pt
     model_weights: thighYOLO8_100epoch_square_resize
     model_type: YOLO
     conf: 0.25
-    post_processing: True
 
   segmentation:
-    base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_weights: SAM
-    model_type: vit_b
+    # base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    # model_path: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    # model_weights: SAM
+    # model_type: vit_b
+
+    # base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    # model_path: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh_SAM_YOLO/SAM_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_6/20240706-1605_finetuned_model_best_converted.pth
+    # model_weights: multiclass_Thigh_SAM_with_fascia_square_resize
+    # model_type: vit_b
+
+    # base_model: work_dir/model_weights/MedSAM/medsam_vit_b.pth
+    # model_path: work_dir/model_weights/MedSAM/medsam_vit_b.pth
+    # model_weights: MedSAM
+    # model_type: vit_b
+
+    base_model: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
+    model_path: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
+    model_weights: SAM2
+    model_type: sam2_hiera_b+.yaml
 
     trainable:
       prompt_encoder: False

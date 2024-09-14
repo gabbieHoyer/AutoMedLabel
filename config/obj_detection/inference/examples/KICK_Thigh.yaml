@@ -32,7 +32,6 @@ models:
     model_weights: thighYOLO8_100epoch_square_resize
     model_type: YOLO
     conf: 0.2
-    post_processing: False 
 
   segmentation:
     base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth

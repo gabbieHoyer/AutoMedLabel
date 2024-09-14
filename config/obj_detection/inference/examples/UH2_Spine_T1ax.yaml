@@ -24,7 +24,6 @@ models:
     model_weights: spinet1ax_YOLO8_200epoch
     model_type: YOLO
     conf: 0.25
-    post_processing: True
 
   segmentation:
     # base_model: work_dir/model_weights/MedSAM/medsam_vit_b.pth

@@ -1,8 +1,8 @@
 model: YOLO8/yolov8n.pt
 model_type: YOLO
-data_yaml: thigh_data_plus.yaml
+data_yaml: examples/thigh_data_plus.yaml
 imgsz: 1024
-epochs: 100
+epochs: 1 #100
 batch: 8 
 rect: False
 workers: 8 

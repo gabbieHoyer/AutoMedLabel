@@ -55,7 +55,7 @@ def autoLabel(
     mask_3D_orig_size = np.zeros_like(img_3D_unprocessed, dtype=np.uint8)  # mask_3D_orig_size.shape -> (27, 640, 1024)
     orig_img_with_bbox_size = (img_3D_unprocessed.shape[1], img_3D_unprocessed.shape[2])
 
-    sam_model = sam_model.to(device)
+    sam_model = segmentation_model.to(device)
 
     for slice_idx in range(img_3D.shape[0]):
         img_2D = dataImagePrep.prep_image_step2(img_3D[slice_idx,:,:])  
@@ -111,8 +111,8 @@ def autoLabel(
                 #                 image_name=f"{img_name}_{slice_idx}_labelID_{label_id}",
                 #                 model_save_path=run_dir)
                 # ----------- #
-                sam_mask = resize_prediction(pred_binary.squeeze().detach().cpu().numpy(), orig_img_with_bbox_size, label_id, dataImagePrep.make_square)
 
+                sam_mask = resize_prediction(pred_binary.squeeze().detach().cpu().numpy(), orig_img_with_bbox_size, label_id, dataImagePrep.make_square)
                 # ----------- 
                 sam_mask = postprocess_prediction(sam_mask)
                 # ----------- 
@@ -125,7 +125,7 @@ def autoLabel(
         # Convert combined_mask to the final integer mask
         mask_3D_orig_size[slice_idx] = combined_mask.cpu().numpy().astype(np.uint8)
         
-        if visualize and slice_idx % 5 == 0:  
+        if visualize and slice_idx % 2 == 0:  
             visualize_full_pred(image=img_3D_unprocessed[slice_idx,...],
                             pred_mask=mask_3D_orig_size[slice_idx,...],
                             mask_labels=mask_labels,

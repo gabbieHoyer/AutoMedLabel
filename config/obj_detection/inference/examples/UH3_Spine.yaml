@@ -15,7 +15,6 @@ models:
     model_weights: spineYOLO8_100epoch
     model_type: YOLO
     conf: 0.25 #0.5
-    post_processing: True
     
   segmentation:
     # base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
