@@ -27,6 +27,7 @@ mask_data_paths: ${general_data_dir}/dataframes/yolo_sam_100_thigh_cohort_update
 
 image_column: dcm_clipped_slice #.dcms without extensions
 mask_column: composite_resized_thigh #.nii.gz (w, h, slice)
+# image_column: AX_T1_THIGH 
 
 image_config:
   key: 
@@ -76,15 +77,18 @@ preprocessing_cfg:
   image_size: 1024
   voxel_num_thre2d: 100
   voxel_num_thre3d: 200
-  remove_label_ids: []  # No labels to remove in this configuration
+  remove_label_ids: [2]  # No labels to remove in this configuration
   target_label_id: null  # No specific label targeted for instance segmentation
   instance_bbox: True
-  make_square: True
+  make_square: True  # initially doing false to match the original sam thigh dataset before yolo 
   ratio_resize: False #True
   yolo_compatible: True
+  sam2:
+    image_size: 256
+    image_size: 256
 
 # --- OUTPUT (OVERRIDE DEFAULT): Location to output SAM-compatible .npy files
-npy_dir: ${general_data_dir}/npy/SAM
+npy_dir: ${general_data_dir}/npy/SAM   # should be ok to add in another folder
 
 # ------------------ VISUALIZE NPY ------------------
 npy_fig_cfg:
@@ -159,13 +163,26 @@ additional_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats
 stats_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
 
 # Operation B - location of subject-level metadata used for training
+# getting the original Train/val/test subjects and hoping to just add the additional ones to train...
+# old_ml_metadata_file: /data/mskdata/standardized/OAI/thigh/T1_ax/metadata/volume_metadata_for_ml.json
+# ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json  # complete refresh with split assignments
+
 ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml_thigh_plus.json 
 
 # Operation C - location to parquet files for ML
-slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
+# slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
+slice_info_parquet_dir: ${general_data_dir}/metadata/SAM2/slice_paths  # needs a new path for parquet files
+
+
+# slice_info_parquet_dir: ${general_data_dir}/metadata/SAM_uint8/slice_paths
+# slice_info_parquet_dir: ${general_data_dir}/metadata/tired/slice_paths
 
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
+
+# ------------------ Prompting Experimentation ------------------
+prompt_experiment: 
+  config: baseline_prompt.yaml
 
 
 # # ------------------ INFO FOR YOLO PREP ------------------
@@ -180,3 +197,4 @@ yolo_preprocessing_cfg:
   instance_bbox: True
 
 # yolo_npy_dir: ${general_data_dir}/npy/YOLO
+yolo_npy_dir: ${general_data_dir}/npy/tired_yolo

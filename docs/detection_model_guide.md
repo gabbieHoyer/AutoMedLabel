@@ -82,7 +82,7 @@ val: val/images
 test: test/images
 ```
 
-Ensure this file is correctly referenced in your main experiment configuration file under the data_yaml field.
+Ensure this file is correctly referenced in your main experiment configuration file under the `data_yaml` field.
 
 ### Scripts Usage
 #### 1. Training Script (train_msk.py)
@@ -107,7 +107,7 @@ $ python src/obj_detection/predict_msk.py <yaml file name>
 ```
 
 **Note**
-Make sure to replace <yaml file name> with the actual name of your YAML configuration file without the .yaml extension. For instance, if your YAML file is named exp1_obj_det.yaml, the command would be:
+Make sure to replace `<yaml file name>` with the actual name of your YAML configuration file without the `.yaml` extension. For instance, if your YAML file is named exp1_obj_det.yaml, the command would be:
 
 ```bash
 $ python src/obj_detection/train_msk.py exp1_obj_det

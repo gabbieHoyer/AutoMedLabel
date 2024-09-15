@@ -8,8 +8,8 @@ experiment:
 
 dataset:
   OAI-thigh:
-    # config: OAI_T1_Thigh_plus.yaml
-    config: OAI_T1_Thigh.yaml  # without the additional 49 subjects
+    config: examples/OAI_T1_Thigh_plus.yaml
+    # config: OAI_T1_Thigh.yaml  # without the additional 49 subjects
 
 SEED: 42
 distributed: True 
@@ -45,7 +45,7 @@ module:
   use_wandb: True 
   visualize: True
 
-  num_epochs: 500 
+  num_epochs: 1 
 
   optimizer:
     weight_decay: 0.01

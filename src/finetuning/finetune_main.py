@@ -1,10 +1,9 @@
 """ Finetuning scripts functional for non instance-based finetuning """
 
 import os
+import yaml
 import logging
 import argparse
-import yaml
-import monai
 from monai.losses import DiceLoss
 
 import torch
@@ -14,7 +13,6 @@ from torch.optim.lr_scheduler import CosineAnnealingLR, CosineAnnealingWarmResta
 
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
-
 from segment_anything import sam_model_registry
 
 import pyrootutils
@@ -28,13 +26,11 @@ root = pyrootutils.setup_root(
 import src.finetuning.utils.gpu_setup as GPUSetup
 from src.finetuning.utils.utils import determine_run_directory
 from src.utils.file_management.config_handler import load_experiment, summarize_config
-from src.utils.file_management.args_handler import process_kwargs, apply_overrides
+from src.utils.file_management.args_handler import process_kwargs
 from src.finetuning.datamodule.dynamic_dataset_loader import get_dataset_info, process_dataset, save_dataset_summary, create_dataloader
-from src.finetuning.engine.finetune_engine import Trainer, Tester  
+from src.finetuning.engine.finetune_engine import Trainer
 from src.finetuning.engine.models.sam2 import finetunedSAM2
 from src.finetuning.utils.logging import log_info
-from src.sam2.modeling.sam2_base import SAM2Base
-from src.sam2.utils.transforms import SAM2Transforms
 from src.sam2.build_sam import build_sam2
 
 # Retrieve a logger for the module
@@ -243,20 +239,6 @@ def finetune_main(cfg):
     # Start training and validation phases
     logger.info(f"Local Rank {local_rank}: Starting training and validation phases...")
     trainer.train(num_epochs=cfg['module']['num_epochs'])
-
-    # --------------- EVALUATE --------------- #
-    # # Instantiate the Tester with the appropriate loaders and model setup
-    # tester = Tester(
-    #     model=model,
-    #     test_loader=test_loader,
-    #     module_cfg=cfg.get('module'),
-    #     experiment_cfg=cfg.get('experiment'),
-    #     run_path=run_path,
-    #     device=device,
-    # )
-    # logger.info(f"Local Rank {local_rank}: Starting testing phase...")
-    # tester.test()
-
 
 
 if __name__ == "__main__":

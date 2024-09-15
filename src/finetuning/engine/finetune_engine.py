@@ -1,22 +1,12 @@
 """ Finetuning scripts functional for non instance-based finetuning """
 
-import os
+import logging
 from datetime import datetime
+from monai.metrics import DiceMetric
+
 import torch
 import torch.distributed as dist
-import logging
-import pickle
-import json
-import monai
-from monai.metrics import DiceMetric
-from monai.transforms import AsDiscrete
-
 from torch.cuda.amp import autocast, GradScaler
-import numpy as np
-# from monai.transforms import EnsureType
-
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 
 import pyrootutils
 root = pyrootutils.setup_root(
@@ -30,7 +20,7 @@ import src.finetuning.utils.gpu_setup as GPUSetup #is_distributed
 from src.finetuning.utils.utils import plot_combined_losses, plot_losses, save_losses, reduce_tensor, plot_metrics, save_metrics
 from src.finetuning.utils.checkpointing import log_and_checkpoint, final_checkpoint_conversion
 from src.finetuning.utils.logging import main_process_only, log_info, wandb_log
-from src.finetuning.utils.fig_QC import quality_check, visualize_input, visualize_predictions
+from src.finetuning.utils.fig_QC import visualize_input
 
 logger = logging.getLogger(__name__)
 
@@ -123,10 +113,7 @@ class Trainer:
             if self.current_step % accumulate_steps == 0:  # Only zero gradients on the correct accumulation step
                 self.optimizer.zero_grad()
 
-            # import pdb; pdb.set_trace()
-
             with autocast(enabled=self.use_amp):  # Conditional AMP
-                # https://github.com/facebookresearch/segment-anything/issues/277 -> # RuntimeError: The size of tensor a (4) must match the size of tensor b (2) at non-singleton dim 0
                 predictions = self.model(image, boxes)
 
                 loss = self.calculate_loss(predictions, gt2D) / accumulate_steps  # Normalize the loss
@@ -150,8 +137,8 @@ class Trainer:
                             image_name=f"{img_name[i]}_QC",
                             model_save_path=self.model_save_path
                         )
-                    del image_for_viz, gt_mask_for_viz, pred_mask_for_viz, box_for_viz
-                    torch.cuda.empty_cache()  # Help free unused memory from PyTorch's cache, although usage should be considered
+                    # del image_for_viz, gt_mask_for_viz, pred_mask_for_viz, box_for_viz
+                    # torch.cuda.empty_cache()  # Help free unused memory from PyTorch's cache, although usage should be considered
 
                     print('Visualization complete!!!')
 
@@ -184,8 +171,6 @@ class Trainer:
         else:
             with torch.no_grad():
                 predictions = self.model(image, boxes)
-
-                # lols just saw this; why???
                 loss = self.calculate_loss(predictions, gt2D)
                 
                 # Convert logits to binary predictions
@@ -196,8 +181,8 @@ class Trainer:
         if GPUSetup.is_distributed():
             loss = reduce_tensor(loss)  # Reduce loss only if in a distributed environment
 
-        del predictions, image, gt2D, boxes  # Free variables that are no longer needed
-        torch.cuda.empty_cache()  # Helps free unused memory from PyTorch's cache, although usage should be considered
+        # del predictions, image, gt2D, boxes  # Free variables that are no longer needed
+        # torch.cuda.empty_cache()  # Helps free unused memory from PyTorch's cache, although usage should be considered
 
         return loss.item()
     
@@ -327,104 +312,5 @@ class Trainer:
         save_losses(self.shared_losses, self.model_save_path, self.run_id)
         save_metrics(self.shared_metrics, self.model_save_path, self.run_id)
         final_checkpoint_conversion(self.module_cfg, self.model_save_path, self.run_id)
-
-
-
-
-# ----------- FUNCTIONS FOR SINGLE BINARY MASK NPYDATASET + GLOBAL DICE EVALUATION ----------- #
-
-class Tester:
-    def __init__(self, model, test_loader, module_cfg, experiment_cfg, run_path, device='cpu'):
-        self.model = model.to(device)
-        self.test_loader = test_loader
-        self.module_cfg = module_cfg
-        self.experiment_cfg = experiment_cfg
-        self.run_path = run_path
-        self.device = device
-        self.model_save_path, self.run_id = self.setup_experiment_environment()
-
-        # Initialize DiceMetric for testing
-        self.shared_metrics = {'test': []}
-        self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        self.test_set_details = {'predictions': [], 'gt2D': []}
-
-    def setup_experiment_environment(self):
-        module_cfg = self.module_cfg
-        experiment_cfg = self.experiment_cfg
-        # Use the already determined run_path
-        model_save_path = self.run_path
-        run_id = datetime.now().strftime("%Y%m%d-%H%M")
-        
-        # Initialize Weights & Biases if configured
-        if self.module_cfg.get('use_wandb', False) and GPUSetup.is_main_process():
-            import wandb
-            wandb.login()
-            wandb.init(project=module_cfg['task_name'], 
-                    group=module_cfg['group_name'], 
-                    config={
-                        "lr": module_cfg['optimizer']['lr'],
-                        "batch_size": module_cfg['batch_size'],
-                        "model_type": module_cfg['model_type'],
-                        "description": experiment_cfg['description'],
-                        "pretrained_weights": experiment_cfg['pretrained_weights']
-                    }, 
-                    tags=['test', experiment_cfg['name']],
-                    name=run_id)  # Use run_id as the name for the W&B run for easy identification
-
-        return model_save_path, run_id
-
-    def evaluate_test_set(self):
-        self.model.eval()
-        self.dice_metric.reset()
-        
-        with torch.no_grad():
-            for batch in self.test_loader:
-                images, gt2D, boxes = batch['image'], batch['gt2D'], batch['boxes']
-                images = images.to(self.device)
-                gt2D = gt2D.to(self.device)
-                
-                predictions = self.model(images, boxes)
-                predictions_binary = torch.sigmoid(predictions) > 0.5
-                self.dice_metric(y_pred=predictions_binary, y=gt2D)
-                
-                # Collect for logging/saving
-                self.test_set_details['predictions'].append(predictions.cpu().numpy())
-                self.test_set_details['gt2D'].append(gt2D.cpu().numpy())
-
-        # Gather and reduce the dice scores from all processes
-        dice_score_tensor = self.dice_metric.aggregate()
-
-        if GPUSetup.is_distributed():
-            # Sum each class's dice scores across GPUs
-            dist.all_reduce(dice_score_tensor, op=dist.ReduceOp.SUM)
-            # Compute the global mean across all GPUs and all classes
-            dice_score_tensor /= (dist.get_world_size() * dice_score_tensor.numel())
-
-        # Now we can safely convert to a float, since it's a scalar
-        global_dice_score = dice_score_tensor.mean().item()
-
-        self.shared_metrics['test'].append(global_dice_score)
-        log_info(f"Global average Dice score on test set: {global_dice_score:.4f}")
-
-    @main_process_only
-    def save_test_results(self):
-        ## saves the results (prediction + ground truth numpy arrays).
-        # results_path = os.path.join(self.model_save_path, 'test_eval', f"{self.run_id}_test_results.pkl")
-        # os.makedirs(os.path.dirname(results_path), exist_ok=True)
-        # with open(results_path, 'wb') as f:
-        #     pickle.dump(self.test_set_details, f)
-
-        #-------------
-        metrics_file_path = os.path.join(self.model_save_path, 'test_eval', f"{self.run_id}_metrics.json")
-        os.makedirs(os.path.dirname(metrics_file_path), exist_ok=True)
-
-        # Write the shared_metrics dictionary to a JSON file
-        with open(metrics_file_path, 'w') as f:
-            json.dump(self.shared_metrics, f, indent=4)  # Use indent for pretty printing
-
-    def test(self):
-        self.evaluate_test_set()  # The logging is handled within this method
-        self.save_test_results()
-
 
 
