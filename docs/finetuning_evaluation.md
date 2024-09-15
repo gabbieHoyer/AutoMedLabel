@@ -195,7 +195,7 @@ models:
 1. **evaluation**: High-level settings like the experiment name and description.
 2. **dataset**: Configuration for the test dataset being evaluated.
 3. **datamodule**:
- - **metric.func**: Defines which custom metrics (e.g., tissuevolume) are computed.
+ - **metric.func**: Defines which custom metrics (e.g., `tissuevolume`) are computed.
  - **metric.tissues**: Specifies the list of tissue labels for which the biomarker metrics will be computed.
  - **metric.dicom_fields**: DICOM metadata fields required for computing biomarker metrics like volume or area.
  - **representative_slice**: Option to use a single representative slice for evaluation (useful in some cases).
@@ -241,9 +241,9 @@ The biomarker evaluation pipeline allows you to define custom metrics that are c
 
 ## Troubleshooting
 ### Common Issues
-File Not Found: Ensure all paths to model checkpoints, test datasets, and output directories are correctly set in the YAML configuration.
-CSV Output Not Generated: Verify that the model evaluation is completing successfully. Check the logs for any error messages.
-Multiclass/Multilabel Issues: Make sure the segmentation classes or labels are properly defined in the dataset config.
+- **File Not Found**: Ensure all paths to model checkpoints, test datasets, and output directories are correctly set in the YAML configuration.
+- **CSV Output Not Generated**: Verify that the model evaluation is completing successfully. Check the logs for any error messages.
+- **Multiclass/Multilabel Issues**: Make sure the segmentation classes or labels are properly defined in the dataset config.
 
 ## Conclusion
 The evaluation scripts (`finetune_evaluate.py` and `finetune_evaluate_biomarker.py`) allow for comprehensive model evaluation using both standard segmentation metrics (Dice/IoU) and custom biomarker metrics. Ensure that the YAML configuration files are properly set up before running the scripts, and use the output CSVs for further analysis.
