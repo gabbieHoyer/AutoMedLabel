@@ -61,7 +61,6 @@ class Tester:
 
         self.dicom_fields = self.datamodule_cfg['metric']['dicom_fields']
 
-
     def setup_experiment_environment(self):
         # Use the already determined run_path
         model_save_path = self.run_path
@@ -91,7 +90,6 @@ class Tester:
                     settings=wandb.Settings(_service_wait=300),
                     tags=['test', self.experiment_cfg['name'], self.datamodule_cfg['dataset_name'], self.eval_cfg['model_weights']],
                     name=run_id
-                    #"{}_{}_{}".format(self.datamodule_cfg['dataset_name'], self.eval_cfg['model_weights'], run_id)
                     )
         return model_save_path, run_id
     
@@ -185,8 +183,6 @@ class Tester:
                 total_volumes_pred, total_volumes_true = metric.compute()
                 aggregated_volumes_pred, aggregated_volumes_true = metric.aggregate_by_subject()
 
-                # import pdb; pdb.set_trace()
-
                 self.save_custom_metric_scores(metric_name, total_volumes_pred, total_volumes_true, aggregated_volumes_pred, aggregated_volumes_true)
 
                 # in dev - hasn't been tested
@@ -213,8 +209,6 @@ class Tester:
                 
                 multi_masks = torch.zeros_like(gt2D[0], device=self.device)
                 num_classes = self.datamodule_cfg['num_classes']  
-
-                # import pdb; pdb.set_trace()
 
                 batch_size, height, width = multi_masks.size(0), multi_masks.size(1), multi_masks.size(2)
                 multi_class_probs = torch.zeros((batch_size, num_classes, height, width), device=self.device)
@@ -292,24 +286,42 @@ class Tester:
 
     @main_process_only
     def save_to_csv(self, data, path):
-        # Collect all possible columns from all subjects
-        all_columns = set()
-        for subj_data in data.values():
-            all_columns.update(subj_data.keys())
-        all_columns = sorted(all_columns)  # Optional: sort the columns
+        # Check if data contains dictionaries or lists
+        if isinstance(next(iter(data.values())), dict):
+            # If the values are dictionaries, proceed with the current approach
+            all_columns = set()
+            for subj_data in data.values():
+                all_columns.update(subj_data.keys())
+            all_columns = sorted(all_columns)  # Optional: sort the columns
 
-        # Create the DataFrame from the data dictionary
-        df = pd.DataFrame.from_dict(data, orient='index')
+            # Create the DataFrame from the data dictionary
+            df = pd.DataFrame.from_dict(data, orient='index')
 
-        # Reindex the DataFrame to include all columns, filling missing values with NaN
-        df = df.reindex(columns=all_columns)
+            # Reindex the DataFrame to include all columns, filling missing values with NaN
+            df = df.reindex(columns=all_columns)
+            
+        elif isinstance(next(iter(data.values())), list):
+            # If the values are lists, create DataFrame directly
+            df = pd.DataFrame.from_dict(data, orient='index')
+
+            # Check if the list length matches the expected class names count
+            if len(df.columns) == len(self.class_names):
+                df.columns = self.class_names
+            elif len(df.columns) == len(self.class_names) + 1:
+                df.columns = self.class_names + ['total']
+            else:
+                df.columns = [f"Label_{i}" for i in range(len(df.columns))]  # Generic column names
+
+        else:
+            raise ValueError("Data structure not supported. Expected dict of dicts or dict of lists.")
+
+        # Assign 'Subject' as the index name and save to CSV
         df.index.name = 'Subject'
-
         os.makedirs(os.path.dirname(path), exist_ok=True)
         df.to_csv(path)
-        print(f'Saved custom metric scores to {path}')
-
-
+        print(f"Saved custom metric scores to {path}")
+              
+            
     def save_custom_metric_scores(self, metric_name, total_volumes_pred, total_volumes_true, aggregated_volumes_pred, aggregated_volumes_true):
         base_path = os.path.join(self.run_path, 'test_eval')
         os.makedirs(base_path, exist_ok=True)
@@ -341,18 +353,11 @@ class Tester:
 
 
 
-
-
-# ---------------- old version ------------------- #
-
-    # @main_process_only
+    # original version that works for tissue volume and should be good for cart thick, etc.
     # def save_to_csv(self, data, path):
     #     df = pd.DataFrame.from_dict(data, orient='index')
     #     if len(df.columns) == len(self.class_names) + 1:
     #         df.columns = self.class_names + ['total']
-
-    #     # likely  need more complex logic to handle case of instance labels vs not
-    #     # how are these lining up exactly????
     #     else:
     #         df.columns = self.class_names
 
@@ -361,19 +366,21 @@ class Tester:
     #     df.to_csv(path)
     #     print(f'Saved custom metric scores to {path}')
 
-    # def save_custom_metric_scores(self, metric_name, total_volumes_pred, total_volumes_true, aggregated_volumes_pred, aggregated_volumes_true):
-    #     base_path = os.path.join(self.run_path, 'test_eval')
-    #     os.makedirs(base_path, exist_ok=True)
-        
-    #     filenames = [
-    #         (f"{metric_name}_pred_slice_volume.csv", total_volumes_pred),
-    #         (f"{metric_name}_gt_slice_volume.csv", total_volumes_true),
-    #         (f"{metric_name}_pred_volume.csv", aggregated_volumes_pred),
-    #         (f"{metric_name}_gt_volume.csv", aggregated_volumes_true)
-    #     ]
-        
-    #     for filename, data in filenames:
-    #         path = os.path.join(base_path, f"{self.run_id}_{self.datamodule_cfg['dataset_name']}_model_{self.eval_cfg['model_weights']}", self.data_type, filename)
-    #         self.save_to_csv(data, path)
-    #         if self.module_cfg.get('use_wandb', False):
-    #             wandb_log({filename: path})
+    # works for uh3 disc height but not muscle vol
+    # def save_to_csv(self, data, path):
+    #     # Collect all possible columns from all subjects
+    #     all_columns = set()
+    #     for subj_data in data.values():
+    #         all_columns.update(subj_data.keys())
+    #     all_columns = sorted(all_columns)  # Optional: sort the columns
+
+    #     # Create the DataFrame from the data dictionary
+    #     df = pd.DataFrame.from_dict(data, orient='index')
+
+    #     # Reindex the DataFrame to include all columns, filling missing values with NaN
+    #     df = df.reindex(columns=all_columns)
+    #     df.index.name = 'Subject'
+
+    #     os.makedirs(os.path.dirname(path), exist_ok=True)
+    #     df.to_csv(path)
+    #     print(f'Saved custom metric scores to {path}')

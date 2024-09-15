@@ -8,8 +8,9 @@ SEED: 42
 distributed: False 
 
 dataset:
-  OAI-thigh:
-    config: OAI_T1_Thigh.yaml       
+  OAI-thigh:      
+    config: examples/OAI_T1_Thigh_plus.yaml
+    # config: OAI_T1_Thigh.yaml  # without the additional 49 subjects
     project: multiclass_Thigh-Evaluation
 
 datamodule:

@@ -23,9 +23,9 @@ from src.finetuning.utils.logging import log_info
 # from src.finetuning.engine.models.sam import finetunedSAM
 from src.finetuning.engine.models.sam2 import finetunedSAM2
 from src.finetuning.utils.utils import determine_run_directory
-from src.finetuning.engine.finetune_engine_eval_biomarker_sam2 import Tester 
+from src.finetuning.engine.finetune_engine_eval_biomarker import Tester 
 from src.utils.file_management.config_handler import load_evaluation, summarize_config
-from src.finetuning.datamodule.eval_dataset_loader_biomarker_sam2 import get_dataset_info, process_dataset, create_dataloader
+from src.finetuning.datamodule.eval_dataset_loader_biomarker import get_dataset_info, process_dataset, create_dataloader
 from src.sam2.build_sam import build_sam2
 
 

@@ -139,7 +139,7 @@ class Tester:
                             prediction = self.model(images[img_idx].unsqueeze(0), box.unsqueeze(0))   
 
                             # this works fine for instances per label
-                            if self.module_cfg['visualize'] and batch_idx < 1 and self.data_type == 'sampled': 
+                            if self.module_cfg['visualize'] and batch_idx < 1: # and self.data_type == 'sampled': 
                                 gt_mask_single_label = (gt2D == class_label).float() * gt2D[0]
                                 visualize_input(
                                     image=images[img_idx].detach().cpu(),                  
