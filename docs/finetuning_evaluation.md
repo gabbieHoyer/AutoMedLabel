@@ -34,9 +34,9 @@ config/finetuning/evaluation
 The evaluation pipeline generates the following CSV files:
 
 - **Dice and IoU Scores**:
- - **Slice Level**: Metrics for individual image slices.
- - **Subject/Volume Level**: Aggregated metrics per subject or volume.
- - **Global/Dataset Level**: Metrics averaged across the entire dataset.
+  - **Slice Level**: Metrics for individual image slices.
+  - **Subject/Volume Level**: Aggregated metrics per subject or volume.
+  - **Global/Dataset Level**: Metrics averaged across the entire dataset.
 The output directory for the CSV files is defined in the YAML configuration file.
 
 ## Evaluation Pipeline 2: Custom Biomarker Metric Evaluation
@@ -66,12 +66,12 @@ config/finetuning/evaluation
 The custom biomarker evaluation pipeline generates the following CSV files:
 
 - **Ground Truth Biomarker CSV**:
- - **Slice Level**: Ground truth biomarker metrics for individual slices.
- - **Subject/Volume Level**: Ground truth biomarker metrics aggregated per subject or volume.
+  - **Slice Level**: Ground truth biomarker metrics for individual slices.
+  - **Subject/Volume Level**: Ground truth biomarker metrics aggregated per subject or volume.
 
 - **Predicted Biomarker CSV**:
- - **Slice Level**: Biomarker metrics derived from the predicted segmentation masks for individual slices.
- - **Subject/Volume Level**: Biomarker metrics derived from predicted masks aggregated per subject or volume.
+  - **Slice Level**: Biomarker metrics derived from the predicted segmentation masks for individual slices.
+  - **Subject/Volume Level**: Biomarker metrics derived from predicted masks aggregated per subject or volume.
 
 The output directory for these CSV files is defined in the YAML configuration file.
 
@@ -195,10 +195,10 @@ models:
 1. **evaluation**: High-level settings like the experiment name and description.
 2. **dataset**: Configuration for the test dataset being evaluated.
 3. **datamodule**:
- - **metric.func**: Defines which custom metrics (e.g., `tissuevolume`) are computed.
- - **metric.tissues**: Specifies the list of tissue labels for which the biomarker metrics will be computed.
- - **metric.dicom_fields**: DICOM metadata fields required for computing biomarker metrics like volume or area.
- - **representative_slice**: Option to use a single representative slice for evaluation (useful in some cases).
+  - **metric.func**: Defines which custom metrics (e.g., `tissuevolume`) are computed.
+  - **metric.tissues**: Specifies the list of tissue labels for which the biomarker metrics will be computed.
+  - **metric.dicom_fields**: DICOM metadata fields required for computing biomarker metrics like volume or area.
+  - **representative_slice**: Option to use a single representative slice for evaluation (useful in some cases).
 4. **module**: General configuration related to the evaluation process.
 5. **models**: Specifies which finetuned models to evaluate, along with their paths and settings.
 6. **output_configuration**: Defines where the evaluation results (CSV files) will be saved, along with visualization paths.

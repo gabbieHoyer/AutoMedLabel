@@ -201,18 +201,18 @@ Similar to the finetuning engine, the evaluation engine supports features like *
 
 #### Key Features of the Evaluation Engine
 - **Multilabel and Single-label Evaluation:**
- - For multilabel datasets, the engine generates predictions for each segmentation label and its instances using bounding box prompts.
- - For single-label datasets, it computes predictions across a variety of segmentation labels without the need for instance-based prompting.
+  - For multilabel datasets, the engine generates predictions for each segmentation label and its instances using bounding box prompts.
+  - For single-label datasets, it computes predictions across a variety of segmentation labels without the need for instance-based prompting.
 
 - **Dice and IoU Computation:**
- - Dice and IoU metrics are computed on both the slice level and the subject/volume level.
- - These metrics are logged for each segmentation class, providing both global and per-class scores.
+  - Dice and IoU metrics are computed on both the slice level and the subject/volume level.
+  - These metrics are logged for each segmentation class, providing both global and per-class scores.
 
 - **Instance Handling:**
- - The evaluation pipeline is capable of handling multiple instances of each class, creating a bounding box for each instance and evaluating predictions at this fine-grained level.
+  - The evaluation pipeline is capable of handling multiple instances of each class, creating a bounding box for each instance and evaluating predictions at this fine-grained level.
 
 - **Custom Visualizations:**
- - Visualizations of predictions can be generated for sampled datasets during evaluation. This allows for **quality checks** to ensure that the model’s predictions align with the ground truth.
+  - Visualizations of predictions can be generated for sampled datasets during evaluation. This allows for **quality checks** to ensure that the model’s predictions align with the ground truth.
 
 
 ## Engine Class for Dice/IoU Evaluation
