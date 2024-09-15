@@ -164,5 +164,111 @@ This example applies:
 - **Random Brightness/Contrast Adjustment**: Adjusts brightness and contrast within the range of 0.2 with a 50% chance.
 
 
+## Dataset Classes for Finetuning and Evaluation
+### Overview
+The dataset classes used in this pipeline enable flexible handling of segmentation masks and bounding box prompts. These dataset classes support both single-class and multi-class segmentation and are compatible with SAM and SAM2 models. For finetuning, a random segmentation mask label is selected for each image, while for evaluation, all segmentation mask labels are used to generate bounding box prompts for prediction.
+
+### Finetuning Dataset Class: `mskSAM2Dataset`
+The `mskSAM2Dataset` class is responsible for managing the dataset during the finetuning process. It randomly selects one segmentation mask label from the available ground truth masks (in case of multi-class segmentation), computes the bounding box for the selected label, and applies optional augmentations. This allows for dynamic bounding box prompt generation, which is compatible with SAM and SAM2 models.
+
+#### Key Features:
+- **Single Label Selection**: For each image, one segmentation label is randomly chosen from the available ground truth masks.
+- **Bounding Box Prompt**: Computes bounding box coordinates for the selected label, with optional bounding box shift augmentations.
+- **Augmentations**: Supports custom augmentation pipelines applied to the images and masks.
+- **Batches**: The output is batched and includes the image, ground truth mask, bounding box, and other relevant information for the finetuning engine pipeline.
+
+
+**Example Code:**
+
+```python
+class mskSAM2Dataset(Dataset):
+    def __init__(self, root_paths, gt2_paths, img_paths, bbox_shift=0, instance_bbox=False, remove_label_ids=[], dataset_name=None, augmentation_config=None):
+        self.root_paths = root_paths
+        self.gt2_path_files = gt2_paths
+        self.bbox_shift = bbox_shift
+        self.instance_bbox = instance_bbox
+        self.remove_label_ids = remove_label_ids
+        self.dataset_name = dataset_name
+        self.augmentation_pipeline = build_augmentation_pipeline(augmentation_config)
+
+    def __getitem__(self, index):
+        # Loads the image and ground truth mask
+        img_1024 = np.load(os.path.join(self.root_paths[index], "imgs", img_name))
+        gt = np.load(self.gt2_path_files[index])
+
+        # Randomly selects one label from the ground truth mask
+        label_ids = np.unique(gt)[1:]
+        chosen_label = random.choice(label_ids)
+
+        # Generates the bounding box for the selected label, with optional perturbation
+        y_indices, x_indices = np.where(gt == chosen_label)
+        bbox = np.array([np.min(x_indices), np.min(y_indices), np.max(x_indices), np.max(y_indices)]) * 4
+
+        return {
+            'image': torch.tensor(img_1024).float(),
+            'gt2D': torch.tensor(gt == chosen_label).long(),
+            'boxes': torch.tensor(bbox).float(),
+            'label_id': torch.tensor(chosen_label).long(),
+            'img_name': img_name,
+            'dataset_name': self.dataset_name
+        }
+```
+
+**Customization Options:**
+- **Bounding Box Shift**: You can control how much the bounding box is shifted during augmentation using the bbox_shift parameter.
+- **Augmentations**: Supports an augmentation pipeline passed through the augmentation_config, allowing you to apply custom transformations.
+
+### Evaluation Dataset Class: `MultiClassSAM2Dataset`
+The MultiClassSAM2Dataset class is designed for evaluation, particularly when evaluating multiple segmentation mask labels for each image. It computes bounding boxes for all available ground truth segmentation masks and their instances. Additionally, it supports custom biomarker evaluation by including T1rho and T2 maps.
+
+#### Key Features:
+Multi-Label Support: Unlike the finetuning dataset, this class generates bounding boxes for all segmentation labels present in the ground truth masks.
+Instance Segmentation: Supports instance-based segmentation by computing separate bounding boxes for multiple instances of the same class.
+Custom Biomarker Support: Can optionally include T1rho and T2 biomarker maps, which are loaded and included in the evaluation batch.
+
+**Example Code:**
+
+```python
+class MultiClassSAM2Dataset(Dataset):
+    def __init__(self, root_paths, gt_paths, img_paths, bbox_shift=0, mask_labels=None, instance_bbox=False, remove_label_ids=[], use_biomarkers=False, T1rho_map_paths=None, T2_map_paths=None):
+        self.root_paths = root_paths
+        self.gt_path_files = gt_paths
+        self.bbox_shift = bbox_shift
+        self.instance_bbox = instance_bbox
+        self.remove_label_ids = remove_label_ids
+        self.use_biomarkers = use_biomarkers
+        self.T1rho_map_paths = T1rho_map_paths
+        self.T2_map_paths = T2_map_paths
+
+    def __getitem__(self, index):
+        # Load image and ground truth mask
+        img_1024 = np.load(join(self.root_paths[index], "imgs", img_name))
+        gt = np.load(self.gt_path_files[index])
+
+        # Generate bounding boxes for all labels in the ground truth mask
+        label_ids = np.unique(gt)[1:]
+        bbox_list = []
+        for label_id in label_ids:
+            y_indices, x_indices = np.where(gt == label_id)
+            bbox = np.array([np.min(x_indices), np.min(y_indices), np.max(x_indices), np.max(y_indices)]) * 4
+            bbox_list.append(bbox)
+
+        return {
+            'image': torch.tensor(img_1024).float(),
+            'gt2D': torch.tensor(gt).long(),
+            'boxes': torch.tensor(np.stack(bbox_list)).float(),
+            'label_ids': torch.tensor(label_ids).long(),
+            'img_name': img_name
+        }
+```
+
+#### Customization Options:
+- **Instance Bounding Boxes**: The class can generate separate bounding boxes for multiple instances of the same class, which is useful in datasets with instance-level segmentation.
+- **Biomarker Integration**: You can include custom biomarkers like T1rho and T2 maps in the evaluation batch for downstream analysis, in the case that the biomarker requires an additional file such as T1rho/T2 image maps to compute a tissue value.
+
+#### Advanced Use:
+In evaluation, all segmentation labels are evaluated with corresponding bounding boxes, providing a more complete analysis of the model's performance across all regions of interest. This is particularly useful in the evaluation of multi-class models and in downstream biomarker analyses.
+
+
 ## Conclusion
-The dynamic data loader in the SAM/SAM2 models pipeline is a versatile tool for handling complex dataset configurations, subject selection, balancing, and augmentations. Whether you're working with a single dataset or multiple datasets, the loader ensures efficient and flexible data handling for training and evaluation. By using metadata, the loader guarantees reproducibility and consistency across experiments.
+The dynamic data loader in the SAM/SAM2 models pipeline provides a highly flexible and powerful framework for managing complex dataset configurations, subject selection, dynamic balancing, and custom augmentations. Whether your experiments involve single or multiple datasets, the data loader efficiently handles the necessary operations for both finetuning and evaluation, ensuring that bounding box prompts and segmentation labels are processed seamlessly. By leveraging metadata, the loader ensures reproducibility, consistency, and scalability across diverse experiments, making it an essential component for advancing segmentation and biomarker analysis workflows.
