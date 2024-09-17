@@ -42,17 +42,26 @@ module:
   # sam2_model_cfg: sam2_hiera_s.yaml
   sam2_model_cfg: sam2_hiera_b+.yaml
 
-  use_wandb: True 
-  visualize: True
+  use_wandb: False #True 
+  visualize: False #True
 
   num_epochs: 1 
 
   optimizer:
-    weight_decay: 0.01
-    lr: 0.0001 
+    type: "AdamW"  # Optimizer type
+    lr: 0.0001     # Learning rate
+    weight_decay: 0.01  # Weight decay (regularization)
+
+  # scheduler:
+  #   type: "CosineAnnealingWarmRestarts" # Scheduler type
+  #   T_0: 10   # Scheduler specific parameter
+  #   T_mult: 1
+  #   eta_min: 0.00001  
 
   scheduler:
-    eta_min: 0.00001  
+    type: "CosineAnnealingLR"  
+    T_max: 50  # Number of iterations for the scheduler to reach the minimum learning rate
+    eta_min: 0.00001  # Minimum learning rate
 
   use_amp: True
   clip_grad: 1.0

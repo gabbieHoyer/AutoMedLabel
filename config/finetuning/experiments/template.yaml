@@ -62,12 +62,19 @@ module:
   num_epochs: <NUMBER_OF_EPOCHS>  # Total number of training epochs (e.g., 500).
 
   optimizer:
+    type: <OPTIMIZER_TYPE>  # e.g., "AdamW", "SGD", "RMSprop", "Adam"
     weight_decay: <WEIGHT_DECAY_VALUE>  # Weight decay (L2 regularization) coefficient (e.g., 0.01).
     lr: <LEARNING_RATE>  # Initial learning rate (e.g., 0.0001).
 
   scheduler:
+    type: <SCHEDULER_TYPE>  # e.g., "CosineAnnealingWarmRestarts", "StepLR", "CosineAnnealingLR"
     eta_min: <MIN_LEARNING_RATE>  # Minimum learning rate for the scheduler (e.g., 0.00001).
-    # Additional scheduler parameters can be added if needed.
+    # Additional scheduler parameters based on the type of scheduler
+    T_0: <T_0_VALUE>  # e.g., for CosineAnnealingWarmRestarts
+    T_mult: <T_MULT_VALUE>  # e.g., for CosineAnnealingWarmRestarts
+    T_max: <T_MAX_VALUE>  # e.g., for CosineAnnealingLR
+    step_size: <STEP_SIZE_VALUE>  # e.g., for StepLR
+    gamma: <GAMMA_VALUE>  # e.g., for StepLR or ExponentialLR
 
   use_amp: <True/False>  # Whether to use Automatic Mixed Precision for training.
   clip_grad: <GRADIENT_CLIP_VALUE>  # Maximum gradient norm for gradient clipping (e.g., 1.0).

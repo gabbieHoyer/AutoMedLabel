@@ -90,9 +90,11 @@ This script handles the visualization of MRI images and segmentation masks in NI
 
 ### Steps Performed
 1. **Loading Dataset Configurations**: The script first loads the dataset-specific YAML configuration file. It retrieves paths to the NIfTI images and masks, as well as settings for the type of figures to generate (e.g., 2D overlay or GIF).
+
 2. **Visualizing NIfTI Files**: The visualize_nifti() function creates the overlay images or GIFs for a specified number of image and mask pairs. It performs the following tasks:
     - **Overlay Plot Generation**: Creates 2D overlay plots where the segmentation masks are overlaid on the MRI images.
     - **GIF Creation**: Generates an animated GIF that cycles through the slices of the MRI image with the segmentation mask overlay.
+
 3. **Saving the Visualizations**: The generated figures are saved in the specified output directory. The user can choose to overwrite existing visualizations if necessary.
 
 ### Configuration Parameters (YAML)
@@ -123,6 +125,7 @@ python3 evaluation/visualization/nifti_viz.py OAI_thigh_muscle
 
   - This script will generate 2D overlay images or GIFs based on the configuration defined in the YAML file.
   - The number of figures generated is controlled by the `num_figs` parameter, and the slices can be selected based on the presence of segmentation using the `slice_selection` parameter.
+  
 2. **Figure Generation**: The user can specify the type of figures they want to generate:
   - **2D Overlay**: Generates static 2D images with the segmentation masks overlaid on the MRI slices.
   - **GIF**: Creates an animated GIF cycling through the slices of the MRI image.

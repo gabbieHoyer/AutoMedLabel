@@ -1,16 +1,11 @@
 
 import os
-import matplotlib.pyplot as plt
-import wandb
-import json
-import os
 import json
 import gc
-
+import matplotlib.pyplot as plt
 import torch.distributed as dist
-
-# Note: because these are functions particular to Finetuning, they should be
-# kept in finetuning directory rather than moved to src/utils
+from torch.optim import AdamW, SGD, RMSprop, Adam
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts, StepLR, CosineAnnealingLR, ExponentialLR
 
 # ------- FUNCTIONS TO DETERMINE EXPERIMENT RUN OUTPUT DIRECTORY ------- #
 def determine_run_directory(base_dir, task_name, group_name=None):
@@ -44,6 +39,53 @@ def determine_run_directory(base_dir, task_name, group_name=None):
     os.makedirs(full_run_path, exist_ok=True)
     
     return full_run_path
+
+# --------------------- CHOOSE OPTIMIZER AND SCHEDULER ---------------------- #
+
+def create_optimizer_and_scheduler(optimizer_cfg, scheduler_cfg, model_params):
+    """
+    Creates an optimizer and scheduler based on the provided configuration.
+    
+    Args:
+    - optimizer_cfg (dict): Configuration for the optimizer.
+    - scheduler_cfg (dict): Configuration for the scheduler.
+    - model_params (iterable): Parameters of the model to optimize.
+    
+    Returns:
+    - optimizer (torch.optim.Optimizer): The configured optimizer.
+    - scheduler (torch.optim.lr_scheduler): The configured scheduler.
+    """
+    
+    # Create optimizer
+    optimizer_type = optimizer_cfg.get('type', 'AdamW')  # Default to AdamW if not specified
+    optimizer_params = {'lr': optimizer_cfg['lr'], 'weight_decay': optimizer_cfg['weight_decay']}
+
+    if optimizer_type == 'AdamW':
+        optimizer = AdamW(model_params, **optimizer_params)
+    elif optimizer_type == 'SGD':
+        optimizer = SGD(model_params, **optimizer_params)
+    elif optimizer_type == 'RMSprop':
+        optimizer = RMSprop(model_params, **optimizer_params)
+    elif optimizer_type == 'Adam':
+        optimizer = Adam(model_params, **optimizer_params)
+    else:
+        raise ValueError(f"Unknown optimizer type: {optimizer_type}")
+
+    # Create scheduler
+    scheduler_type = scheduler_cfg.get('type', 'CosineAnnealingWarmRestarts')  # Default to CosineAnnealingWarmRestarts
+    if scheduler_type == 'CosineAnnealingWarmRestarts':
+        scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=scheduler_cfg['T_0'], T_mult=scheduler_cfg['T_mult'], eta_min=scheduler_cfg['eta_min'])
+    elif scheduler_type == 'CosineAnnealingLR':
+        scheduler = CosineAnnealingLR(optimizer, T_max=scheduler_cfg['T_max'], eta_min=scheduler_cfg['eta_min'])
+    elif scheduler_type == 'StepLR':
+        scheduler = StepLR(optimizer, step_size=scheduler_cfg['step_size'], gamma=scheduler_cfg['gamma'])
+    elif scheduler_type == 'ExponentialLR':
+        scheduler = ExponentialLR(optimizer, gamma=scheduler_cfg['gamma'])
+    else:
+        raise ValueError(f"Unknown scheduler type: {scheduler_type}")
+
+    return optimizer, scheduler
+
 
 # ------- FUNCTIONS FOR LOSS SAVING AND TRAIN/VAL CURVES ------- #
 

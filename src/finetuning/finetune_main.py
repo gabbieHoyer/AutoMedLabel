@@ -8,8 +8,6 @@ from monai.losses import DiceLoss
 
 import torch
 from torch import nn
-from torch.optim import AdamW
-from torch.optim.lr_scheduler import CosineAnnealingLR, CosineAnnealingWarmRestarts
 
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
@@ -32,6 +30,8 @@ from src.finetuning.engine.finetune_engine import Trainer
 from src.finetuning.engine.models.sam2 import finetunedSAM2
 from src.finetuning.utils.logging import log_info
 from src.sam2.build_sam import build_sam2
+
+from utils.utils import create_optimizer_and_scheduler
 
 # Retrieve a logger for the module
 logger = logging.getLogger(__name__)
@@ -128,15 +128,11 @@ def prepare_training_base(comp_cfg, sam2_model_cfg:str, initial_weights:str, opt
             # Decide whether to continue with training from scratch or to abort
             raise e
 
-    # import pdb; pdb.set_trace()
-
     # Prepare optimizer with parameters that require gradients
     img_mask_encdec_params = [param for param in finetuned_model.parameters() if param.requires_grad]
     
-    optimizer = AdamW(img_mask_encdec_params, lr=optimizer_cfg['lr'], weight_decay=optimizer_cfg['weight_decay'])
-
-    # scheduler = CosineAnnealingLR(optimizer, T_max=scheduler_cfg['T_max'], eta_min=scheduler_cfg['eta_min'])
-    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=1, eta_min=scheduler_cfg['eta_min'])
+    # Use the utility function to create the optimizer and scheduler
+    optimizer, scheduler = create_optimizer_and_scheduler(optimizer_cfg, scheduler_cfg, img_mask_encdec_params)
 
     # Prepare loss functions
     loss_fn = (DiceLoss(sigmoid=True, squared_pred=True, reduction="mean"), nn.BCEWithLogitsLoss(reduction="mean"))
@@ -198,9 +194,8 @@ def finetune_main(cfg):
             comp_cfg = cfg.get('module').get('trainable', {}),
             sam2_model_cfg = cfg.get('module').get('sam2_model_cfg'), 
             initial_weights = cfg.get('module').get('pretrain_model'),
-            optimizer_cfg = {'lr': cfg.get('module').get('optimizer').get('lr'), 
-                        'weight_decay': cfg.get('module').get('optimizer').get('weight_decay')},
-            scheduler_cfg = {'eta_min': cfg.get('module').get('scheduler').get('eta_min')},
+            optimizer_cfg=cfg.get('module').get('optimizer'),
+            scheduler_cfg=cfg.get('module').get('scheduler'),
             resume_checkpoint_path = cfg.get('module').get('checkpoint'),
             device = device, 
             )
