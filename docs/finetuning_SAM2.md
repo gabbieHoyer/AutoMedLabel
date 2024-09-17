@@ -24,8 +24,10 @@ $ python src/finetuning/finetune_main.py OAI_Thigh_mskSAM2_mem
 ### Customizing Dataset and Augmentation
 The dataset loader and augmentation pipeline can be customized for your specific experiment. You can adjust the augmentation settings, bounding box shift, and number of subjects in the configuration files.
 
-- Learn more about the Dataset Loader <link>
-- Learn more about the Augmentation Pipeline <link>
+- [Learn more about the Dataset Loader](https://github.com/gabbieHoyer/AutoMedLabel/blob/main/docs/pipeline_details/dataset_dataloader.md)
+
+- [Learn more about the Augmentation Pipeline](path/to/augmentation_pipeline.md)
+
 
 ### Logging and Checkpoints
 The script supports:
@@ -56,7 +58,7 @@ grad_accum: 4
 ### More About the Finetuning Engine
 To understand how the finetuning engine works, including how loss functions and optimizers are handled, refer to the following documentation:
 
-- Learn more about the Finetuning Engine <link>
+- [Learn more about the Finetuning Engine](https://github.com/gabbieHoyer/AutoMedLabel/blob/main/docs/pipeline_details/finetuning_engine.md)
 
 ### Troubleshooting
 - **Distributed Training Issues**: Ensure proper SLURM or multi-GPU configuration.
