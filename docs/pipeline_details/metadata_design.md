@@ -31,8 +31,8 @@ This metadata is essential for various downstream tasks such as volume estimatio
 
 ```json
 {
-  "OAI_902173454": {
-    "subject_id": "OAI_902173454",
+  "OAI_3454": {
+    "subject_id": "OAI_3454",
     "slices": {
       "001": {
         "AccessionNumber": "016610439902",
@@ -115,14 +115,14 @@ This file contains subject-level metadata, including paths to the image and mask
 
 ```json
 {
-  "TBrecon-01-02-00047": {
-    "subject_id": "TBrecon-01-02-00047",
-    "image_nifti": "/data/TBrecon3/Users/ghoyer/SAM_data/new_design_tests_TBrecon/tbrecon_nifti_img/TBrecon-01-02-00047.nii.gz",
-    "mask_nifti": "/data/TBrecon3/Users/ghoyer/SAM_data/new_design_tests_TBrecon/tbrecon_nifti_mask/TBrecon-01-02-00047.nii.gz",
+  "subject-00047": {
+    "subject_id": "subject-00047",
+    "image_nifti": "/data/knee_data/tbrecon_nifti_img/subject-00047.nii.gz",
+    "mask_nifti": "/data/knee_data/tbrecon_nifti_mask/subject-00047.nii.gz",
     "Sex": "F",
     "Age": 42,
     "Weight": 70.31,
-    "Dataset": "TBrecon",
+    "Dataset": "Knee_3D_CUBE_fully_sampled",
     "Anatomy": "knee",
     "num_slices": 196,
     "mask_labels": {
@@ -172,8 +172,8 @@ The slice_info_parquet_dir directory contains parquet files that store paths to 
 
 | npy_image_path | npy_mask_path | npy_base_dir                        |
 |----------------|---------------|-------------------------------------|
-| img_001.npy    | mask_001.npy   | /data/preprocessed/TBrecon-00047    |
-| img_002.npy    | mask_002.npy   | /data/preprocessed/TBrecon-00047    |
+| img_001.npy    | mask_001.npy   | /data/preprocessed/subject-00047    |
+| img_002.npy    | mask_002.npy   | /data/preprocessed/subject-00047    |
 | ...            | ...           | ...                                 |
 
 
