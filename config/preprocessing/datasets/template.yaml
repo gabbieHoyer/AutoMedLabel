@@ -95,6 +95,7 @@ metadata_cfg:
   mri_sequence: '<MRI_SEQUENCE>'  # e.g., '3D_DESS', 'T2'
 
   # DICOM header fields to extract (standardized name: DICOM tag)
+  # Change to fit your DICOM Header design
   dicom_values:
     AccessionNumber: AccessionNumber
     SOPInstanceUID: SOPInstanceUID

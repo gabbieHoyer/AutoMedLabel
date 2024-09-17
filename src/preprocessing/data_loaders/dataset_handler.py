@@ -68,24 +68,6 @@ class RawDataLoader():
             elif transform_name == 'top_cc_2D':
                 for slice_index in range(np.shape(data)[0]):
                     data[slice_index] = self.top_largest_cc(data[slice_index], transform_args, connectivity=8)
-            # elif transform_name == 'combination_method':
-            #     # The script will combine masks from one matrix
-            #     # Note combining data from multiple files occurs elsewhere
-            #     if (transform_args == 'combine_binary_label_dims') or (transform_args == 'add_multi_class_label_dims'):
-            #         for dim in range(np.shape(data)[-1]):
-            #             # Prepare data for combination
-            #             if transform_args == 'combine_binary_label_dims':
-            #                 label_counter = dim + 1  # Increment label for the next mask
-            #                 labeled_data = np.where(data[...,dim] > 0, label_counter, 0)
-            #             elif transform_args == 'add_multi_class_label_dims':
-            #                 labeled_data = np.copy(data[...,dim])
-            #             # Combine data with priority to first labels
-            #             if dim == 0:
-            #                 combined_data = labeled_data
-            #             else:
-            #                 # Conditional addition to avoid overwriting existing labels
-            #                 combined_data = np.where(combined_data == 0, labeled_data, combined_data)
-            #         data = np.copy(combined_data)
             elif transform_name == 'extract_imorphics_mask':
                 data = extract_imorphics_mask(data)
             elif transform_name == 'dtype':
@@ -380,3 +362,25 @@ def validate_data(data, expected_properties:dict, content='mask'):
     """
     actual_properties = data_properties(data, content)
     return validate_data_properties(actual_properties, expected_properties)
+
+
+
+
+            # elif transform_name == 'combination_method':
+            #     # The script will combine masks from one matrix
+            #     # Note combining data from multiple files occurs elsewhere
+            #     if (transform_args == 'combine_binary_label_dims') or (transform_args == 'add_multi_class_label_dims'):
+            #         for dim in range(np.shape(data)[-1]):
+            #             # Prepare data for combination
+            #             if transform_args == 'combine_binary_label_dims':
+            #                 label_counter = dim + 1  # Increment label for the next mask
+            #                 labeled_data = np.where(data[...,dim] > 0, label_counter, 0)
+            #             elif transform_args == 'add_multi_class_label_dims':
+            #                 labeled_data = np.copy(data[...,dim])
+            #             # Combine data with priority to first labels
+            #             if dim == 0:
+            #                 combined_data = labeled_data
+            #             else:
+            #                 # Conditional addition to avoid overwriting existing labels
+            #                 combined_data = np.where(combined_data == 0, labeled_data, combined_data)
+            #         data = np.copy(combined_data)
