@@ -64,9 +64,9 @@ nifti_mask_dir: ${general_data_dir}/nifti/masks
 
 # ------------------ VISUALIZE NIFTI ------------------
 nifti_fig_cfg:
-  fig_type: 2D_overlay # Options: '2D_overlay', 'gif', ['2D_overlay', 'gif']
-  num_figs: 5  # Number of files to randomly select and process
-  slice_selection: 'with_segmentation' # 'any' 'with_segmentation'
+  fig_type: 2D_overlay 
+  num_figs: 5  
+  slice_selection: 'with_segmentation' 
 # --- OUTPUT (OVERRIDE DEFAULT): location to save figures
   fig_path: ${general_data_dir}/nifti/figs
 
@@ -92,12 +92,11 @@ npy_dir: ${general_data_dir}/npy/SAM   # should be ok to add in another folder
 
 # ------------------ VISUALIZE NPY ------------------
 npy_fig_cfg:
-  fig_type: 2D_overlay # Options: '2D_overlay', 'gif', ['2D_overlay', 'gif']
-  num_figs: 10  # Number of files to randomly select and process; 'full' for complete dataset QC
-  slice_selection: 'any' # 'any' 'with_segmentation'
+  fig_type: 2D_overlay 
+  num_figs: 10  
+  slice_selection: 'any' 
 # --- OUTPUT (OVERRIDE DEFAULT): location to save figures
   fig_path: ${npy_dir}/figs
-  # fig_path: ${general_data_dir}/npy/tired_yolo/figs
 
 # ------------------ INFO FOR METADATA EXTRACTION ------------------
 # Original MRI dicom image folder path
@@ -108,7 +107,7 @@ metadata_cfg:
   # details about your dataset:
   dataset_name: ${dataset.name}
   anatomy: 'thigh'
-  field_strength: '3.0'  # '2.89'
+  field_strength: '3.0' 
   mri_sequence: 't1_ax'
 
   # MRI dicom header info to extract for statistics metadata:
@@ -163,19 +162,10 @@ additional_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats
 stats_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
 
 # Operation B - location of subject-level metadata used for training
-# getting the original Train/val/test subjects and hoping to just add the additional ones to train...
-# old_ml_metadata_file: /data/mskdata/standardized/OAI/thigh/T1_ax/metadata/volume_metadata_for_ml.json
-# ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json  # complete refresh with split assignments
-
 ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml_thigh_plus.json 
 
 # Operation C - location to parquet files for ML
-# slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
-slice_info_parquet_dir: ${general_data_dir}/metadata/SAM2/slice_paths  # needs a new path for parquet files
-
-
-# slice_info_parquet_dir: ${general_data_dir}/metadata/SAM_uint8/slice_paths
-# slice_info_parquet_dir: ${general_data_dir}/metadata/tired/slice_paths
+slice_info_parquet_dir: ${general_data_dir}/metadata/SAM2/slice_paths  
 
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv

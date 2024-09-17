@@ -125,12 +125,7 @@ def extract_header_info(dcm_file_path:str, dicom_values:dict, volume_csv_config:
     
     return metadata, demographics  # Return demographics as a separate dictionary
 
-
 # ------------------------------------------------------------------------------------------
-
-# def extract_dicom_data(file_path):
-#     ds = pydicom.dcmread(file_path)
-#     return ds
 
 def summarize_unique_dicom_data(dicom_metadata):
     summary_dicom_metadata = {}

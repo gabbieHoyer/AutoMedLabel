@@ -1,29 +1,8 @@
-# If you have common functions or 
-# utilities that are used across 
-# different modules, you might place 
-# them in a utils.py file for shared access.
 
 import re
 from collections import defaultdict
 import numpy as np
 import random
-
-
-# def extract_numeric_value(value):
-#     """Extracts the numeric part of a string and returns it as a float or int, as appropriate."""
-#     if isinstance(value, (int, float)):
-#         return value  # Return the value directly if it's already a numeric type
-#     elif isinstance(value, str):
-#         # Extract numeric part, including decimal points
-#         numeric_part = re.sub("[^0-9.]", "", value)
-#         if numeric_part.isdigit():
-#             return int(numeric_part)  # Return as int if there are no decimal points
-#         try:
-#             return float(numeric_part)  # Attempt to convert to float
-#         except ValueError:
-#             return None  # Return None if conversion to float fails
-#     else:
-#         return None  # Return None if value is neither an int, float, nor a str
 
 def extract_numeric_value(value):
     """Extracts the numeric part of a string representing age in format 'XXXY' and returns it as an integer."""
@@ -69,7 +48,7 @@ def preprocess_subjects(metadata):
             'Weight': weight
         })
     
-    return processed_subjects # look clean 
+    return processed_subjects 
 
 def stratify_and_sample(subjects, split_ratios, seed=None):
     # Set the random seed for reproducibility

@@ -277,7 +277,7 @@ Similar to the finetuning engine, you can modify or extend the metrics used for 
 The **SAM2 finetuning evaluation pipeline** provides flexibility for evaluating model performance not only based on traditional segmentation metrics such as **Dice** and **IoU**, but also through custom biomarker metrics. These biomarkers can be integral to clinical analysis, assessing tissue properties or other medical characteristics such as **T1rho**, **T2 maps**, and **cartilage thickness**.
 
 ### Key Features of the Custom Biomarker Evaluation Engine
-- **Biomarker Metrics**: In addition to traditional segmentation metrics, custom metrics like **cartilage thickness**, **tissue height**, **tissue volume**, and **T1rho/T2 maps **can be evaluated. These metrics provide clinical insights into the health of tissues in the segmentation masks, such as evaluating degenerative conditions in cartilage.
+- **Biomarker Metrics**: In addition to traditional segmentation metrics, custom metrics like **cartilage thickness**, **tissue height**, **tissue volume**, and **T1rho/T2 maps** can be evaluated. These metrics provide clinical insights into the health of tissues in the segmentation masks, such as evaluating degenerative conditions in cartilage.
 
 - **Metric Factory for Custom Metrics**: The engine relies on a dynamic **metric factory** to load and compute these custom metrics. This design allows for easy integration of new metrics and ensures flexibility based on dataset-specific needs.
 
