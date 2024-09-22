@@ -33,6 +33,8 @@ notebooks/*.ipynb
 /src/obj_detection/dev_work/
 /src/obj_detection/air/
 
+/config/preprocessing/augmentations/monai_simple.yaml
+
 # /docs/
 
 /scripts/prompting/

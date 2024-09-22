@@ -19,9 +19,9 @@ datamodule:
   balanced: False
   bbox_shift: 0
   batch_size: 4
-  num_workers: 1
-  # augmentation_pipeline: 
-  #   config: simple.yaml
+  num_workers: 0 #1
+  augmentation_pipeline: 
+    config: simple.yaml #complex.yaml  #simple.yaml  #monai_simple.yaml #
 
 module:
   work_dir: "work_dir/finetuning"
@@ -43,7 +43,7 @@ module:
   sam2_model_cfg: sam2_hiera_b+.yaml
 
   use_wandb: False #True 
-  visualize: False #True
+  visualize: True
 
   num_epochs: 1 
 
