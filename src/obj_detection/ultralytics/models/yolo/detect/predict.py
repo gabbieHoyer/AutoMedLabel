@@ -1,8 +1,12 @@
 # Ultralytics YOLO 🚀, AGPL-3.0 license
 
-from ultralytics.engine.predictor import BasePredictor
-from ultralytics.engine.results import Results
-from ultralytics.utils import ops
+# from ultralytics.engine.predictor import BasePredictor
+# from ultralytics.engine.results import Results
+# from ultralytics.utils import ops
+
+from ....engine.predictor import BasePredictor
+from ....engine.results import Results
+from ....utils import ops
 
 
 class DetectionPredictor(BasePredictor):

@@ -2,11 +2,15 @@
 
 from pathlib import Path
 
-from ultralytics.engine.model import Model
-from ultralytics.models import yolo
-from ultralytics.nn.tasks import DetectionModel, SegmentationModel, WorldModel
-from ultralytics.utils import yaml_load, ROOT
+# from ultralytics.engine.model import Model
+# from ultralytics.models import yolo
+# from ultralytics.nn.tasks import DetectionModel, SegmentationModel, WorldModel
+# from ultralytics.utils import yaml_load, ROOT
 
+from ...engine.model import Model
+from ...models import yolo
+from ...nn.tasks import DetectionModel, SegmentationModel, WorldModel
+from ...utils import yaml_load, ROOT
 
 class YOLO(Model):
     """YOLO (You Only Look Once) object detection model."""
@@ -15,6 +19,7 @@ class YOLO(Model):
         """Initialize YOLO model, switching to YOLOWorld if model filename contains '-world'."""
 
         model_path = Path(model)
+        # import pdb; pdb.set_trace()
         
         # Assume the default location for weights if the model path is not absolute and file does not exist
         if not model_path.is_absolute() and not model_path.exists():

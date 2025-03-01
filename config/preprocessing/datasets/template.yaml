@@ -66,11 +66,16 @@ nifti_fig_cfg:
 # ------------------ SAM PREPARATION ------------------
 preprocessing_cfg:
   image_size: <IMAGE_SIZE>  # e.g., 1024
+  gt_mask_size: <MASK_SIZE> # e.g., 1024 or 256
   voxel_num_thre2d: <VOXEL_THRESHOLD_2D>  # Minimum voxel count per 2D slice.
   voxel_num_thre3d: <VOXEL_THRESHOLD_3D>  # Minimum voxel count per 3D volume.
+  kernel_size: <KERNEL_SIZE>  # Size of the morphological kernel (in pixels) used for post-processing predicted masks 
+                              # (e.g., morphological closing, Gaussian blur). Adjust based on the complexity and resolution of your data.
+
   remove_label_ids: []  # List of label IDs to remove from masks.
   target_label_id: null  # Specific label ID for instance segmentation; set to null if not applicable.
   instance_bbox: <True/False>  # Whether to use instance bounding boxes.
+  make_square: <True/False>    # Whether to resize images to square dimensions prior to resizing to model compatible 1024x1024; useful for rectangular images / bilaterial anatomical imaging studies (e.g., False).
   yolo_compatible: <True/False>  # Whether to prepare data compatible with YOLO format.
 
 # --- OUTPUT DIRECTORY FOR SAM-COMPATIBLE DATA ---
@@ -138,17 +143,5 @@ additional_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats
 stats_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json  # For statistics.
 ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json  # For machine learning models.
 slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths  # For ML data in Parquet format.
-dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv  # Summary of DICOM metadata.
-
-# ------------------ YOLO PREPARATION ------------------
-yolo_preprocessing_cfg:
-  image_size: [<WIDTH>, <HEIGHT>]  # e.g., [1024, 1024]
-  voxel_num_thre2d: <VOXEL_THRESHOLD_2D>
-  voxel_num_thre3d: <VOXEL_THRESHOLD_3D>
-  remove_label_ids: []  # Labels to remove from masks.
-  target_label_id: null  # Specific label ID; null if not applicable.
-  instance_bbox: <True/False>  # Use instance bounding boxes.
-
-# --- OUTPUT DIRECTORY FOR YOLO-COMPATIBLE DATA ---
-yolo_npy_dir: ${general_data_dir}/npy/YOLO  # Directory for YOLO-compatible data.
+dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.txt # Summary of DICOM metadata (e.g., .txt or .csv extension).
 

@@ -6,7 +6,7 @@ epochs: 1 #100
 batch: 8 
 rect: False
 workers: 6 #8 
-run_dir: /data/VirtualAging/users/ghoyer/correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/OAI_Thigh/runs
+run_dir: /path/to/correcting_rad_workflow/AutoMedLabel/work_dir/obj_detection/OAI_Thigh/runs
 
 # add these in to improve symmetry - overcome fact that there are missing labels in ground truth for one side
 fliplr: 1.0
@@ -26,5 +26,5 @@ best_weights: work_dir/obj_detection/OAI_Thigh/runs/train30/weights/best.pt
 classes: [4, 5, 6, 7, 8, 9]
 max_det: 10
 
-data: standardized_data/yolo_not_resized_npy/test/images/OAI_9004175-007.npy 
+data: /path/to/standardized_data/yolo_not_resized_npy/test/images/OAI_9004175-007.npy 
 

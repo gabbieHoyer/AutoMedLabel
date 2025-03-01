@@ -14,9 +14,13 @@ import torch
 import torch.nn as nn
 from PIL import Image
 
-from ultralytics.utils import ARM64, LINUX, LOGGER, ROOT, yaml_load
-from ultralytics.utils.checks import check_requirements, check_suffix, check_version, check_yaml
-from ultralytics.utils.downloads import attempt_download_asset, is_url
+# from ultralytics.utils import ARM64, LINUX, LOGGER, ROOT, yaml_load
+# from ultralytics.utils.checks import check_requirements, check_suffix, check_version, check_yaml
+# from ultralytics.utils.downloads import attempt_download_asset, is_url
+
+from ..utils import ARM64, LINUX, LOGGER, ROOT, yaml_load
+from ..utils.checks import check_requirements, check_suffix, check_version, check_yaml
+from ..utils.downloads import attempt_download_asset, is_url
 
 
 def check_class_names(names):
@@ -147,7 +151,8 @@ class AutoBackend(nn.Module):
             self.model = model  # explicitly assign for to(), cpu(), cuda(), half()
             pt = True
         elif pt:  # PyTorch
-            from ultralytics.nn.tasks import attempt_load_weights
+            # from ultralytics.nn.tasks import attempt_load_weights
+            from ..nn.tasks import attempt_load_weights
 
             model = attempt_load_weights(
                 weights if isinstance(weights, list) else w, device=device, inplace=True, fuse=fuse
@@ -251,7 +256,8 @@ class AutoBackend(nn.Module):
             LOGGER.info(f"Loading {w} for TensorFlow GraphDef inference...")
             import tensorflow as tf
 
-            from ultralytics.engine.exporter import gd_outputs
+            # from ultralytics.engine.exporter import gd_outputs
+            from ..engine.exporter import gd_outputs
 
             def wrap_frozen_graph(gd, inputs, outputs):
                 """Wrap frozen graphs for deployment."""
@@ -319,11 +325,13 @@ class AutoBackend(nn.Module):
             metadata = w.parent / "metadata.yaml"
         elif triton:  # NVIDIA Triton Inference Server
             check_requirements("tritonclient[all]")
-            from ultralytics.utils.triton import TritonRemoteModel
+            # from ultralytics.utils.triton import TritonRemoteModel
+            from ..utils.triton import TritonRemoteModel
 
             model = TritonRemoteModel(w)
         else:
-            from ultralytics.engine.exporter import export_formats
+            # from ultralytics.engine.exporter import export_formats
+            from ..engine.exporter import export_formats
 
             raise TypeError(
                 f"model='{w}' is not a supported model format. "
@@ -528,7 +536,8 @@ class AutoBackend(nn.Module):
             >>> model = AutoBackend(weights="path/to/model.onnx")
             >>> model_type = model._model_type()  # returns "onnx"
         """
-        from ultralytics.engine.exporter import export_formats
+        # from ultralytics.engine.exporter import export_formats
+        from ..engine.exporter import export_formats
 
         sf = list(export_formats().Suffix)  # export suffixes
         if not is_url(p, check=False) and not isinstance(p, str):

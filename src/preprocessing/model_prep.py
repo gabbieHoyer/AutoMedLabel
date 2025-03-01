@@ -1,13 +1,12 @@
 
-from typing import Union #, Tuple, List
-import numpy as np
 import math
 import cv2
-
+import cc3d
+import numpy as np
+from typing import Union #, Tuple, List
+from skimage import transform
 from scipy.ndimage import center_of_mass
 from scipy.ndimage import label as scipy_label
-import cc3d
-from skimage import transform
 
 # ---------------------- UTILITY FUNCTIONS ----------------------
 
@@ -32,7 +31,7 @@ class MaskPrep():
     - target_label_id: 
     - voxel_threshold_3d: The voxel count threshold for removing small objects in 3D.
     - pixel_threshold_2d: The pixel count threshold for removing small objects in 2D slices.
-    - image_size_tuple: (H, W) in pixels to resize mask using nearest-neighbor interpolation. This 
+    - mask_size_tuple: (H, W) in pixels to resize mask using nearest-neighbor interpolation. This 
         will preserve image intensities.
     - crop_non_zero_slices_flag: True or False. Indicate whether to crop volume to only slices with 
         segmentations if the mask is 3D.
@@ -40,12 +39,12 @@ class MaskPrep():
     Input Params:
     - mask_data: The mask data as a numpy array. Supports 2D slices or 3D volumes.
     """
-    def __init__(self, remove_label_ids: list = [], target_label_id: Union[int, list[int]] = [], voxel_threshold_3d: int = 0, pixel_threshold_2d: int = 0, image_size_tuple:tuple[int, int] = [], crop_non_zero_slices_flag:bool=True, make_square:bool=False, ratio_resize:bool=False):
+    def __init__(self, remove_label_ids: list = [], target_label_id: Union[int, list[int]] = [], voxel_threshold_3d: int = 0, pixel_threshold_2d: int = 0, mask_size_tuple:tuple[int, int] = [], crop_non_zero_slices_flag:bool=True, make_square:bool=False, ratio_resize:bool=False):
         self.remove_label_ids = remove_label_ids
         self.target_label_id = target_label_id
         self.voxel_threshold_3d = voxel_threshold_3d
         self.pixel_threshold_2d = pixel_threshold_2d
-        self.image_size_tuple = image_size_tuple
+        self.mask_size_tuple = mask_size_tuple
         self.crop_non_zero_slices_flag = crop_non_zero_slices_flag
         self.make_square = make_square
         self.ratio_resize = ratio_resize
@@ -172,23 +171,23 @@ class MaskPrep():
         
         return mask_data
     
-    def resize_mask(self, mask_data, image_size_tuple:tuple[int,int]= None):
+    def resize_mask(self, mask_data, mask_size_tuple:tuple[int,int]= None):
         """
         Resize mask data using nearest-neighbor interpolation to preserve label integrity.
         Parameters:
         - mask_data: The mask data as a numpy array.
-        - image_size_tuple: (H, W) in pixels to resize mask. 
+        - mask_size_tuple: (H, W) in pixels to resize mask. 
         
         Returns:
         - A numpy array with dimensions (H, W).
         """
-        def resize_mask_2D(mask_slice, image_size_tuple:tuple[int,int]):
-            if mask_slice.shape == image_size_tuple:
+        def resize_mask_2D(mask_slice, mask_size_tuple:tuple[int,int]):
+            if mask_slice.shape == mask_size_tuple:
                 return mask_slice  # Skip resizing if the shape is the same
             # Resize the mask slice
             resized_mask = transform.resize(
                 mask_slice,
-                image_size_tuple,
+                mask_size_tuple,
                 order=0,  # nearest-neighbor interpolation to preserve label integrity
                 preserve_range=True,
                 mode='constant',
@@ -196,12 +195,12 @@ class MaskPrep():
             )
             return resized_mask
         
-        def scaled_resize_mask_2D(mask_slice, image_size_tuple:(int,int)):
+        def scaled_resize_mask_2D(mask_slice, mask_size_tuple:(int,int)):
             h0, w0 = mask_slice.shape[:2]  # Original dimensions
             # Resize long side to imgsz while maintaining aspect ratio
-            r = image_size_tuple[0]/ max(h0, w0)  # Ratio
+            r = mask_size_tuple[0]/ max(h0, w0)  # Ratio
             if r != 1:  # If sizes are not equal
-                w, h = (min(math.ceil(w0 * r), image_size_tuple[0]), min(math.ceil(h0 * r), image_size_tuple[0]))
+                w, h = (min(math.ceil(w0 * r), mask_size_tuple[0]), min(math.ceil(h0 * r), mask_size_tuple[0]))
                 resized_mask = cv2.resize(mask_slice, (w, h), interpolation=cv2.INTER_NEAREST)  # cv2.INTER_LINEAR
                 return resized_mask
             return mask_slice
@@ -230,17 +229,17 @@ class MaskPrep():
                 unpadded_mask = mask_slice  # already square
             return unpadded_mask
         
-        if image_size_tuple is None:
-            image_size_tuple = self.image_size_tuple
+        if mask_size_tuple is None:
+            mask_size_tuple = self.mask_size_tuple
 
         if self.ratio_resize:
             dims = len(np.shape(mask_data))
             if dims == 2:
-                resized_masks =scaled_resize_mask_2D(mask_data, image_size_tuple)
+                resized_masks =scaled_resize_mask_2D(mask_data, mask_size_tuple)
             elif dims == 3:
                 resized_masks = []
                 for mask_slice in mask_data:
-                    resized_mask = scaled_resize_mask_2D(mask_slice, image_size_tuple)
+                    resized_mask = scaled_resize_mask_2D(mask_slice, mask_size_tuple)
                     resized_masks.append(resized_mask)
                 resized_masks = np.array(resized_masks)
 
@@ -256,22 +255,22 @@ class MaskPrep():
 
                 dims = len(np.shape(mask_data))
                 if dims == 2:
-                    resized_masks = resize_mask_2D(mask_data, image_size_tuple)
+                    resized_masks = resize_mask_2D(mask_data, mask_size_tuple)
                 elif dims == 3:
                     resized_masks = []
                     for mask_slice in mask_data:
-                        resized_mask = resize_mask_2D(mask_slice, image_size_tuple)
+                        resized_mask = resize_mask_2D(mask_slice, mask_size_tuple)
                         resized_masks.append(resized_mask)
                     resized_masks = np.array(resized_masks)
 
             elif self.make_square and (original_shape[0] == original_shape[1]):
-                if (original_shape[0] > image_size_tuple[0]) or (original_shape[1] > image_size_tuple[1]):
+                if (original_shape[0] > mask_size_tuple[0]) or (original_shape[1] > mask_size_tuple[1]):
 
                     # Compute the intermediate target size for resizing
-                    if original_shape[0] > image_size_tuple[0]:
-                        adjusted_size = (image_size_tuple[1], image_size_tuple[1]) # lol gave me 640x 640 when want 
+                    if original_shape[0] > mask_size_tuple[0]:
+                        adjusted_size = (mask_size_tuple[1], mask_size_tuple[1]) # lol gave me 640x 640 when want 
                     else:
-                        adjusted_size = (image_size_tuple[0], image_size_tuple[0])
+                        adjusted_size = (mask_size_tuple[0], mask_size_tuple[0])
 
                     dims = len(np.shape(mask_data))
                     if dims == 2:
@@ -285,18 +284,18 @@ class MaskPrep():
 
                     # If the original mask was padded and then resized to smaller dimensions, unpad it
                     if len(resized_masks.shape) == 2:
-                        resized_masks = unpad_to_original_size(resized_masks, image_size_tuple)
+                        resized_masks = unpad_to_original_size(resized_masks, mask_size_tuple)
                     elif len(resized_masks.shape) == 3:
-                        resized_masks = np.array([unpad_to_original_size(slice, image_size_tuple) for slice in resized_masks])
+                        resized_masks = np.array([unpad_to_original_size(slice, mask_size_tuple) for slice in resized_masks])
                         
             else:
                 dims = len(np.shape(mask_data))
                 if dims == 2:
-                    resized_masks = resize_mask_2D(mask_data, image_size_tuple)
+                    resized_masks = resize_mask_2D(mask_data, mask_size_tuple)
                 elif dims == 3:
                     resized_masks = []
                     for mask_slice in mask_data:
-                        resized_mask = resize_mask_2D(mask_slice, image_size_tuple)
+                        resized_mask = resize_mask_2D(mask_slice, mask_size_tuple)
                         resized_masks.append(resized_mask)
                     resized_masks = np.array(resized_masks)
         
@@ -544,71 +543,87 @@ def write_list_to_file(file_path, data_list):
     with open(file_path, 'w') as file:
         for item in data_list:
             file.write(str(item) + '\n')
-            
-def get_bounding_boxes(multiclass_mask, instance=False):
 
-    # obtain unique labels in the image
-    unique_labels = np.unique(multiclass_mask)
+
+def get_bounding_boxes(multiclass_mask, scale_factor: float = None, instance: bool = False):
+    """
+    Compute bounding boxes from a multiclass mask.
+    If a scale_factor is provided, the box coordinates (computed in the mask coordinate system)
+    will be multiplied by it to scale to the full image dimensions.
+    Returns boxes in YOLO format: "label norm_center_x norm_center_y norm_width norm_height"
+    where the normalization is with respect to the full image dimensions.
+    
+    Args:
+        multiclass_mask (np.ndarray): A 2D array representing the segmentation mask.
+        scale_factor (float, optional): Factor to multiply mask coordinates by to match the image size.
+            For example, if the mask is 256×256 and the image is 1024×1024, then scale_factor should be 1024/256 = 4.
+        instance (bool): If True, compute bounding boxes for each connected instance.
+                        If False, compute one bounding box for each label.
+    Returns:
+        List[str]: A list of bounding boxes formatted as strings.
+    """
     bounding_boxes = []
-
-    for label in unique_labels:
-        # Skip background label
-        if label == 0:
-            continue  
-        
+    
+    # Get full image dimensions
+    if scale_factor is not None:
+        full_width = multiclass_mask.shape[1] * scale_factor
+        full_height = multiclass_mask.shape[0] * scale_factor
+    else:
+        full_width = multiclass_mask.shape[1]
+        full_height = multiclass_mask.shape[0]
+    
+    unique_labels = np.unique(multiclass_mask)
+    
+    for lbl in unique_labels:
+        if lbl == 0:
+            continue  # skip background
         if instance:
             # Process each instance separately
-            gt2D = np.uint8(multiclass_mask == label)  # Binary mask for chosen class
-            labeled_array, num_features = scipy_label(gt2D)
-
-            for component in range(1, num_features + 1):
-                component_mask = labeled_array == component
-                y_indices, x_indices = np.where(component_mask)
-
-                # Compute the bounding box for the selected component
-                x_min, x_max = np.min(x_indices), np.max(x_indices)
-                y_min, y_max = np.min(y_indices), np.max(y_indices)
-
-                # Calculate center and dimensions
-                center_x = (x_min + x_max) / 2
-                center_y = (y_min + y_max) / 2
-                width = x_max - x_min
-                height = y_max - y_min
-
-                # Normalize
-                height_sz, width_sz = multiclass_mask.shape
+            binary_mask = (multiclass_mask == lbl).astype(np.uint8)
+            labeled_array, num_features = scipy_label(binary_mask)
+            for comp in range(1, num_features + 1):
+                comp_mask = (labeled_array == comp)
+                y_inds, x_inds = np.where(comp_mask)
+                x_min, x_max = np.min(x_inds), np.max(x_inds)
+                y_min, y_max = np.min(y_inds), np.max(y_inds)
+                # Scale if needed:
+                if scale_factor is not None:
+                    x_min *= scale_factor
+                    x_max *= scale_factor
+                    y_min *= scale_factor
+                    y_max *= scale_factor
+                center_x = (x_min + x_max) / 2.0
+                center_y = (y_min + y_max) / 2.0
+                box_width = x_max - x_min
+                box_height = y_max - y_min
+                # Normalize with respect to full image dimensions
+                norm_center_x = center_x / full_width
+                norm_center_y = center_y / full_height
+                norm_box_width = box_width / full_width
+                norm_box_height = box_height / full_height
                 bounding_boxes.append(
-                    str(label) +
-                    ' ' + str(center_x / width_sz) +
-                    ' ' + str(center_y / height_sz) +
-                    ' ' + str(width / width_sz) +
-                    ' ' + str(height / height_sz) )
+                    f"{lbl} {norm_center_x} {norm_center_y} {norm_box_width} {norm_box_height}"
+                )
         else:
-            # Original logic for bounding box of entire label
-            indices = np.where(multiclass_mask == label)
-
-            # Calculate bounding box coordinates
-            min_row, min_col = np.min(indices[0]), np.min(indices[1])
-            max_row, max_col = np.max(indices[0]), np.max(indices[1])
-
-            # Calculate center and dimensions
-            center_x = (min_col + max_col) / 2
-            center_y = (min_row + max_row) / 2
-            width = max_col - min_col
-            height = max_row - min_row
-
-            # Normalize
-            height_sz, width_sz = multiclass_mask.shape
+            # One bounding box for the entire label region
+            indices = np.where(multiclass_mask == lbl)
+            y_min, y_max = np.min(indices[0]), np.max(indices[0])
+            x_min, x_max = np.min(indices[1]), np.max(indices[1])
+            if scale_factor is not None:
+                x_min *= scale_factor
+                x_max *= scale_factor
+                y_min *= scale_factor
+                y_max *= scale_factor
+            center_x = (x_min + x_max) / 2.0
+            center_y = (y_min + y_max) / 2.0
+            box_width = x_max - x_min
+            box_height = y_max - y_min
+            norm_center_x = center_x / full_width
+            norm_center_y = center_y / full_height
+            norm_box_width = box_width / full_width
+            norm_box_height = box_height / full_height
             bounding_boxes.append(
-                str(label) +
-                ' ' + str(center_x / width_sz) +
-                ' ' + str(center_y / height_sz) +
-                ' ' + str(width / width_sz) +
-                ' ' + str(height / height_sz) )
-
+                f"{lbl} {norm_center_x} {norm_center_y} {norm_box_width} {norm_box_height}"
+            )
     return bounding_boxes
-
-
-
-
-
+      

@@ -7,12 +7,12 @@ names:
 
 nc: 5
 
-path: /lumbar_spine/T1_ax/npy/YOLO
+path: /path/to/lumbar_spine/T1_ax/npy/YOLO
 
 train: train/images
 # val: val/images
 val: train/images
 test: test/images
 
-meta_path: /lumbar_spine/T1_ax/metadata/volume_metadata_for_ml.json
+# meta_path: /path/to/lumbar_spine/T1_ax/metadata/volume_metadata_for_ml.json
 

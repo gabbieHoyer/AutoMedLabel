@@ -1,44 +1,116 @@
-# Byte-compiles / optimized / DLL files
+# ------------------------------------------------------------------------------
+#  Byte-compiled / optimized / DLL files
+# ------------------------------------------------------------------------------
 __pycache__/
-**/__pycache__/*
+*.py[cod]
+*$py.class
+*.pyo
 
+# ------------------------------------------------------------------------------
+#  C extensions
+# ------------------------------------------------------------------------------
+*.so
+
+# ------------------------------------------------------------------------------
+#  Distribution / packaging
+# ------------------------------------------------------------------------------
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ------------------------------------------------------------------------------
+#  Installer logs
+# ------------------------------------------------------------------------------
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ------------------------------------------------------------------------------
+#  Unit test / coverage
+# ------------------------------------------------------------------------------
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# ------------------------------------------------------------------------------
+#  Virtual environments
+# ------------------------------------------------------------------------------
+.env
+.venv
+venv/
+ENV/
+env/
+venv.bak/
+env.bak/
+
+# ------------------------------------------------------------------------------
+#  Jupyter notebooks
+# ------------------------------------------------------------------------------
 .ipynb_checkpoints/
 **/.ipynb_checkpoints/*
 
-# Log files directory
+# ------------------------------------------------------------------------------
+#  Log files
+# ------------------------------------------------------------------------------
 /logs/
 *.log
 
-# save checkpoints / working directory
-# /work_dir/
-# Ignore everything in the work_dir folder
-/work_dir/**
+# ------------------------------------------------------------------------------
+#  Weights & Biases artifacts
+# ------------------------------------------------------------------------------
+/wandb/
 
-# But do not ignore the work_dir folder itself and its subfolders
+# ------------------------------------------------------------------------------
+#  Notebooks (optional if you keep them out of version control)
+# ------------------------------------------------------------------------------
+notebooks/
+notebooks/*.ipynb
+
+# ------------------------------------------------------------------------------
+#  Working directory (store outputs/checkpoints but keep structure)
+# ------------------------------------------------------------------------------
+/work_dir/**
 !/work_dir/
 !/work_dir/*/
 !/work_dir/**/.gitkeep
 
-/wandb/
+# ------------------------------------------------------------------------------
+#  OS or Editor-specific files
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
-notebooks/
-notebooks/*.ipynb
-
-/src/data_processing/sam_prep_neg.py
-
-/src/prompt_eng/infer_3D_plus_viz_neg.py
-
-/standardized_data/
-
-/src/obj_detection/dev_work/
-/src/obj_detection/air/
-
-/config/preprocessing/augmentations/monai_simple.yaml
-
-# /docs/
-
-/scripts/prompting/
-
-#.gitignore
+# ------------------------------------------------------------------------------
+#  Git attributes
+# ------------------------------------------------------------------------------
 .gitattributes
-# .gitkeep
+
+
+# quick dev tests:
+/dev/
+/config/preprocessing/datasets/DHAL.yaml
+/config/finetuning/evaluation/DHAL_yolo.yaml

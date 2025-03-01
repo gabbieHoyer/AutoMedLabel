@@ -1,8 +1,7 @@
 
 import re
-from collections import defaultdict
-import numpy as np
 import random
+import numpy as np
 
 def extract_numeric_value(value):
     """Extracts the numeric part of a string representing age in format 'XXXY' and returns it as an integer."""
@@ -21,7 +20,6 @@ def extract_numeric_value(value):
                 return None  # Return None if no numeric part is found
     else:
         return None  # Return None if value is neither an int, float, nor a str
-
 
 def preprocess_subjects(metadata):
     """
@@ -84,7 +82,6 @@ def stratify_and_sample(subjects, split_ratios, seed=None):
         split_assignments['test'].extend(group_subjects[train_count + val_count:])
 
     return split_assignments
-
 
 def adjust_splits_for_balance(split_assignments, sexes):
     # Placeholder for potential adjustments

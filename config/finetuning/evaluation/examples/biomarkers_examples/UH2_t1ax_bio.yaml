@@ -41,7 +41,8 @@ base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
 models:
     # best for muscle
   - finetuned_model: /work_dir/model_weights/Finetuned/mskSAM/no_aug_bbox_shift_0/not_balanced/img_enc_True/early_stop_patience_10/subject_full/20240618-0018_finetuned_model_best.pth
-    model_weights: mskSAM
+    model_identifier: mskSAM
+    pretrain_model: ${base_model}
     model_type: vit_b
     model_details:
       balanced: false
@@ -51,3 +52,4 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
+      resize_masks: True

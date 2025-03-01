@@ -1,7 +1,7 @@
 
 # ------------------------ Evaluation ------------------------ #
 evaluation:
-  name: "OAI_T1_Thigh_multiclass_SAM2_mem"
+  name: "OAI_T1_Thigh_multiclass_SAM2"
   description: "Evaluating multiclass models finetuned on the OAI thigh muscle MRI dataset."
 
 SEED: 42
@@ -9,8 +9,7 @@ distributed: False
 
 dataset:
   OAI-thigh:      
-    config: examples/OAI_T1_Thigh_plus.yaml
-    # config: OAI_T1_Thigh.yaml  # without the additional 49 subjects
+    config: OAI_T1_Thigh.yaml  
     project: multiclass_Thigh-Evaluation
 
 datamodule:
@@ -42,9 +41,10 @@ base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
 
 models:
 
-  - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/mskSAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240903-2127_finetuned_model_best_converted.pth
-    model_weights: Thigh_multiclass_SAM2_mem-bal_False-sub_set_full-bbox_shift_0
-    sam2_model_cfg: sam2_hiera_b+.yaml
+  - finetuned_model: /path/to/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/mskSAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240903-2127_finetuned_model_best_converted.pth
+    model_identifier: Thigh_multiclass_SAM2_mem-bal_False-sub_set_full-bbox_shift_0
+    pretrain_model: ${base_model}
+    model_type: sam2_hiera_b+.yaml
     model_details:
       balanced: false
       subject: full
@@ -53,10 +53,12 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
+      resize_masks: True
 
-  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_3/20240816-0220_finetuned_model_best_converted.pth
-  #   model_weights: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_0
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  # - finetuned_model: /path/to/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_3/20240816-0220_finetuned_model_best_converted.pth
+  #   model_identifier: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_0
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -65,9 +67,11 @@ models:
   #     prompt_encoder: false
   #     image_encoder: false
   #     mask_decoder: true
-  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_4/20240816-2250_finetuned_model_best_converted.pth
-  #   model_weights: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_5
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #     resize_masks: True
+  # - finetuned_model: /path/to/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_4/20240816-2250_finetuned_model_best_converted.pth
+  #   model_identifier: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_5
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -76,9 +80,11 @@ models:
   #     prompt_encoder: false
   #     image_encoder: false
   #     mask_decoder: true
-  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_18/20240818-2212_finetuned_model_best_converted.pth
-  #   model_weights: Thigh_multiclass_SAM2_mem-bal_False-sub_set_full-bbox_shift_0
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #     resize_masks: True
+  # - finetuned_model: /path/to/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_18/20240818-2212_finetuned_model_best_converted.pth
+  #   model_identifier: Thigh_multiclass_SAM2_mem-bal_False-sub_set_full-bbox_shift_0
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -87,9 +93,11 @@ models:
   #     prompt_encoder: false
   #     image_encoder: true
   #     mask_decoder: true
-  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_16/20240815-2251_finetuned_model_best_converted.pth
-  #   model_weights: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_0
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #     resize_masks: True
+  # - finetuned_model: /path/to/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_16/20240815-2251_finetuned_model_best_converted.pth
+  #   model_identifier: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_0
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -98,9 +106,11 @@ models:
   #     prompt_encoder: false
   #     image_encoder: true
   #     mask_decoder: true
-  # - finetuned_model: /data/mskprojects/mskSAM/users/ghoyer/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_17/20240816-1344_finetuned_model_best_converted.pth
-  #   model_weights: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_5
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #     resize_masks: True
+  # - finetuned_model: /path/to/AutoMedLabel2/work_dir/finetuning/OAI_Thigh/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_17/20240816-1344_finetuned_model_best_converted.pth
+  #   model_identifier: Thigh_multiclass_SAM2-bal_False-sub_set_full-bbox_shift_5
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -109,3 +119,4 @@ models:
   #     prompt_encoder: false
   #     image_encoder: true
   #     mask_decoder: true
+  #     resize_masks: True

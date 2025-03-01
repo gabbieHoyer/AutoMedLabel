@@ -10,8 +10,12 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from ultralytics.data.utils import exif_size, img2label_paths
-from ultralytics.utils.checks import check_requirements
+# from ultralytics.data.utils import exif_size, img2label_paths
+# from ultralytics.utils.checks import check_requirements
+
+from ..data.utils import exif_size, img2label_paths
+from ..utils.checks import check_requirements
+
 
 check_requirements("shapely")
 from shapely.geometry import Polygon

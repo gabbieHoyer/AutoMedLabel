@@ -2,10 +2,15 @@
 
 from copy import copy
 
-from ultralytics.models import yolo
-from ultralytics.nn.tasks import SegmentationModel
-from ultralytics.utils import DEFAULT_CFG, RANK
-from ultralytics.utils.plotting import plot_images, plot_results
+# from ultralytics.models import yolo
+# from ultralytics.nn.tasks import SegmentationModel
+# from ultralytics.utils import DEFAULT_CFG, RANK
+# from ultralytics.utils.plotting import plot_images, plot_results
+
+from ....models import yolo
+from ....nn.tasks import SegmentationModel
+from ....utils import DEFAULT_CFG, RANK
+from ....utils.plotting import plot_images, plot_results
 
 
 class SegmentationTrainer(yolo.detect.DetectionTrainer):

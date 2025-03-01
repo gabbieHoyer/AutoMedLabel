@@ -7,13 +7,19 @@ import cv2
 import numpy as np
 import pandas as pd
 
-from ultralytics.data.augment import LetterBox
-from ultralytics.utils import LOGGER as logger
-from ultralytics.utils import SETTINGS
-from ultralytics.utils.checks import check_requirements
-from ultralytics.utils.ops import xyxy2xywh
-from ultralytics.utils.plotting import plot_images
+# from ultralytics.data.augment import LetterBox
+# from ultralytics.utils import LOGGER as logger
+# from ultralytics.utils import SETTINGS
+# from ultralytics.utils.checks import check_requirements
+# from ultralytics.utils.ops import xyxy2xywh
+# from ultralytics.utils.plotting import plot_images
 
+from ...data.augment import LetterBox
+from ...utils import LOGGER as logger
+from ...utils import SETTINGS
+from ...utils.checks import check_requirements
+from ...utils.ops import xyxy2xywh
+from ...utils.plotting import plot_images
 
 def get_table_schema(vector_size):
     """Extracts and returns the schema of a database table."""

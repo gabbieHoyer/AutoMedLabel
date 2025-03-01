@@ -10,14 +10,21 @@ import torch.nn as nn
 
 import matplotlib.pyplot as plt
 
-from ultralytics.data import build_dataloader, build_yolo_dataset
-from ultralytics.engine.trainer import BaseTrainer
-from ultralytics.models import yolo
-from ultralytics.nn.tasks import DetectionModel
-from ultralytics.utils import LOGGER, RANK
-from ultralytics.utils.plotting import plot_images, plot_labels, plot_results
-from ultralytics.utils.torch_utils import de_parallel, torch_distributed_zero_first
+# from ultralytics.data import build_dataloader, build_yolo_dataset
+# from ultralytics.engine.trainer import BaseTrainer
+# from ultralytics.models import yolo
+# from ultralytics.nn.tasks import DetectionModel
+# from ultralytics.utils import LOGGER, RANK
+# from ultralytics.utils.plotting import plot_images, plot_labels, plot_results
+# from ultralytics.utils.torch_utils import de_parallel, torch_distributed_zero_first
 
+from ....data import build_dataloader, build_yolo_dataset
+from ....engine.trainer import BaseTrainer
+from ....models import yolo
+from ....nn.tasks import DetectionModel
+from ....utils import LOGGER, RANK
+from ....utils.plotting import plot_images, plot_labels, plot_results
+from ....utils.torch_utils import de_parallel, torch_distributed_zero_first
 
 class DetectionTrainer(BaseTrainer):
     """

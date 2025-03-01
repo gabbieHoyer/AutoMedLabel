@@ -10,7 +10,8 @@ from pathlib import Path
 
 import requests
 
-from ultralytics.utils import (
+# from ultralytics.utils import (
+from ..utils import (
     ENVIRONMENT,
     LOGGER,
     ONLINE,
@@ -26,7 +27,8 @@ from ultralytics.utils import (
     is_git_dir,
     is_pip_package,
 )
-from ultralytics.utils.downloads import GITHUB_ASSETS_NAMES
+# from ultralytics.utils.downloads import GITHUB_ASSETS_NAMES
+from ..utils.downloads import GITHUB_ASSETS_NAMES
 
 HUB_API_ROOT = os.environ.get("ULTRALYTICS_HUB_API", "https://api.ultralytics.com")
 HUB_WEB_ROOT = os.environ.get("ULTRALYTICS_HUB_WEB", "https://hub.ultralytics.com")

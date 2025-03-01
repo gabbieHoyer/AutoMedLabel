@@ -4,9 +4,14 @@ from copy import copy
 
 import torch
 
-from ultralytics.models.yolo.detect import DetectionTrainer
-from ultralytics.nn.tasks import RTDETRDetectionModel
-from ultralytics.utils import RANK, colorstr
+# from ultralytics.models.yolo.detect import DetectionTrainer
+# from ultralytics.nn.tasks import RTDETRDetectionModel
+# from ultralytics.utils import RANK, colorstr
+
+from ...models.yolo.detect import DetectionTrainer
+from ...nn.tasks import RTDETRDetectionModel
+from ...utils import RANK, colorstr
+
 from .val import RTDETRDataset, RTDETRValidator
 
 

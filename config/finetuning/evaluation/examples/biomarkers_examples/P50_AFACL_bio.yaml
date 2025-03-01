@@ -53,8 +53,9 @@ models:
 
   # best for cartilage: 
   - finetuned_model: /work_dir/finetuning/P50_AF/SAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240818-2238_finetuned_model_best_converted.pth
-    model_weights: P50_AFACL_SAM2_mem
-    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_identifier: P50_AFACL_SAM2_mem
+    pretrain_model: ${base_model}
+    model_type: sam2_hiera_b+.yaml
     model_details:
       balanced: false
       subject: full
@@ -63,3 +64,4 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
+      resize_masks: True

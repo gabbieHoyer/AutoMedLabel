@@ -5,6 +5,7 @@
 import os
 import argparse
 import subprocess
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
@@ -16,12 +17,13 @@ root = pyrootutils.setup_root(
     dotenv=True, # load environment variables from .env if exists in root directory
 )
 
-from src.utils.file_management.config_handler import load_dataset_config
-from src.utils.file_management.file_handler import save_nifti
-from src.preprocessing.data_loaders.dataset_handler import get_data, get_combined_data, validate_data
-from src.utils.file_management.path_info import extract_data_paths
+from src.utils import load_dataset_config, extract_data_paths, save_nifti
+from src.preprocessing.data_loaders import (
+    get_data,
+    get_combined_data,
+    validate_data,
+)
 
-import numpy as np
 # Define the main conversion function for MRI images or masks
 def convert_to_nifti(data_dir, nifti_output_dir:str, columns_to_process=None, \
                      key:str='', data_transforms:dict={}, expected_properties:dict={}, \
@@ -78,7 +80,6 @@ def data_standardization(config_name):
 
     def check_path_exists(cfg, dir_key):
         return cfg.get(dir_key) and os.path.exists(cfg[dir_key])
-    #import pdb; pdb.set_trace()
     if check_path_exists(cfg, "image_data_paths"):
         convert_to_nifti(cfg.get("image_data_paths"),
                          cfg.get("nifti_image_dir"),
@@ -90,7 +91,6 @@ def data_standardization(config_name):
                          cfg.get("no_dicom_extension_flag", False),
                          cfg.get("subject_test_sample", ""),
                          )
-    #import pdb; pdb.set_trace()
     if check_path_exists(cfg, "mask_data_paths"):
         convert_to_nifti(cfg.get("mask_data_paths"),
                          cfg.get("nifti_mask_dir"),

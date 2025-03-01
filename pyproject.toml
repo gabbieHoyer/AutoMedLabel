@@ -1,0 +1,33 @@
+
+[project]
+name = "automedlabel"
+version = "0.1.0"
+description = "A reproducible pipeline for evaluating foundation models in musculoskeletal MRI."
+authors = [
+    {name = "Gabrielle Hoyer", email = "gabbie.hoyer@ucsf.edu"}
+]
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.10"
+
+# Main dependencies 
+dependencies = [
+    "pyrootutils",
+    "numpy",
+]
+
+# Optional extras ('stats' group):
+# (Install them by running: poetry install --with stats)
+[project.optional-dependencies]
+stats = [
+    "pandas",
+    "scipy",
+    "statsmodels"
+]
+
+[project.scripts]
+automedlabel = "src.main:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

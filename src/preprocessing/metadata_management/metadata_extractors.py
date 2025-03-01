@@ -15,8 +15,6 @@ root = pyrootutils.setup_root(
     dotenv=True, # load environment variables from .env if exists in root directory
 )
 
-from src.utils.file_management.file_loaders_savers import save_json, save_parquet
-
 def extract_demographics_from_csv(volume_csv_config:dict):
     """
     Extract and standardize specified demographics information from a CSV file for a specific subject,
@@ -157,7 +155,7 @@ def generate_subject_metadata(dataset_info:dict, subject_info:dict, additional_m
     Parameters:
     - dataset_info: Additional characteristics from dataset.
     - subject_info: Additional characteristics from dataset.
-    - additional_metadata: #TODO Dictionary of all subject metadata.
+    - additional_metadata:  Dictionary of all subject metadata.
 
     Returns:
     - subject_metadata: Dictionary with a subset of info from "additional_metadata" for a single subject.
@@ -189,8 +187,7 @@ def generate_subject_metadata(dataset_info:dict, subject_info:dict, additional_m
 
 # ------------------------------------------------------------------------------------------
 
-# def generate_slice_info_for_subject(img_file_paths, mask_file_paths, dataset_info):
-def generate_slice_info_for_subject(img_file_paths, mask256_file_paths, label_file_paths, dataset_info):  #mask_file_paths,
+def generate_slice_info_for_subject(img_file_paths, mask_file_paths, label_file_paths, dataset_info):  
     """
     For a single subject/volume, summarize file path info about all slices.
 
@@ -208,8 +205,7 @@ def generate_slice_info_for_subject(img_file_paths, mask256_file_paths, label_fi
     for img_path in sorted(img_file_paths):
         subject_id = os.path.basename(img_path).rsplit('-',1)[0]
         slice_number = img_path.rsplit('-')[-1].split('.')[0].zfill(3)  # Format slice_number with leading zeros
-        # mask_path = [f for f in mask_file_paths if f"{subject_id}-{slice_number}" in f][0]
-        mask256_path = [f for f in mask256_file_paths if f"{subject_id}-{slice_number}" in f][0]
+        mask_path = [f for f in mask_file_paths if f"{subject_id}-{slice_number}" in f][0]
 
         if label_file_paths is not None:
             label_path = [f for f in label_file_paths if f"{subject_id}-{slice_number}" in f][0]
@@ -217,8 +213,7 @@ def generate_slice_info_for_subject(img_file_paths, mask256_file_paths, label_fi
                             'slice_number': slice_number,
                             'npy_base_dir': dataset_info['npy_dir'],
                             'npy_image_path': img_path,
-                            # 'npy_mask_path': mask_path,
-                            'npy256_mask_path': mask256_path,
+                            'npy_mask_path': mask_path,
                             'txt_label_path': label_path,
                             'Dataset': dataset_info['dataset_name'],
                             'mask_labels': 'placeholder'})
@@ -227,8 +222,7 @@ def generate_slice_info_for_subject(img_file_paths, mask256_file_paths, label_fi
                             'slice_number': slice_number,
                             'npy_base_dir': dataset_info['npy_dir'],
                             'npy_image_path': img_path,
-                            # 'npy_mask_path': mask_path,
-                            'npy256_mask_path': mask256_path,
+                            'npy_mask_path': mask_path,
                             'Dataset': dataset_info['dataset_name'],
                             'mask_labels': 'placeholder'})
 

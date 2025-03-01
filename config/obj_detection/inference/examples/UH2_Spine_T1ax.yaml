@@ -1,5 +1,5 @@
 data:
-  data_dir: /lumbar_spine/T1_ax/UH3_test_cases/group1/
+  data_dir: path/to/lumbar_spine/T1_ax/UH3_test_cases/group1/
 
   mask_labels:
     0: background
@@ -15,6 +15,7 @@ preprocessing_cfg:
   remove_label_ids: []
   instance_bbox: True
   make_square: False
+  use_sitk: False #True
 
 device: cuda:0
 
@@ -24,14 +25,14 @@ models:
     model_weights: spinet1ax_YOLO8_200epoch
     model_type: YOLO
     conf: 0.25
+    post_processing: True
 
   segmentation:
-    # base_model: work_dir/model_weights/MedSAM/medsam_vit_b.pth
-    base_model: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
-    # model_path: work_dir/model_weights/MedSAM/medsam_vit_b.pth
-    model_path: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
-    # model_weights: MedSAM
-    model_weights: SAM2
+    finetuned_model: ""
+    # pretrain_model: work_dir/model_weights/MedSAM/medsam_vit_b.pth
+    pretrain_model: work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt
+    # model_identifier: MedSAM
+    model_identifier: SAM2
     # model_type: vit_b
     model_type: sam2_hiera_b+.yaml
     
@@ -39,6 +40,7 @@ models:
       prompt_encoder: False
       image_encoder: True
       mask_decoder: True
+      resize_masks: True
 
 output_cfg:
   base_output_dir: work_dir/inference
@@ -47,3 +49,4 @@ output_cfg:
   visualize: True
   img_clim: False
   logging_level: DEBUG
+  save_method: sitk

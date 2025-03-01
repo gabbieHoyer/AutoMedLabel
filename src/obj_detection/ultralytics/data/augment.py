@@ -9,12 +9,20 @@ import numpy as np
 import torch
 import torchvision.transforms as T
 
-from ultralytics.utils import LOGGER, colorstr
-from ultralytics.utils.checks import check_version
-from ultralytics.utils.instance import Instances
-from ultralytics.utils.metrics import bbox_ioa
-from ultralytics.utils.ops import segment2box, xyxyxyxy2xywhr
-from ultralytics.utils.torch_utils import TORCHVISION_0_10, TORCHVISION_0_11, TORCHVISION_0_13
+# from ultralytics.utils import LOGGER, colorstr
+# from ultralytics.utils.checks import check_version
+# from ultralytics.utils.instance import Instances
+# from ultralytics.utils.metrics import bbox_ioa
+# from ultralytics.utils.ops import segment2box, xyxyxyxy2xywhr
+# from ultralytics.utils.torch_utils import TORCHVISION_0_10, TORCHVISION_0_11, TORCHVISION_0_13
+
+from ..utils import LOGGER, colorstr
+from ..utils.checks import check_version
+from ..utils.instance import Instances
+from ..utils.metrics import bbox_ioa
+from ..utils.ops import segment2box, xyxyxyxy2xywhr
+from ..utils.torch_utils import TORCHVISION_0_10, TORCHVISION_0_11, TORCHVISION_0_13
+
 from .utils import polygons2masks, polygons2masks_overlap
 
 DEFAULT_MEAN = (0.0, 0.0, 0.0)

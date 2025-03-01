@@ -6,9 +6,11 @@ from time import time
 import cv2
 import numpy as np
 
-from ultralytics.utils.checks import check_imshow
-from ultralytics.utils.plotting import Annotator, colors
+# from ultralytics.utils.checks import check_imshow
+# from ultralytics.utils.plotting import Annotator, colors
 
+from ..utils.checks import check_imshow
+from ..utils.plotting import Annotator, colors
 
 class SpeedEstimator:
     """A class to estimation speed of objects in real-time video stream based on their tracks."""

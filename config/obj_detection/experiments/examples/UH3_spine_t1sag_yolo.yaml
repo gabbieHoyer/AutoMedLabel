@@ -1,5 +1,5 @@
-# model: YOLO8/yolov8n.pt
-model: work_dir/obj_detection/UH3_Spine/runs/train3/weights/last.pt
+model: YOLO8/yolov8n.pt
+checkpoint: work_dir/obj_detection/UH3_Spine/runs/train3/weights/last.pt
 model_type: YOLO
 data_yaml: spine_t1sag_data.yaml
 imgsz: 1024
@@ -7,11 +7,11 @@ epochs: 300
 batch: 8 
 rect: False
 workers: 8 
-run_dir: /correcting_rad_workflow/det2seg/AutoMedLabel/work_dir/obj_detection/UH3_Spine/runs
+run_dir: /path/to/correcting_rad_workflow/AutoMedLabel/work_dir/obj_detection/UH3_Spine/runs
 # multi_scale: True
 
 # best_weights: runs/detect/train/weights/best.pt
 
 # for testing inference
-data: /spine_pipeline/dicom_cases/
+data: /path/to/spine_pipeline/dicom_cases/
 

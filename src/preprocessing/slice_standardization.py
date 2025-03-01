@@ -1,9 +1,9 @@
+
 import os
 import sys
+import argparse
 import numpy as np
 from tqdm import tqdm
-
-import argparse
 
 import pyrootutils
 root = pyrootutils.setup_root(
@@ -12,14 +12,10 @@ root = pyrootutils.setup_root(
     pythonpath=True,
     dotenv=True,
 )
-
-from src.utils.file_management.config_handler import load_dataset_config
-
-# -------------------- DATA LOADING FUNCTIONS --------------------
-from src.utils.file_management.file_handler import load_nifti
+from src.utils import load_dataset_config, load_nifti
 
 # ----------------- DATA TRANSFORMATION FUNCTIONS -----------------
-from src.preprocessing.model_prep import MaskPrep, ImagePrep, write_list_to_file, get_bounding_boxes
+from .model_prep import MaskPrep, ImagePrep, write_list_to_file, get_bounding_boxes
 
 # --------------------- DATA SAVING FUNCTIONS ---------------------
 def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, dataImagePrep, z_indices, output_dir:str, base_name, yolo_processing):
@@ -35,29 +31,32 @@ def save_processed_data(image_data:np.ndarray, mask_data:np.ndarray, dataImagePr
     - Saves masks slices (1 channel) in output_dir/gt/base_name-###.npy, where ### is the slice index
     """
     images_dir = os.path.join(output_dir, "imgs")
-    masks_dir = os.path.join(output_dir, "gts_256")
-    # masks_dir = os.path.join(output_dir, "gts")
+    masks_dir = os.path.join(output_dir, "gts")
     os.makedirs(images_dir, exist_ok=True)
     os.makedirs(masks_dir, exist_ok=True)
 
     if yolo_processing:
-        annotations_dir = os.path.join(output_dir, "labels_256")
-        # annotations_dir = os.path.join(output_dir, "labels")
+        annotations_dir = os.path.join(output_dir, "labels")
         os.makedirs(annotations_dir, exist_ok=True)
     
     for i, (img_slice, mask_slice) in enumerate(zip(image_data, mask_data)):
         
-        # img_slice = dataImagePrep.prep_image_step2(img_slice)
-
         img_slice_3c = np.repeat(img_slice[:, :, None], 3, axis=-1) 
+        # print(f'mask_slice.shape: {mask_slice.shape}')
 
         image_file_name = f"{base_name}-{str(z_indices[i]).zfill(3)}"
         np.save(os.path.join(images_dir, image_file_name + ".npy"), img_slice_3c)  # wut their size is (640, 1024) to (640, 1024, 3)
         np.save(os.path.join(masks_dir, image_file_name + ".npy"), mask_slice)  # wut their size is (640, 1024)
 
         if yolo_processing:
-            write_list_to_file(os.path.join(annotations_dir, image_file_name + ".txt"), get_bounding_boxes(mask_slice, instance=True))
 
+            # Assume img_slice_3c is 1024x1024 and mask_slice is 256x256.
+            # Compute the bounding boxes using the full image dimensions:
+            scale_factor = img_slice_3c.shape[0] / mask_slice.shape[0]
+            # print(f'scale: {scale_factor}')
+            bbox_list = get_bounding_boxes(mask_slice, scale_factor=scale_factor, instance=True)
+            write_list_to_file(os.path.join(annotations_dir, image_file_name + ".txt"), bbox_list)
+            
         sys.stdout.flush()  # Ensure output is flushed immediately
 
 
@@ -113,23 +112,23 @@ def slice_standardization(config_name):
     cfg = load_dataset_config(config_name, root)
 
     # Run the SAM preparation process with parameters from the config
+    prep_cfg = cfg.get('preprocessing_cfg', {})
+    mask_size = prep_cfg.get('gt_mask_size', prep_cfg.get('image_size'))
     dataMaskPrep = MaskPrep(
-        remove_label_ids=cfg.get('preprocessing_cfg').get('remove_label_ids'),
-        target_label_id=cfg.get('preprocessing_cfg').get('target_label_id', None),  # Optional parameter with default
-        voxel_threshold_3d=cfg.get('preprocessing_cfg').get('voxel_num_thre3d'),
-        pixel_threshold_2d=cfg.get('preprocessing_cfg').get('voxel_num_thre2d'),
-        image_size_tuple=(cfg.get('preprocessing_cfg').get('image_size'),
-                          cfg.get('preprocessing_cfg').get('image_size')),
-        crop_non_zero_slices_flag = cfg.get('preprocessing_cfg').get('crop_non_zero_slices_flag', True),
-        make_square = cfg.get('preprocessing_cfg').get('make_square', False),
-        ratio_resize = cfg.get('preprocessing_cfg').get('ratio_resize', False),
+        remove_label_ids=prep_cfg.get('remove_label_ids'),
+        target_label_id=prep_cfg.get('target_label_id', None),  # Optional parameter with default
+        voxel_threshold_3d=prep_cfg.get('voxel_num_thre3d'),
+        pixel_threshold_2d=prep_cfg.get('voxel_num_thre2d'),
+        mask_size_tuple=(mask_size, mask_size),
+        crop_non_zero_slices_flag = prep_cfg.get('crop_non_zero_slices_flag', True),
+        make_square = prep_cfg.get('make_square', False),
+        ratio_resize = prep_cfg.get('ratio_resize', False),
         )
-
+    image_size = prep_cfg.get('image_size')
     dataImagePrep = ImagePrep(
-        image_size_tuple=(cfg.get('preprocessing_cfg').get('image_size'),
-                          cfg.get('preprocessing_cfg').get('image_size')),
-        make_square = cfg.get('preprocessing_cfg').get('make_square', False),
-        ratio_resize = cfg.get('preprocessing_cfg').get('ratio_resize', False),
+        image_size_tuple=(image_size, image_size),
+        make_square = prep_cfg.get('make_square', False),
+        ratio_resize = prep_cfg.get('ratio_resize', False),
     )
     nifti_to_npy(
         mask_dir=cfg.get('nifti_mask_dir'),

@@ -2,8 +2,11 @@
 
 import subprocess
 
-from ultralytics.cfg import TASK2DATA, TASK2METRIC, get_save_dir
-from ultralytics.utils import DEFAULT_CFG, DEFAULT_CFG_DICT, LOGGER, NUM_THREADS
+# from ultralytics.cfg import TASK2DATA, TASK2METRIC, get_save_dir
+# from ultralytics.utils import DEFAULT_CFG, DEFAULT_CFG_DICT, LOGGER, NUM_THREADS
+
+from ..cfg import TASK2DATA, TASK2METRIC, get_save_dir
+from ..utils import DEFAULT_CFG, DEFAULT_CFG_DICT, LOGGER, NUM_THREADS
 
 
 def run_ray_tune(

@@ -7,7 +7,8 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 
-from ultralytics.nn.modules import (
+# from ultralytics.nn.modules import (
+from ..nn.modules import (
     AIFI,
     C1,
     C2,
@@ -44,11 +45,18 @@ from ultralytics.nn.modules import (
     Segment,
     WorldDetect,
 )
-from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
-from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
-from ultralytics.utils.loss import v8ClassificationLoss, v8DetectionLoss, v8OBBLoss, v8PoseLoss, v8SegmentationLoss
-from ultralytics.utils.plotting import feature_visualization
-from ultralytics.utils.torch_utils import (
+# from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
+# from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
+# from ultralytics.utils.loss import v8ClassificationLoss, v8DetectionLoss, v8OBBLoss, v8PoseLoss, v8SegmentationLoss
+# from ultralytics.utils.plotting import feature_visualization
+
+from ..utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
+from ..utils.checks import check_requirements, check_suffix, check_yaml
+from ..utils.loss import v8ClassificationLoss, v8DetectionLoss, v8OBBLoss, v8PoseLoss, v8SegmentationLoss
+from ..utils.plotting import feature_visualization
+
+# from ultralytics.utils.torch_utils import (
+from ..utils.torch_utils import (
     fuse_conv_and_bn,
     fuse_deconv_and_bn,
     initialize_weights,
@@ -693,7 +701,8 @@ def torch_safe_load(weight):
     Returns:
         (dict): The loaded PyTorch model.
     """
-    from ultralytics.utils.downloads import attempt_download_asset
+    # from ultralytics.utils.downloads import attempt_download_asset
+    from ..utils.downloads import attempt_download_asset
 
     check_suffix(file=weight, suffix=".pt")
     file = attempt_download_asset(weight)  # search online if missing locally

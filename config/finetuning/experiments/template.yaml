@@ -27,7 +27,6 @@ datamodule:
   bbox_shift: <SHIFT_VALUE>  # Shift value for bounding boxes (e.g., 0).
   batch_size: <BATCH_SIZE>  # Batch size for training (e.g., 4).
   num_workers: <NUM_WORKERS>  # Number of worker processes for data loading (e.g., 1).
-  # instance: <True/False>  # Uncomment if instance segmentation is used.
   # augmentation_pipeline: 
   #   config: <AUGMENTATION_CONFIG_FILE>  # Path to data augmentation configuration (e.g., 'simple.yaml').
 
@@ -46,14 +45,17 @@ module:
     prompt_encoder: <True/False>   # Whether to train the prompt encoder.
     image_encoder: <True/False>    # Whether to train the image encoder.
     mask_decoder: <True/False>     # Whether to train the mask decoder.
+    resize_masks: <True/False>     # Whether to resize the model's predicted masks to match the ground-truth mask dimensions before metric evaluation.
+                                   # For example, if the ground-truth masks are 1024x1024 but the model outputs 256x256 predictions, set this to True
+                                   # so predictions are upscaled to 1024x1024. Conversely, if ground-truth masks and predictions are both 256x256,
+                                   # set this to False to avoid unnecessary resizing.
 
   # Task and group naming.
   task_name: <TASK_NAME>  # Name of the task or dataset (e.g., 'DHAL-Shoulder').
   group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
   
   # Model configuration.
-  model_type: <MODEL_TYPE>  # Type of the model architecture (e.g., 'vit_b').
-  sam2_model_cfg: <MODEL_CONFIG_FILE>  # Path to the model configuration file (e.g., 'sam2_hiera_b+.yaml').
+  model_type: <MODEL_TYPE/MODEL_CONFIG_FILE>  # Functions two-fold as type of the model architecture (e.g., 'vit_b'), or model configuration file to use (e.g., 'sam2_hiera_b+.yaml').
 
   # Additional settings.
   use_wandb: <True/False>  # Whether to use Weights & Biases for experiment tracking.
@@ -84,6 +86,9 @@ module:
     enabled: <True/False>  # Whether to enable early stopping.
     patience: <PATIENCE_EPOCHS>  # Number of epochs with no improvement after which training will be stopped (e.g., 10).
     min_delta: <MIN_DELTA_VALUE>  # Minimum change in the monitored metric to qualify as an improvement (e.g., 0.0001).
+
+  checkpoint_interval: <INTERVAL_VALUE>   # How often to save the mid-run "latest" checkpoint (e.g., 5, 10, 20)
+  always_convert_best: <True/False>   # If true, always do final checkpoint conversion (in place of utils/sam_ckpt_conversion.py)
 
 # ------------------------ OUTPUT CONFIGURATION ------------------------ #
 output_configuration:

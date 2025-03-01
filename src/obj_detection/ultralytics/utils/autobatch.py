@@ -6,9 +6,11 @@ from copy import deepcopy
 import numpy as np
 import torch
 
-from ultralytics.utils import DEFAULT_CFG, LOGGER, colorstr
-from ultralytics.utils.torch_utils import profile
+# from ultralytics.utils import DEFAULT_CFG, LOGGER, colorstr
+# from ultralytics.utils.torch_utils import profile
 
+from ..utils import DEFAULT_CFG, LOGGER, colorstr
+from ..utils.torch_utils import profile
 
 def check_train_batch_size(model, imgsz=640, amp=True):
     """

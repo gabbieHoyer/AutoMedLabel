@@ -8,7 +8,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Dict, List, Union
 
-from ultralytics.utils import (
+# from ultralytics.utils import (
+from ..utils import (
     ASSETS,
     DEFAULT_CFG,
     DEFAULT_CFG_DICT,
@@ -245,7 +246,8 @@ def get_save_dir(args, name=None):
     if getattr(args, "save_dir", None):
         save_dir = args.save_dir
     else:
-        from ultralytics.utils.files import increment_path
+        # from ultralytics.utils.files import increment_path
+        from ..utils.files import increment_path
 
         # project = args.project or (ROOT.parent / "tests/tmp/runs" if TESTS_RUNNING else RUNS_DIR) / args.task
         project = args.run_dir or args.project or (ROOT.parent / "tests/tmp/runs" if TESTS_RUNNING else RUNS_DIR) / args.task
@@ -342,7 +344,8 @@ def handle_yolo_hub(args: List[str]) -> None:
         python my_script.py hub login your_api_key
         ```
     """
-    from ultralytics import hub
+    # from ultralytics import hub
+    from .. import hub
 
     if args[0] == "login":
         key = args[1] if len(args) > 1 else ""
@@ -517,11 +520,13 @@ def entrypoint(debug=""):
     overrides["model"] = model
     stem = Path(model).stem.lower()
     if "rtdetr" in stem:  # guess architecture
-        from ultralytics import RTDETR
+        # from ultralytics import RTDETR
+        from .. import RTDETR
 
         model = RTDETR(model)  # no task argument
     else:
-        from ultralytics import YOLO
+        # from ultralytics import YOLO
+        from .. import YOLO
 
         model = YOLO(model, task=task)
     if isinstance(overrides.get("pretrained"), str):

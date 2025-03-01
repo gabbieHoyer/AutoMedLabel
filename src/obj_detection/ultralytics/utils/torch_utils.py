@@ -16,8 +16,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 
-from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, __version__
-from ultralytics.utils.checks import PYTHON_VERSION, check_version
+# from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, __version__
+# from ultralytics.utils.checks import PYTHON_VERSION, check_version
+
+from ..utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, __version__
+from ..utils.checks import PYTHON_VERSION, check_version
+
 
 try:
     import thop
@@ -283,7 +287,8 @@ def model_info_for_loggers(trainer):
         ```
     """
     if trainer.args.profile:  # profile ONNX and TensorRT times
-        from ultralytics.utils.benchmarks import ProfileModels
+        # from ultralytics.utils.benchmarks import ProfileModels
+        from ..utils.benchmarks import ProfileModels
 
         results = ProfileModels([trainer.last], device=trainer.device).profile()[0]
         results.pop("model/name")

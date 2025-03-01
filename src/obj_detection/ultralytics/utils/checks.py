@@ -20,7 +20,8 @@ import requests
 import torch
 from matplotlib import font_manager
 
-from ultralytics.utils import (
+# from ultralytics.utils import (
+from ..utils import (
     ASSETS,
     AUTOINSTALL,
     LINUX,
@@ -278,7 +279,8 @@ def check_pip_update_available():
     """
     if ONLINE and is_pip_package():
         with contextlib.suppress(Exception):
-            from ultralytics import __version__
+            # from ultralytics import __version__
+            from .. import __version__
 
             latest = check_latest_pypi_version()
             if check_version(__version__, f"<{latest}"):  # check if current version is < latest version
@@ -546,7 +548,8 @@ def check_yolo(verbose=True, device=""):
     """Return a human-readable YOLO software and hardware summary."""
     import psutil
 
-    from ultralytics.utils.torch_utils import select_device
+    # from ultralytics.utils.torch_utils import select_device
+    from ..utils.torch_utils import select_device
 
     if is_jupyter():
         if check_requirements("wandb", install=False):
@@ -576,8 +579,10 @@ def collect_system_info():
 
     import psutil
 
-    from ultralytics.utils import ENVIRONMENT, is_git_dir
-    from ultralytics.utils.torch_utils import get_cpu_info
+    # from ultralytics.utils import ENVIRONMENT, is_git_dir
+    # from ultralytics.utils.torch_utils import get_cpu_info
+    from ..utils import ENVIRONMENT, is_git_dir
+    from ..utils.torch_utils import get_cpu_info
 
     ram_info = psutil.virtual_memory().total / (1024**3)  # Convert bytes to GB
     check_yolo()
@@ -649,7 +654,8 @@ def check_amp(model):
     LOGGER.info(f"{prefix}running Automatic Mixed Precision (AMP) checks with YOLOv8n...")
     warning_msg = "Setting 'amp=True'. If you experience zero-mAP or NaN losses you can disable AMP with amp=False."
     try:
-        from ultralytics import YOLO
+        # from ultralytics import YOLO
+        from .. import YOLO
 
         assert amp_allclose(YOLO("yolov8n.pt"), im)
         LOGGER.info(f"{prefix}checks passed ✅")

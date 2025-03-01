@@ -1,7 +1,7 @@
+
+import cv2
 import numpy as np
 from scipy.io import loadmat
-import cv2
-
 from collections import OrderedDict
 
 imorphics_assign = OrderedDict([

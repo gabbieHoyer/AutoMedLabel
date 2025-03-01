@@ -6,7 +6,7 @@ train: train/images
 val: val/images
 test: test/images
 
-meta_path: /lumbar_spine/T1_sag/metadata/volume_metadata_for_ml.json 
+# meta_path: /path/to/lumbar_spine/T1_sag/metadata/volume_metadata_for_ml.json 
 
 names:
 - background

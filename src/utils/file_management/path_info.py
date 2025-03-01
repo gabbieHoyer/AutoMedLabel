@@ -1,18 +1,25 @@
+
 import os
-import pandas as pd
 import re
+import pandas as pd
 from typing import Union
 
-
-def file_without_extension_from_path(file_name:str):
-    """ Extract filenames without extension
-    Caution: fails for files with periods but no extension (ex. dicom file: "1.2.345")
+def get_base_name(file_or_dir: str) -> str:
     """
-    # Removes file extension
-    # If zipped, remove zipped file extension (name.dcm.gz, name.nii.gz)
-    if file_name.endswith('.gz'):
-        file_name = file_name.rstrip('.gz')
-    return os.path.splitext(file_name)[0] # Assuming file_name can be used as subject_id
+    Extracts the base name (without file extensions) from a file or directory path.
+    
+    If the input is a directory, returns the directory name.
+    If the input is a file, removes its extension (and any trailing '.gz' if present).
+    
+    Caution: May fail for files with periods but no extension (ex. dicom file: "1.2.345").
+    """
+    if os.path.isdir(file_or_dir):
+        return os.path.basename(os.path.normpath(file_or_dir))
+    else:
+        file_name = os.path.basename(file_or_dir)
+        if file_name.endswith('.gz'):
+            file_name = file_name.rstrip('.gz')
+        return os.path.splitext(file_name)[0]
 
 def pair_files(image_path:str, mask_path:str, path_ext:str='', file_prefix:str=''):
 
@@ -69,7 +76,7 @@ def pair_files_in_split(image_dir:str, mask_dir:str, path_ext:str='', split_dict
         for image_path, mask_path in selected_pairs:
             # Check whether file name without extension is assigned to the desired split
             file_name = os.path.basename(image_path)
-            file_name_without_ext = file_without_extension_from_path(file_name)
+            file_name_without_ext = get_base_name(file_name)
             if split_dict.get(file_name_without_ext, {}).get('Split') == split_text:
                 valid_pairs.append((image_path, mask_path))
             
@@ -118,7 +125,7 @@ def extract_data_paths(data_dir:str, columns_to_process:Union[list[str], str, No
         for file_name in os.listdir(data_dir):
             data_paths = [os.path.join(data_dir, file_name)]
             # Assuming file_name can be used as subject_id, Removes file extension, 
-            subject_id = file_without_extension_from_path(file_name) 
+            subject_id = get_base_name(file_name) 
 
             data_paths_info.append((data_paths, subject_id))
     else:
@@ -130,7 +137,6 @@ def extract_data_paths(data_dir:str, columns_to_process:Union[list[str], str, No
         data_paths_info = data_paths_info[0:subject_test_sample]
 
     return data_paths_info
-
 
 # ---------------- Npy Volume ID Path Functions ----------------
 
@@ -157,7 +163,6 @@ def volume_id_file_paths_in_dir(npy_files_dir:str, volume_id:str):
             file_paths.append(file_path)
     return file_paths
 
-
 def pair_volume_id_paths(image_path:str, mask_path:str):
 
     if os.path.isdir(image_path) and os.path.isdir(mask_path):
@@ -169,7 +174,6 @@ def pair_volume_id_paths(image_path:str, mask_path:str):
     else:
         selected_pairs = []
     return selected_pairs
-
 
 # ---------------- MISC ----------------
 def alphanumeric_sort(strings):

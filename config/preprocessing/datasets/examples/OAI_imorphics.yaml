@@ -71,8 +71,10 @@ nifti_fig_cfg:
 # Values for image preprocessing script
 preprocessing_cfg:
   image_size: 1024
-  voxel_num_thre2d: 100
+  gt_mask_size: 1024
+  voxel_num_thre2d: 800
   voxel_num_thre3d: 1000
+  kernel_size: 7
   remove_label_ids: []  # No labels to remove in this configuration
   target_label_id: null  # No specific label targeted for instance segmentation
   instance_bbox: False
@@ -149,6 +151,7 @@ stats_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_stats.json
 ml_metadata_file: ${general_data_dir}/metadata/volume_metadata_for_ml.json
 # Operation C - location to parquet files for ML
 slice_info_parquet_dir: ${general_data_dir}/metadata/SAM/slice_paths
+
 # Operation D - location for text file of dicom metadata from one file
 dicom_metadata_file: ${general_data_dir}/metadata/dicom_metadata_summary.csv
 

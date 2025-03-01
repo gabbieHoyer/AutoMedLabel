@@ -1,16 +1,13 @@
 model: NAS/yolo_nas_s.pt
 model_type: NAS
 data_yaml: thigh_data.yaml
-imgsz: [1024, 512]  # technically this is variable :/ three different variations exist in thigh oai dataset
-epochs: 1 #300
-batch: 16
+imgsz: 1024 
+epochs: 20 #100
+batch: 8
 rect: True
 # multi_scale: True
 
-# currently not functional b/c pycocotools onnx build failed via pip
-# need to reconcile to install module 'super_gradients'
-
 best_weights: work_dir/obj_detection/runs/detect/train18/weights/best.pt
 
-data: standardized_data/dpr/thigh_npy3_instance/test/images/subject407-003.npy
+data: /path/to/standardized_data/dpr/thigh_npy3_instance/test/images/subject407-003.npy
 

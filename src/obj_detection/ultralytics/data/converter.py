@@ -7,8 +7,11 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from ultralytics.utils import LOGGER, TQDM
-from ultralytics.utils.files import increment_path
+# from ultralytics.utils import LOGGER, TQDM
+# from ultralytics.utils.files import increment_path
+
+from ..utils import LOGGER, TQDM
+from ..utils.files import increment_path
 
 
 def coco91_to_coco80_class():
@@ -501,10 +504,16 @@ def yolo_bbox2segment(im_dir, save_dir=None, sam_model="sam_b.pt"):
                 ├─ ..
                 └─ NNN.txt
     """
-    from ultralytics.data import YOLODataset
-    from ultralytics.utils.ops import xywh2xyxy
-    from ultralytics.utils import LOGGER
-    from ultralytics import SAM
+    # from ultralytics.data import YOLODataset
+    # from ultralytics.utils.ops import xywh2xyxy
+    # from ultralytics.utils import LOGGER
+    # from ultralytics import SAM
+
+    from ..data import YOLODataset
+    from ..utils.ops import xywh2xyxy
+    from ..utils import LOGGER
+    from .. import SAM
+
     from tqdm import tqdm
 
     # NOTE: add placeholder to pass class index check

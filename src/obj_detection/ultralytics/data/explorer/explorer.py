@@ -12,11 +12,18 @@ from matplotlib import pyplot as plt
 from pandas import DataFrame
 from tqdm import tqdm
 
-from ultralytics.data.augment import Format
-from ultralytics.data.dataset import YOLODataset
-from ultralytics.data.utils import check_det_dataset
-from ultralytics.models.yolo.model import YOLO
-from ultralytics.utils import LOGGER, IterableSimpleNamespace, checks, USER_CONFIG_DIR
+# from ultralytics.data.augment import Format
+# from ultralytics.data.dataset import YOLODataset
+# from ultralytics.data.utils import check_det_dataset
+# from ultralytics.models.yolo.model import YOLO
+# from ultralytics.utils import LOGGER, IterableSimpleNamespace, checks, USER_CONFIG_DIR
+
+from ...data.augment import Format
+from ...data.dataset import YOLODataset
+from ...data.utils import check_det_dataset
+from ...models.yolo.model import YOLO
+from ...utils import LOGGER, IterableSimpleNamespace, checks, USER_CONFIG_DIR
+
 from .utils import get_sim_index_schema, get_table_schema, plot_query_result, prompt_sql_query, sanitize_batch
 
 

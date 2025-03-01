@@ -4,9 +4,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ultralytics.utils.metrics import OKS_SIGMA
-from ultralytics.utils.ops import crop_mask, xywh2xyxy, xyxy2xywh
-from ultralytics.utils.tal import RotatedTaskAlignedAssigner, TaskAlignedAssigner, dist2bbox, dist2rbox, make_anchors
+# from ultralytics.utils.metrics import OKS_SIGMA
+# from ultralytics.utils.ops import crop_mask, xywh2xyxy, xyxy2xywh
+# from ultralytics.utils.tal import RotatedTaskAlignedAssigner, TaskAlignedAssigner, dist2bbox, dist2rbox, make_anchors
+
+from ..utils.metrics import OKS_SIGMA
+from ..utils.ops import crop_mask, xywh2xyxy, xyxy2xywh
+from ..utils.tal import RotatedTaskAlignedAssigner, TaskAlignedAssigner, dist2bbox, dist2rbox, make_anchors
+
 from .metrics import bbox_iou, probiou
 from .tal import bbox2dist
 

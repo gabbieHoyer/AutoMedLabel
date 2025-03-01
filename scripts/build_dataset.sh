@@ -1,99 +1,94 @@
 #!/bin/bash
 
-#SBATCH --job-name=build_dataset
-#SBATCH --output=../logs/build_dataset_%j.log  # Save log to file with job ID
-#SBATCH --mem=16G                       # Memory requirement
-#SBATCH --time=02:00:00                 # Time limit hrs:min:sec
-#SBATCH --cpus-per-task=4               # Number of CPU cores per task
+###############################################################################
+# SLURM Job Configuration
+###############################################################################
+#SBATCH --job-name=build_dataset         # Job name
+#SBATCH --output=../logs/build_dataset_%j.log  # Log file with job ID
+#SBATCH --mem=16G                        # Memory requirement
+#SBATCH --time=02:00:00                  # Time limit (hh:mm:ss)
+#SBATCH --cpus-per-task=4                # Number of CPU cores per task
 
-# Enable exit on error
+# Set bash to exit on error
 set -e
 
 echo "Running on node $HOSTNAME"
 
-# Activate conda environment
-# export PATH=/netopt/rhel7/bin:$PATH
-# eval "$('/netopt/rhel7/versions/python/Anaconda3-edge/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
+###############################################################################
+# HPC Environment Configuration (Generic)
+###############################################################################
+# 1. (Optionally) Load required modules for your HPC environment.
+#    Below are placeholders; adjust as appropriate for your system.
+#    For example:
+# module load anaconda
+# module load python/3.9
 
-export MODULEPATH=$MODULEPATH:/home/ghoyer/Modules/modulefiles
-module load use.own
+# 2. Activate your conda environment or other virtual environment.
+#    Replace <ENV_NAME> with your environment’s name or path.
+#    Example:
+# source activate <ENV_NAME>
 
-if [ -d "/home/ghoyer/miniconda3" ]; then
-    # Load Conda module for RHEL9
-    module load conda_base/1.0
-    if [ $? -ne 0 ]; then
-        echo "Failed to load Miniconda module for RHEL9. Check module name and path."
-    else
-        # Assuming conda init is already run and managed
-        echo "Conda is initialized for RHEL9."
-    fi
-else
-    echo "Miniconda3 directory not found on RHEL9."
-fi
+# Or if you use mamba or a different approach, place it here.
 
-eval "$('/home/ghoyer/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+###############################################################################
+# User-Defined Parameters
+###############################################################################
+# You can store the list of config files in an array for batch processing.
+# CONFIG_LIST=("OAI_T1_Thigh" "TBrecon" "YOUR_CONFIG_NAME")
 
-# -------------------- USER DEFINED PARAMS -------------------- #
+CONFIG_LIST=("OAI_T1_Thigh")
 
-# Define a list containing the base name of your config file without the path or extension
+# If your HPC requires a specific working directory, you can cd there:
+# cd /path/to/your/project/scripts || exit
 
-# CONFIG_LIST=("TBrecon") # 
-CONFIG_LIST=("K2S")
+echo "========================================================="
+echo "Environment setup complete. Starting data processing..."
+echo "========================================================="
 
-# Your Conda environment name: 'myenv'
-if [ -d /data/VirtualAging ] ;
-then
-  dVA="VirtualAging"
-else
-  dVA="virtualaging"
-fi
-
-CONDA_ENV_NAME=/data/$dVA/users/ghoyer/conda/envs/autolabel
-
-# -------------------- BEGIN CODE -------------------- #
-
-## Activate Conda environment
-echo "Activating Conda environment: ${CONDA_ENV_NAME}"
-source activate ${CONDA_ENV_NAME} || conda activate ${CONDA_ENV_NAME}
-
-## Navigate to the data processing directory
-cd ../src || exit
-
-
-## Iterate through each dataset
+###############################################################################
+# Data Processing Pipeline
+###############################################################################
+# Example of iterating through the config files and running your scripts.
 for CONFIG_NAME in "${CONFIG_LIST[@]}"; do 
     echo "**************************************************"
-    echo "config $CONFIG_NAME chosen for data-processing pipeline"
+    echo "Config: $CONFIG_NAME"
 
-    # # Run your scripts
     echo "Starting data_standardization.py with ${CONFIG_NAME}"
-    python3 preprocessing/data_standardization.py "${CONFIG_NAME}"
+    python3 -m preprocessing.data_standardization "${CONFIG_NAME}"
 
     echo "Starting nifti_viz.py with ${CONFIG_NAME}"
-    python3 evaluation/visualization/nifti_viz.py "${CONFIG_NAME}"
+    python3 -m utils.visualization.preprocessing.nifti_viz "${CONFIG_NAME}"
 
-    echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation A"
-    python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation A
+    echo "Starting metadata_creation.py (operation A) with ${CONFIG_NAME}"
+    python3 -m preprocessing.metadata_creation "${CONFIG_NAME}" --operation A
 
-    echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation B"
-    python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation B
+    echo "Starting metadata_creation.py (operation B) with ${CONFIG_NAME}"
+    python3 -m preprocessing.metadata_creation "${CONFIG_NAME}" --operation B
 
     echo "Starting slice_standardization.py with ${CONFIG_NAME}"
-    python3 preprocessing/slice_standardization.py "${CONFIG_NAME}"
+    python3 -m preprocessing.slice_standardization "${CONFIG_NAME}"
 
     echo "Starting npy_viz.py with ${CONFIG_NAME}"
-    python3 evaluation/visualization/npy_viz.py "${CONFIG_NAME}"
+    python3 -m utils.visualization.preprocessing.npy_viz "${CONFIG_NAME}"
 
-    echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation C"
-    python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation C
+    echo "Starting metadata_creation.py (operation C) with ${CONFIG_NAME}"
+    python3 -m preprocessing.metadata_creation "${CONFIG_NAME}" --operation C
 
-    # ----------------------- Bonus ---------------------- #
-    # echo "Starting metadata_creation.py with ${CONFIG_NAME} for operation D"
-    # python3 preprocessing/metadata_creation.py "${CONFIG_NAME}" --operation D
+    echo "Starting metadata_creation.py (operation D) with ${CONFIG_NAME}"
+    python3 -m preprocessing.metadata_creation "${CONFIG_NAME}" --operation D
 
-    echo "All processes completed successfully."
+    echo "All processes for $CONFIG_NAME completed successfully."
+done
 
-done 
+echo "========================================================="
+echo "All dataset processes are finished."
+echo "========================================================="
 
-# to run shell script: sbatch build_sam_dataset.sh 
-# from inside the /scripts directory
+# Usage:
+#   sbatch build_dataset.sh
+#
+# Make sure you have:
+#   - Adjusted the SLURM settings (#SBATCH directives) for your HPC needs
+#   - Updated environment/module loading
+#   - Provided correct CONFIG_LIST entries for your config files
+#   - Confirmed the python modules (e.g., python3 -m preprocessing...) match your repo structure

@@ -5,6 +5,7 @@
 # ------------------------ MODEL CONFIGURATION ------------------------ #
 model: <MODEL_PATH>  # Path to the pre-trained model or model architecture to use (e.g., 'yolov8n.pt').
 model_type: <MODEL_TYPE>  # Type of the model architecture (e.g., 'YOLO', 'DETR').
+# checkpoint: <CHECKPOINT_PATH>  # Path to the best model weights file, useful for resuming training or inference. e.g., 'runs/detect/train/weights/checkpoint.pt'
 
 # ------------------------ DATASET CONFIGURATION ------------------------ #
 data_yaml: <DATA_YAML_FILE>  # Path to the dataset YAML configuration file (e.g., 'dhal_data.yaml').
@@ -47,7 +48,7 @@ copy_paste: 0.0       # Segment copy-paste (probability)
 # save_dir: <SAVE_DIRECTORY>  # Custom directory to save training outputs (e.g., '/path/to/save_dir').
 
 # ------------------------ BEST WEIGHTS ------------------------ #
-# Path to the best model weights file, useful for resuming training or inference.
+# Path to the best model weights file, useful for validation / inference.
 
 # best_weights: <BEST_WEIGHTS_PATH>  # e.g., 'runs/detect/train/weights/best.pt'
 

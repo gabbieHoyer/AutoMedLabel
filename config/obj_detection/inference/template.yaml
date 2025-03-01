@@ -22,6 +22,7 @@ preprocessing_cfg:
   remove_label_ids: []             # List of label IDs to remove; leave empty if none.
   instance_bbox: <True/False>      # Whether to use instance bounding boxes (e.g., True).
   make_square: <True/False>        # Whether to resize images to square dimensions (e.g., False).
+  use_sitk: <True/False>           # If True, uses SimpleITK for loading NIfTI files instead of nibabel.
 
 # ------------------------ DEVICE CONFIGURATION ------------------------ #
 device: <DEVICE>  # Device for computation (e.g., 'cuda:0' for GPU or 'cpu' for CPU).
@@ -36,9 +37,9 @@ models:
     post_processing: <True/False>  # Whether to apply post-processing (e.g., True).
 
   segmentation:
-    base_model: <BASE_MODEL_PATH>  # Path to the base segmentation model weights (e.g., 'path/to/sam_vit_b.pth').
-    model_path: <MODEL_PATH>       # Path to the finetuned segmentation model weights; can be the same as base_model.
-    model_weights: <MODEL_WEIGHTS_NAME>  # Identifier for the segmentation model (e.g., 'SAM', 'SAM2').
+    pretrain_model: <BASE_MODEL_PATH>  # Path to the base segmentation model weights (e.g., 'path/to/sam_vit_b.pth').
+    finetuned_model: <MODEL_PATH>       # Path to the finetuned segmentation model weights; can be the same as base_model.
+    model_identifier: <MODEL_WEIGHTS_NAME>  # Identifier for the segmentation model (e.g., 'SAM', 'SAM2').
     model_type: <MODEL_TYPE>       # Type or configuration file of the segmentation model (e.g., 'vit_b', 'sam2_hiera_b+.yaml').
 
     # Specify which components of the model are trainable or were trained.
@@ -46,6 +47,7 @@ models:
       prompt_encoder: <True/False>  # Whether the prompt encoder is trainable.
       image_encoder: <True/False>   # Whether the image encoder is trainable.
       mask_decoder: <True/False>    # Whether the mask decoder is trainable.
+      resize_masks: <True/False>    # Whether to resize predicted masks to the model input shape before post-processing.
 
 # ------------------------ OUTPUT CONFIGURATION ------------------------ #
 output_cfg:
@@ -55,6 +57,7 @@ output_cfg:
   visualize: <True/False>              # Whether to generate visualizations (e.g., True).
   img_clim: <True/False>               # Optional color scaling for images (e.g., True for certain MRI sequences).
   logging_level: <LOGGING_LEVEL>       # Logging level (e.g., 'DEBUG', 'INFO').
+  save_method: <sitk/nibabel>          # Library choice for saving NIfTI output (e.g., 'sitk' or 'nibabel').
 
 # ------------------------ ADDITIONAL CONFIGURATION ------------------------ #
 # Add any additional configurations or comments as needed.

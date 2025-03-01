@@ -31,10 +31,11 @@ module:
     prompt_encoder: False   # Frozen
     image_encoder: True       
     mask_decoder: True      # Trainable
+    resize_masks: True
 
   task_name: OAI-Knee  # W&B project name
   group_name: ${experiment.pretrained_weights}_${datamodule.max_subject_set}_trainSubjects_sliceBalance_${datamodule.balanced}_imgEnc_${module.trainable.image_encoder}_maskDec_${module.trainable.mask_decoder}
-  sam2_model_cfg: sam2_hiera_b+.yaml
+  model_type: sam2_hiera_b+.yaml
 
   use_wandb: True
   visualize: True
@@ -61,15 +62,12 @@ module:
     patience: 10
     min_delta: 0.0001   
 
+  checkpoint_interval: 5      # how often to save the mid-run "latest" checkpoint
+  always_convert_best: true   # if true, always do final checkpoint conversion
+
 output_configuration:
   save_path: Run_Summaries
   viz_eval_path: ${output_configuration.save_path}/figs
   summary_file: ${experiment.name}_data_summary.csv
   logging_level: INFO # as default; DEBUG 
 
-# ------------------ Dataset Evaluation ------------------
-visualizations:
-  metadata_demographics:
-    config: demo_splits.yaml
-  # finetuned_splits: 
-  #   config: finetuned_splits.yaml

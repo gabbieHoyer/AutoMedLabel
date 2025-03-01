@@ -1,7 +1,7 @@
 
 # ------------------------ Evaluation ------------------------ #
 evaluation:
-  name: "DHAL_Shoulder_SAM2_mem"
+  name: "DHAL_Shoulder_SAM2"
   description: "Evaluating models finetuned on the DHAL shoulder MRI dataset."
 
 SEED: 42
@@ -13,7 +13,7 @@ dataset:
     project: DHAL-Evaluation  # useful for stating Weights and Biases project name if user want to use w&b
 
 datamodule:
-  max_subject_set: 3  # if the user wants to test eval pipeline functionality with small subset, though the 'full' test set will automatically be run in addition to this
+  max_subject_set: 5  # if the user wants to test eval pipeline functionality with small subset, though the 'full' test set will automatically be run in addition to this
   bbox_shift: 0  # eval doesnt typically include augmentation, however, if goal is automatic YOLO + SAM model, this shifting may be a realistic gauge of what your model can handle for inference
   batch_size: 1  
   num_workers: 1
@@ -35,8 +35,9 @@ base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
 
 models:
   - finetuned_model: /work_dir/finetuning/DHAL-Shoulder/SAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240819-0105_finetuned_model_best_converted.pth
-    model_weights: DHAL_SAM2_mem-bal_False-sub_set_full-bbox_shift_0
-    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_identifier: DHAL_SAM2_mem-bal_False-sub_set_full-bbox_shift_0
+    pretrain_model: ${base_model}
+    model_type: sam2_hiera_b+.yaml
     model_details:
       balanced: false
       subject: full
@@ -45,10 +46,12 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
+      resize_masks: True
 
   # - finetuned_model: "/work_dir/finetuning/DHAL-Shoulder/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_1/20240816-0132_finetuned_model_best_converted.pth"
-  #   model_weights: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_0
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_identifier: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_0
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -57,9 +60,11 @@ models:
   #     prompt_encoder: false
   #     image_encoder: false
   #     mask_decoder: true
+  #     resize_masks: True
   # - finetuned_model: "/work_dir/finetuning/DHAL-Shoulder/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_2/20240816-2151_finetuned_model_best_converted.pth"
-  #   model_weights: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_5
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_identifier: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_5
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -68,9 +73,11 @@ models:
   #     prompt_encoder: false
   #     image_encoder: false
   #     mask_decoder: true
+  #     resize_masks: True
   # - finetuned_model: "/work_dir/finetuning/DHAL-Shoulder/SAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240819-0105_finetuned_model_best_converted.pth"
-  #   model_weights: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_0
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_identifier: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_0
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -79,9 +86,11 @@ models:
   #     prompt_encoder: false
   #     image_encoder: true
   #     mask_decoder: true
+  #     resize_masks: True
   # - finetuned_model: "/work_dir/finetuning/DHAL-Shoulder/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240815-2251_finetuned_model_best_converted.pth"
-  #   model_weights: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_0
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_identifier: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_0
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -90,9 +99,11 @@ models:
   #     prompt_encoder: false
   #     image_encoder: true
   #     mask_decoder: true
+  #     resize_masks: True
   # - finetuned_model: "/work_dir/finetuning/DHAL-Shoulder/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_2/20240816-1227_finetuned_model_best_converted.pth"
-  #   model_weights: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_5
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   model_identifier: DHAL_SAM2-bal_False-sub_set_full-bbox_shift_5
+  #   pretrain_model: ${base_model}
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -101,3 +112,4 @@ models:
   #     prompt_encoder: false
   #     image_encoder: true
   #     mask_decoder: true
+  #     resize_masks: True

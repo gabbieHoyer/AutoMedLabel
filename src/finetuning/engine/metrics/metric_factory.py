@@ -1,7 +1,5 @@
-from .t1rho_t2_maps import T1rhoMetric, T2Metric
-from .disc_height import TissueHeightMetric
-from .tissue_volume import TissueVolumeMetric
-from .cartilage_thickness import CartilageThicknessMetric
+
+from src.finetuning.engine.metrics import T1rhoMetric, T2Metric, TissueHeightMetric, TissueVolumeMetric, CartilageThicknessMetric
 # Import other metric classes as needed
 
 def metric_factory(metric_name, **kwargs):

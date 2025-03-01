@@ -1,7 +1,8 @@
 import os
+import random
 import logging
 import numpy as np
-import random
+
 import torch
 import torch.distributed as dist
 
@@ -112,8 +113,9 @@ def cleanup():
     # You can add any other cleanup operations here
 
 # ----------------- LOGGING -----------------
+
 def setup_logging(config_level, logger):
-    # Mapping of configuration logging levels to logging module levels
+    # Mapping configuration levels to logging module levels
     level_mapping = {
         'DEBUG': logging.DEBUG,
         'INFO': logging.INFO,
@@ -122,20 +124,24 @@ def setup_logging(config_level, logger):
         'CRITICAL': logging.CRITICAL,
     }
     
-    # Map the config level to the logging module level, default to logging.INFO if mapping not found
+    # Map config_level to a logging module level, defaulting to INFO if not found
     logging_level = level_mapping.get(config_level, logging.INFO)
+    
+    rank = get_rank()  # Retrieve the current process rank once
+    logging.basicConfig(
+        level=logging_level,
+        format=f'%(asctime)s - %(levelname)s - Rank {rank} - %(filename)s:%(lineno)d - %(funcName)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
 
-    logging.basicConfig(level=logging_level,
-                    format=f'%(asctime)s - %(levelname)s - Rank {get_rank()} - %(filename)s:%(lineno)d - %(message)s')
-
-    logger.info(f"PyTorch version: {torch.__version__}")
-    logger.info(f"CUDA available: {torch.cuda.is_available()}")
-    logger.info(f"Number of GPUs available: {torch.cuda.device_count()}")
+    logger.info("PyTorch version: %s", torch.__version__)
+    logger.info("CUDA available: %s", torch.cuda.is_available())
+    logger.info("Number of GPUs available: %s", torch.cuda.device_count())
 
     if torch.cuda.is_available():
         for i in range(torch.cuda.device_count()):
-            logger.info(f"GPU {i}: {torch.cuda.get_device_name(i)}")
-        logger.info(f"CUDA_VISIBLE_DEVICES: {os.environ.get('CUDA_VISIBLE_DEVICES', 'Not Set')}")
+            logger.info("GPU %s: %s", i, torch.cuda.get_device_name(i))
+        logger.info("CUDA_VISIBLE_DEVICES: %s", os.environ.get('CUDA_VISIBLE_DEVICES', 'Not Set'))
 
     return logger
 

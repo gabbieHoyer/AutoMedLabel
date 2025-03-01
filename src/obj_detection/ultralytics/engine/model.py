@@ -5,10 +5,15 @@ import sys
 from pathlib import Path
 from typing import Union
 
-from ultralytics.cfg import TASK2DATA, get_cfg, get_save_dir
-from ultralytics.hub.utils import HUB_WEB_ROOT
-from ultralytics.nn.tasks import attempt_load_one_weight, guess_model_task, nn, yaml_model_load
-from ultralytics.utils import ASSETS, DEFAULT_CFG_DICT, LOGGER, RANK, SETTINGS, callbacks, checks, emojis, yaml_load
+# from ultralytics.cfg import TASK2DATA, get_cfg, get_save_dir
+# from ultralytics.hub.utils import HUB_WEB_ROOT
+# from ultralytics.nn.tasks import attempt_load_one_weight, guess_model_task, nn, yaml_model_load
+# from ultralytics.utils import ASSETS, DEFAULT_CFG_DICT, LOGGER, RANK, SETTINGS, callbacks, checks, emojis, yaml_load
+
+from ..cfg import TASK2DATA, get_cfg, get_save_dir
+from ..hub.utils import HUB_WEB_ROOT
+from ..nn.tasks import attempt_load_one_weight, guess_model_task, nn, yaml_model_load
+from ..utils import ASSETS, DEFAULT_CFG_DICT, LOGGER, RANK, SETTINGS, callbacks, checks, emojis, yaml_load
 
 
 class Model(nn.Module):
@@ -163,7 +168,8 @@ class Model(nn.Module):
     @staticmethod
     def _get_hub_session(model: str):
         """Creates a session for Hub Training."""
-        from ultralytics.hub.session import HUBTrainingSession
+        # from ultralytics.hub.session import HUBTrainingSession
+        from ..hub.session import HUBTrainingSession
 
         session = HUBTrainingSession(model)
         return session if session.client.authenticated else None
@@ -441,7 +447,8 @@ class Model(nn.Module):
             AttributeError: If the predictor does not have registered trackers.
         """
         if not hasattr(self.predictor, "trackers"):
-            from ultralytics.trackers import register_tracker
+            # from ultralytics.trackers import register_tracker
+            from ..trackers import register_tracker
 
             register_tracker(self, persist)
         kwargs["conf"] = kwargs.get("conf") or 0.1  # ByteTrack-based method needs low confidence predictions as input
@@ -505,7 +512,8 @@ class Model(nn.Module):
             AssertionError: If the model is not a PyTorch model.
         """
         self._check_is_pytorch_model()
-        from ultralytics.utils.benchmarks import benchmark
+        # from ultralytics.utils.benchmarks import benchmark
+        from ..utils.benchmarks import benchmark
 
         custom = {"verbose": False}  # method defaults
         args = {**DEFAULT_CFG_DICT, **self.model.args, **custom, **kwargs, "mode": "benchmark"}
@@ -655,7 +663,8 @@ class Model(nn.Module):
         """
         self._check_is_pytorch_model()
         if use_ray:
-            from ultralytics.utils.tuner import run_ray_tune
+            # from ultralytics.utils.tuner import run_ray_tune
+            from ..utils.tuner import run_ray_tune
 
             return run_ray_tune(self, max_samples=iterations, *args, **kwargs)
         else:
@@ -684,8 +693,9 @@ class Model(nn.Module):
         Returns:
             (list | None): The class names of the model if available, otherwise None.
         """
-        from ultralytics.nn.autobackend import check_class_names
-
+        # from ultralytics.nn.autobackend import check_class_names
+        from ..nn.autobackend import check_class_names
+        
         return check_class_names(self.model.names) if hasattr(self.model, "names") else None
 
     @property

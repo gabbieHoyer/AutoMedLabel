@@ -9,12 +9,12 @@ names:
 
 nc: 7
 
-path: /knee_pipeline/standardized_knee/OAI/knee/3D_DESS/Imorphics/npy/YOLO
+path: /path/to/knee_pipeline/standardized_knee/OAI/knee/3D_DESS/Imorphics/npy/YOLO
 
 train: train/images
 val: val/images
 test: test/images
 
 # in development
-# meta_path: /standardized_knee/OAI/knee/3D_DESS/Imorphics/metadata/volume_metadata_for_ml.json 
+# meta_path: /path/to/standardized_knee/OAI/knee/3D_DESS/Imorphics/metadata/volume_metadata_for_ml.json 
 

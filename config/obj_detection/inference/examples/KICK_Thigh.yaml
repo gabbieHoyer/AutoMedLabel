@@ -1,5 +1,5 @@
 data:
-  data_dir: standardized_data/KICK_thigh/standardized_K004_OPC.nii.gz
+  data_dir: path/tostandardized_data/KICK_thigh/standardized_K004_OPC.nii.gz
   # data_dir: standardized_data/KICK_thigh/standardized_K004_Fat.nii.gz
   # data_dir: standardized_data/KICK_thigh/standardized_K004_Water.nii.gz
 
@@ -23,6 +23,7 @@ preprocessing_cfg:
   remove_label_ids: []
   instance_bbox: True
   make_square: True
+  use_sitk: False #True
 
 device: cuda:0
 
@@ -32,16 +33,18 @@ models:
     model_weights: thighYOLO8_100epoch_square_resize
     model_type: YOLO
     conf: 0.2
+    post_processing: True
 
   segmentation:
-    base_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
-    model_path: work_dir/finetuning/OAI_Thigh_SAM_YOLO/SAM_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_6/20240706-1605_finetuned_model_best_converted.pth  # had the early stopping of 10 epochs
-    model_weights: multiclass_Thigh_SAM_with_fascia_square_resize
+    finetuned_model: work_dir/finetuning/OAI_Thigh_SAM_YOLO/SAM_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_6/20240706-1605_finetuned_model_best_converted.pth  # had the early stopping of 10 epochs
+    pretrain_model: work_dir/model_weights/SAM/sam_vit_b_01ec64.pth
+    model_identifier: multiclass_Thigh_SAM_with_fascia_square_resize
     model_type: vit_b
     trainable:
       prompt_encoder: False
       image_encoder: True
       mask_decoder: True
+      resize_masks: True
 
 output_cfg:
   base_output_dir: work_dir/inference
@@ -50,3 +53,4 @@ output_cfg:
   visualize: True
   img_clim: False
   logging_level: DEBUG
+  save_method: sitk

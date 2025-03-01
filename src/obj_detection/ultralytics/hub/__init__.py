@@ -2,10 +2,14 @@
 
 import requests
 
-from ultralytics.data.utils import HUBDatasetStats
-from ultralytics.hub.auth import Auth
-from ultralytics.hub.utils import HUB_API_ROOT, HUB_WEB_ROOT, PREFIX
-from ultralytics.utils import LOGGER, SETTINGS, checks
+# from ultralytics.data.utils import HUBDatasetStats
+# from ultralytics.hub.auth import Auth
+# from ultralytics.hub.utils import HUB_API_ROOT, HUB_WEB_ROOT, PREFIX
+# from ultralytics.utils import LOGGER, SETTINGS, checks
+from ..data.utils import HUBDatasetStats
+from ..hub.auth import Auth
+from ..hub.utils import HUB_API_ROOT, HUB_WEB_ROOT, PREFIX
+from ..utils import LOGGER, SETTINGS, checks
 
 
 def login(api_key: str = None, save=True) -> bool:
@@ -79,7 +83,8 @@ def reset_model(model_id=""):
 
 def export_fmts_hub():
     """Returns a list of HUB-supported export formats."""
-    from ultralytics.engine.exporter import export_formats
+    # from ultralytics.engine.exporter import export_formats
+    from ..engine.exporter import export_formats
 
     return list(export_formats()["Argument"][1:]) + ["ultralytics_tflite", "ultralytics_coreml"]
 

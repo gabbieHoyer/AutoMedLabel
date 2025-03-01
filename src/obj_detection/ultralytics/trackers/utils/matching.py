@@ -4,7 +4,8 @@ import numpy as np
 import scipy
 from scipy.spatial.distance import cdist
 
-from ultralytics.utils.metrics import bbox_ioa, batch_probiou
+# from ultralytics.utils.metrics import bbox_ioa, batch_probiou
+from ...utils.metrics import bbox_ioa, batch_probiou
 
 try:
     import lap  # for linear_assignment

@@ -61,13 +61,21 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from ultralytics.cfg import get_cfg
-from ultralytics.data.dataset import YOLODataset
-from ultralytics.data.utils import check_det_dataset
-from ultralytics.nn.autobackend import check_class_names, default_class_names
-from ultralytics.nn.modules import C2f, Detect, RTDETRDecoder
-from ultralytics.nn.tasks import DetectionModel, SegmentationModel
-from ultralytics.utils import (
+# from ultralytics.cfg import get_cfg
+# from ultralytics.data.dataset import YOLODataset
+# from ultralytics.data.utils import check_det_dataset
+# from ultralytics.nn.autobackend import check_class_names, default_class_names
+# from ultralytics.nn.modules import C2f, Detect, RTDETRDecoder
+# from ultralytics.nn.tasks import DetectionModel, SegmentationModel
+# from ultralytics.utils import (
+
+from ..cfg import get_cfg
+from ..data.dataset import YOLODataset
+from ..data.utils import check_det_dataset
+from ..nn.autobackend import check_class_names, default_class_names
+from ..nn.modules import C2f, Detect, RTDETRDecoder
+from ..nn.tasks import DetectionModel, SegmentationModel
+from ..utils import (
     ARM64,
     DEFAULT_CFG,
     LINUX,
@@ -81,11 +89,17 @@ from ultralytics.utils import (
     get_default_args,
     yaml_save,
 )
-from ultralytics.utils.checks import PYTHON_VERSION, check_imgsz, check_is_path_safe, check_requirements, check_version
-from ultralytics.utils.downloads import attempt_download_asset, get_github_assets
-from ultralytics.utils.files import file_size, spaces_in_path
-from ultralytics.utils.ops import Profile
-from ultralytics.utils.torch_utils import get_latest_opset, select_device, smart_inference_mode
+# from ultralytics.utils.checks import PYTHON_VERSION, check_imgsz, check_is_path_safe, check_requirements, check_version
+# from ultralytics.utils.downloads import attempt_download_asset, get_github_assets
+# from ultralytics.utils.files import file_size, spaces_in_path
+# from ultralytics.utils.ops import Profile
+# from ultralytics.utils.torch_utils import get_latest_opset, select_device, smart_inference_mode
+
+from ..utils.checks import PYTHON_VERSION, check_imgsz, check_is_path_safe, check_requirements, check_version
+from ..utils.downloads import attempt_download_asset, get_github_assets
+from ..utils.files import file_size, spaces_in_path
+from ..utils.ops import Profile
+from ..utils.torch_utils import get_latest_opset, select_device, smart_inference_mode
 
 
 def export_formats():

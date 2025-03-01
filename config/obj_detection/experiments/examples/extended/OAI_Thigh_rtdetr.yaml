@@ -1,14 +1,13 @@
 model: RTDETR/rtdetr-l.pt
 model_type: RTDETR
 data_yaml: thigh_data_plus.yaml
-# imgsz: 1024 #[1024, 1024]
-imgsz: [1024, 512]  # technically this is variable :/ three different variations exist in thigh oai dataset
-epochs: 1 #300
+imgsz: 1024
+epochs: 1 #100
 batch: 16
 rect: True
 # multi_scale: True
 
 best_weights: work_dir/obj_detection/runs/detect/train7/weights/best.pt
 
-data: standardized_data/dpr/thigh_npy3_instance/test/images/subject407-003.npy
+data: /path/to/standardized_data/dpr/thigh_npy3_instance/test/images/subject407-003.npy
 

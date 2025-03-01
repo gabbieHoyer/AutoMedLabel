@@ -50,7 +50,8 @@ base_model: "work_dir/model_weights/SAM/sam_vit_b_01ec64.pth"
 models:
   # best for cartilage-esque label:
   - finetuned_model: /work_dir/model_weights/Finetuned/mixed_Spine/no_aug_bbox_shift_0/Not_Balanced/img_enc_True/early_stop_patience_10/subject_full/20240528-1836_finetuned_model_best.pth
-    model_weights: Spine_mixed_axes
+    model_identifier: Spine_mixed_axes
+    pretrain_model: ${base_model}
     model_type: vit_b
     model_details:
       balanced: false
@@ -60,11 +61,13 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
+      resize_masks: True
 
     # best for bone
   # - finetuned_model: /work_dir/finetuning/Spine_T1sag/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_3/20240816-0045_finetuned_model_best_converted.pth
-  #   model_weights: Spine_T1sag_SAM2-bal_False-sub_set_full-bbox_shift_0
-  #   sam2_model_cfg: sam2_hiera_b+.yaml
+  #   pretrain_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
+  #   model_identifier: Spine_T1sag_SAM2-bal_False-sub_set_full-bbox_shift_0
+  #   model_type: sam2_hiera_b+.yaml
   #   model_details:
   #     balanced: false
   #     subject: full
@@ -73,3 +76,4 @@ models:
   #     prompt_encoder: false
   #     image_encoder: false
   #     mask_decoder: true
+  #     resize_masks: True

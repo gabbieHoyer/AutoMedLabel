@@ -13,7 +13,7 @@ dataset:
     project: UH2_T1ax-Evaluation
 
 datamodule:
-  max_subject_set: 3
+  max_subject_set: 10
   bbox_shift: 0
   batch_size: 1  
   num_workers: 1
@@ -34,8 +34,9 @@ base_model: "work_dir/model_weights/SAM2/sam2_hiera_base_plus.pt"
 
 models:
   - finetuned_model: /work_dir/finetuning/Spine_T1ax/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_1/20240816-0246_finetuned_model_best_converted.pth
-    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_0
-    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_identifier: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_0
+    pretrain_model: ${base_model}
+    model_type: sam2_hiera_b+.yaml
     model_details:
       balanced: false
       subject: full
@@ -44,9 +45,11 @@ models:
       prompt_encoder: false
       image_encoder: false
       mask_decoder: true
+      resize_masks: True
   - finetuned_model: /work_dir/finetuning/Spine_T1ax/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_False_maskDec_True/Run_2/20240816-2315_finetuned_model_best_converted.pth
-    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_5
-    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_identifier: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_5
+    pretrain_model: ${base_model}
+    model_type: sam2_hiera_b+.yaml
     model_details:
       balanced: false
       subject: full
@@ -55,9 +58,11 @@ models:
       prompt_encoder: false
       image_encoder: false
       mask_decoder: true
+      resize_masks: True
   - finetuned_model: /work_dir/finetuning/Spine_T1ax/SAM2_mem_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240818-2344_finetuned_model_best_converted.pth
-    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_0
-    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_identifier: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_0
+    pretrain_model: ${base_model}
+    model_type: sam2_hiera_b+.yaml
     model_details:
       balanced: false
       subject: full
@@ -66,9 +71,11 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
+      resize_masks: True
   - finetuned_model: /work_dir/finetuning/Spine_T1ax/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_1/20240815-2352_finetuned_model_best_converted.pth
-    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_0
-    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_identifier: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_0
+    pretrain_model: ${base_model}
+    model_type: sam2_hiera_b+.yaml
     model_details:
       balanced: false
       subject: full
@@ -77,9 +84,11 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
+      resize_masks: True
   - finetuned_model: /work_dir/finetuning/Spine_T1ax/SAM2_full_trainSubjects_sliceBalance_False_imgEnc_True_maskDec_True/Run_2/20240816-1424_finetuned_model_best_converted.pth
-    model_weights: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_5
-    sam2_model_cfg: sam2_hiera_b+.yaml
+    model_identifier: Spine_T1ax_SAM2-bal_False-sub_set_full-bbox_shift_5
+    pretrain_model: ${base_model}
+    model_type: sam2_hiera_b+.yaml
     model_details:
       balanced: false
       subject: full
@@ -88,3 +97,4 @@ models:
       prompt_encoder: false
       image_encoder: true
       mask_decoder: true
+      resize_masks: True

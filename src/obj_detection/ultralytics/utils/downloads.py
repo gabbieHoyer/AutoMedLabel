@@ -12,7 +12,8 @@ from urllib import parse, request
 import requests
 import torch
 
-from ultralytics.utils import LOGGER, TQDM, checks, clean_url, emojis, is_online, url2file
+# from ultralytics.utils import LOGGER, TQDM, checks, clean_url, emojis, is_online, url2file
+from ..utils import LOGGER, TQDM, checks, clean_url, emojis, is_online, url2file
 
 # Define Ultralytics GitHub assets maintained at https://github.com/ultralytics/assets
 GITHUB_ASSETS_REPO = "ultralytics/assets"
@@ -417,7 +418,8 @@ def attempt_download_asset(file, repo="ultralytics/assets", release="v8.1.0", **
         file_path = attempt_download_asset('yolov5s.pt', repo='ultralytics/assets', release='latest')
         ```
     """
-    from ultralytics.utils import SETTINGS  # scoped for circular import
+    # from ultralytics.utils import SETTINGS  # scoped for circular import
+    from ..utils import SETTINGS  # scoped for circular import
 
     # YOLOv3/5u updates
     file = str(file)

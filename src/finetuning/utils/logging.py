@@ -1,19 +1,11 @@
-from functools import wraps
 import logging
+from functools import wraps
 
-import pyrootutils
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git"],
-    pythonpath=True,
-    dotenv=True,
-)
-
-import src.finetuning.utils.gpu_setup as GPUSetup #is_distributed
+from . import gpu_setup as GPUSetup
 
 logger = logging.getLogger(__name__)
-# -------- DECORATOR FOR MAIN PROCESS ONLY FUNCTIONALITY -------- #
 
+# -------- DECORATOR FOR MAIN PROCESS ONLY FUNCTIONALITY -------- #
 def main_process_only(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -23,9 +15,9 @@ def main_process_only(func):
 
 @main_process_only
 def log_info(message):
-    logger.info(message)
+    logger.info(message, stacklevel=2)
 
 @main_process_only
 def wandb_log(data):
-    import wandb  # It's a good practice to import within the function if it's not used elsewhere to avoid unnecessary imports
+    import wandb  
     wandb.log(data)

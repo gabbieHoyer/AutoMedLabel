@@ -1,67 +1,32 @@
+# src/utils/config_handler.py
 import os
-import copy
-
-import pyrootutils
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git"],
-    pythonpath=True,
-    dotenv=True,
-)
+import os.path as path
+from typing import Any, Dict, List, Union
 
 # --------------- Main class to load and manipulate config files ---------------
-from src.utils.file_management.config_loader import ConfigPathManager
-from src.utils.file_management.args_handler import apply_overrides, apply_overrides2
+from .config_loader import ConfigPathManager, load_yaml
+from .args_handler import apply_overrides, apply_overrides2
 
 # -------- Tool blocks to load and combine config files for experimental use cases --------
-def load_and_merge_config_section(main_config, section_path, config_path_manager, sub_dir, fields_to_merge='all'):
+
+def load_and_merge_config_section(main_config: dict, section_path: List[str],
+                                  manager: ConfigPathManager, sub_dir: str,
+                                  fields_to_merge: Union[str, List[List[str]]] = 'all') -> dict:
     """
-    Loads and merges a config section based on a path within the main config.
+    Look up a nested section in main_config, load an additional YAML file specified in that section,
+    and merge missing values from it into main_config.
     """
-    config_name = main_config
+    section = main_config
     for key in section_path[:-1]:
-        config_name = config_name.get(key, {})
-    
-    # Extract the config file name for the final key in the path
-    config_name = config_name.get(section_path[-1], {}).get('config', None)
-
-    if isinstance(config_name, str):
-        additional_config_path = config_path_manager.extract_config_path(file_name=config_name, sub_dir=sub_dir)
-        additional_config = config_path_manager.load_config_yaml_path(additional_config_path)
-        
-        # Merge the additional config with the main config
-        main_config = config_path_manager.merge_missing_config_values(main_config, additional_config, fields_to_merge)  
+        section = section.get(key, {})
+    config_file = section.get(section_path[-1], {}).get('config')
+    if config_file and isinstance(config_file, str):
+        add_path = manager.get_config_path(config_file, sub_dir)
+        additional_config = manager.load_config_yaml(add_path)
+        main_config = manager.merge_missing_values(main_config, additional_config, fields_to_merge)
     else:
-        print(f"No valid 'config' found for section {'/'.join(section_path)}. Proceeding without it.")
+        print(f"No valid config found for section {'/'.join(section_path)}; skipping merge.")
     return main_config
-
-
-def load_and_merge_visualization_configs(main_config, config_path_manager, sub_dir):
-    """
-    Specifically handles loading and merging visualization configurations.
-    Assumes each visualization config to be merged under its respective key within the `visualizations` section.
-    """
-    visualization_configs = main_config.get('visualizations', {})
-    for key, value in visualization_configs.items():
-        config_name = value.get('config', None)
-        if isinstance(config_name, str):
-            # Construct the full path and check if it exists
-            additional_config_path = os.path.join(config_path_manager.base_dir, sub_dir, config_name)
-            
-            if os.path.exists(additional_config_path):
-                additional_config_path = config_path_manager.extract_config_path(file_name=config_name, sub_dir=sub_dir)
-                additional_config = config_path_manager.load_config_yaml_path(additional_config_path)
-                # Merge this config back under its unique key within `visualizations`
-                # Assuming each config file starts with a `visualizations` key
-                if 'visualizations' in additional_config:
-                    main_config['visualizations'][key] = additional_config['visualizations']
-                else:
-                    print(f"Warning: No 'visualizations' key found in {config_name}. Skipping.")
-            else:
-                print(f"Warning: Visualization config file {additional_config_path} not found. Skipping.")
-
-    return main_config
-
 
 def load_and_merge_dataset_config(main_config, dataset_name, config_path_manager, sub_dir, new_fields_to_add, default_fields_to_add):
     """
@@ -78,76 +43,40 @@ def load_and_merge_dataset_config(main_config, dataset_name, config_path_manager
 
     return main_config
 
-# ------------ Primary Pipeline Functions to load and manipulate config files ------------
-def load_dataset_config(config_file_name, base_dir):
-    configPathManager = ConfigPathManager(base_dir=base_dir)
-    #Extract path to config and make sure yaml file exists
-    config_path = configPathManager.extract_config_path(file_name=config_file_name, 
-                                                        sub_dir=os.path.join('preprocessing','datasets'))
-    #Load config file
-    main_config = configPathManager.load_config_yaml_path(config_path)
-    return main_config
+def load_dataset_config(config_file_name: str, base_dir: str) -> dict:
+    manager = ConfigPathManager(base_dir)
+    config_path = manager.get_config_path(config_file_name, sub_dir=os.path.join('preprocessing', 'datasets'))
+    return manager.load_config_yaml(config_path)
 
-# ------------------------------------------------------------------
+def load_experiment(config_file_name: str, base_dir: str, kwargs: dict = None) -> dict:
+    manager = ConfigPathManager(base_dir)
+    # 1) Load the main experiment config
+    config_path = manager.get_config_path(config_file_name, sub_dir=os.path.join('finetuning', 'experiments'))
+    main_config = manager.load_config_yaml(config_path)
 
-def load_autolabel_prompt(config_file_name, base_dir):
-    configPathManager = ConfigPathManager(base_dir=base_dir)
-
-    # Extract path to config and make sure yaml file exists
-    config_path = configPathManager.extract_config_path(file_name=config_file_name, 
-                                                        sub_dir=os.path.join('prompting','autolabeling'))
-    main_config = configPathManager.load_config_yaml_path(config_path)
-
-    # # Process each dataset configuration
-    for dataset_name in main_config.get('dataset', {}).keys():
-
-        new_fields_to_add = [
-            ['data', 'mask_labels'],  # only works if the field is empty in my current config
-            ['preprocessing_cfg', 'image_size'],
-            ['preprocessing_cfg', 'voxel_num_thre2d'],
-            ['preprocessing_cfg', 'voxel_num_thre3d'],
-            ['preprocessing_cfg', 'instance_bbox'],
-            ['data', 'ml_metadata_file'],
-            ['data', 'slice_info_parquet_dir'],
-        ]
-        default_fields_to_add = [
-            ['mask_labels'],
-            ['preprocessing_cfg', 'image_size'],
-            ['preprocessing_cfg', 'voxel_num_thre2d'],
-            ['preprocessing_cfg', 'voxel_num_thre3d'],
-            ['preprocessing_cfg', 'instance_bbox'],
-            ['ml_metadata_file'],
-            ['slice_info_parquet_dir'],
-        ]
-
-        main_config = load_and_merge_dataset_config(main_config, dataset_name, configPathManager, 'preprocessing/datasets', new_fields_to_add, default_fields_to_add)
-
-    return main_config
-
-# ------------------------------------------------------------------
-
-def load_experiment(config_file_name, base_dir, kwargs=None):
-    configPathManager = ConfigPathManager(base_dir=base_dir)
-
-    # Extract path to config and make sure yaml file exists
-    config_path = configPathManager.extract_config_path(file_name=config_file_name, 
-                                                        sub_dir=os.path.join('finetuning','experiments'))
-    main_config = configPathManager.load_config_yaml_path(config_path)
-
-    # # Apply terminal argument updates
-    if kwargs: #!=None:
+    if kwargs:
         apply_overrides(main_config, kwargs)
 
-    # Update config with augmentation_pipeline info using the refactored function
-    main_config = load_and_merge_config_section(main_config, ['datamodule', 'augmentation_pipeline'], configPathManager, 'preprocessing/augmentations')
+    # 2) Merge augmentation pipeline config, if needed
+    main_config = load_and_merge_config_section(
+        main_config,
+        ['datamodule', 'augmentation_pipeline'],
+        manager,
+        sub_dir='preprocessing/augmentations'
+    )
 
-    # Handle visualization configs separately
-    main_config = load_and_merge_visualization_configs(main_config, configPathManager, 'finetuning/evaluation')
+    # 3) For each dataset, load its config from “preprocessing/datasets” and merge new fields
+    # inside load_experiment or load_evaluation:
+    for dataset_name in main_config.get('dataset', {}):
+        dataset_cfg_file = main_config['dataset'][dataset_name].get('config')
+        if not dataset_cfg_file:
+            continue  # skip or raise error
 
-    # Process each dataset configuration
-    for dataset_name in main_config.get('dataset', {}).keys():
+        path = manager.get_config_path(dataset_cfg_file, sub_dir='preprocessing/datasets')
+        dataset_cfg = manager.load_config_yaml(path)
 
-        new_fields_to_add = [
+        # The pairs of (new_key_path, default_key_path):
+        new_fields = [
             ['dataset', dataset_name, 'name'],
             ['dataset', dataset_name, 'ml_metadata_file'],
             ['dataset', dataset_name, 'slice_info_parquet_dir'],
@@ -155,44 +84,55 @@ def load_experiment(config_file_name, base_dir, kwargs=None):
             ['dataset', dataset_name, 'instance_bbox'],
             ['dataset', dataset_name, 'remove_label_ids'],
         ]
-        default_fields_to_add = [
-            ['dataset', 'name'],
+        default_fields = [
+            ['dataset', 'name'], 
             ['ml_metadata_file'],
             ['slice_info_parquet_dir'],
             ['mask_labels'],
-            ['preprocessing_cfg', 'instance_bbox'],
-            ['preprocessing_cfg', 'remove_label_ids']
+            ['preprocessing_cfg','instance_bbox'],
+            ['preprocessing_cfg','remove_label_ids'],
         ]
-        # ['prompt_experiment', 'preprocessing_cfg', 'instance_bbox'],
 
-        main_config = load_and_merge_dataset_config(main_config, dataset_name, configPathManager, 'preprocessing/datasets', new_fields_to_add, default_fields_to_add)
-
-    # # Apply terminal argument updates
-    # if kwargs !=None:
-    #     apply_overrides2(main_config, kwargs, dataset)
-
+        # Then call your improved function that uses distinct paths:
+        main_config = manager.add_new_values(main_config, dataset_cfg, new_fields, default_fields)
+    
     return main_config
 
+def load_evaluation(
+    config_file_name: str,
+    base_dir: str,
+    kwargs: Dict[str, Any] = None
+) -> Dict[str, Any]:
+    """
+    Load and merge an evaluation configuration for finetuning evaluation.
+    This function is similar to load_experiment() but looks in the
+    finetuning/evaluation subfolder for the main config, then merges each dataset
+    config from 'preprocessing/datasets'.
+    """
+    manager = ConfigPathManager(base_dir)
+    # 1) Load the main evaluation config
+    config_path = manager.get_config_path(
+        config_file_name,
+        sub_dir=os.path.join('finetuning', 'evaluation')
+    )
+    main_config = manager.load_config_yaml(config_path)
 
-def load_evaluation(config_file_name, base_dir, kwargs=None):
-
-    configPathManager = ConfigPathManager(base_dir=base_dir)
-
-    # Extract path to config and make sure yaml file exists
-    config_path = configPathManager.extract_config_path(file_name=config_file_name, 
-                                                        sub_dir=os.path.join('finetuning','evaluation'))
-    main_config = configPathManager.load_config_yaml_path(config_path)
-
-    # Apply terminal argument updates
-    if kwargs !=None:
+    # 2) Optionally apply command-line overrides
+    if kwargs:
         apply_overrides(main_config, kwargs)
-    
-    # import pdb; pdb.set_trace()
 
-    # Process each dataset configuration
-    for dataset_name in main_config.get('dataset', {}).keys():
+    # 3) For each dataset, load its config from “preprocessing/datasets” and merge new fields
+    for dataset_name in main_config.get('dataset', {}):
+        dataset_cfg_file = main_config['dataset'][dataset_name].get('config')
+        if not dataset_cfg_file:
+            continue  # skip or raise error if needed
 
-        new_fields_to_add = [
+        # Load the dataset YAML
+        path = manager.get_config_path(dataset_cfg_file, sub_dir='preprocessing/datasets')
+        dataset_cfg = manager.load_config_yaml(path)
+
+        # The pairs of (new_key_path, default_key_path):
+        new_fields = [
             ['dataset', dataset_name, 'name'],
             ['dataset', dataset_name, 'ml_metadata_file'],
             ['dataset', dataset_name, 'stats_metadata_file'],
@@ -200,21 +140,43 @@ def load_evaluation(config_file_name, base_dir, kwargs=None):
             ['dataset', dataset_name, 'mask_labels'],
             ['dataset', dataset_name, 'instance_bbox'],
             ['dataset', dataset_name, 'remove_label_ids'],
+            ['dataset', dataset_name, 'voxel_num_thre2d'],
+            ['dataset', dataset_name, 'kernel_size'],
         ]
-        default_fields_to_add = [
+        default_fields = [
             ['dataset', 'name'],
             ['ml_metadata_file'],
             ['stats_metadata_file'],
             ['slice_info_parquet_dir'],
             ['mask_labels'],
             ['preprocessing_cfg', 'instance_bbox'],
-            ['preprocessing_cfg', 'remove_label_ids']
+            ['preprocessing_cfg', 'remove_label_ids'],
+            ['preprocessing_cfg', 'voxel_num_thre2d'],
+            ['preprocessing_cfg', 'kernel_size'],
         ]
-        # import pdb; pdb.set_trace()
-        main_config = load_and_merge_dataset_config(main_config, dataset_name, configPathManager, 'preprocessing/datasets', new_fields_to_add, default_fields_to_add)
+
+        # 4) Copy from `dataset_cfg` into `main_config` for the missing keys
+        main_config = manager.add_new_values(main_config, dataset_cfg, new_fields, default_fields)
 
     return main_config
 
+# --------------------------------------------------------- #
+
+def load_autolabel_config(config_file_name: str, base_dir: str) -> dict:
+    """
+    Loads an autolabel configuration file from the 'config/obj_detection/inference' directory.
+    """
+    manager = ConfigPathManager(base_dir)
+    config_path = manager.get_config_path(config_file_name, sub_dir=path.join("obj_detection", "inference"))
+    return manager.load_config_yaml(config_path)
+
+def load_det_config(config_file_name: str, base_dir: str) -> dict:
+    """
+    Loads a detection experiment configuration file from the 'config/obj_detection/experiments' directory.
+    """
+    manager = ConfigPathManager(base_dir)
+    config_path = manager.get_config_path(config_file_name, sub_dir=path.join("obj_detection", "experiments"))
+    return manager.load_config_yaml(config_path)
     
 # ---------------- SUMMARIZE CONFIG FILE ------------------ #
 def summarize_config(config, path):

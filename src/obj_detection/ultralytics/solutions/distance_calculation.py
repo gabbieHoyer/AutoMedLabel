@@ -4,9 +4,11 @@ import math
 
 import cv2
 
-from ultralytics.utils.checks import check_imshow
-from ultralytics.utils.plotting import Annotator, colors
+# from ultralytics.utils.checks import check_imshow
+# from ultralytics.utils.plotting import Annotator, colors
 
+from ..utils.checks import check_imshow
+from ..utils.plotting import Annotator, colors
 
 class DistanceCalculation:
     """A class to calculate distance between two objects in real-time video stream based on their tracks."""

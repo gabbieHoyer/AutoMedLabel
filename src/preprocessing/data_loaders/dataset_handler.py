@@ -1,11 +1,13 @@
-import numpy as np
+
 import os
 import re
-#from skimage.measure import label as sk_label
 import cc3d
+import numpy as np
 
-import src.preprocessing.data_loaders.raw_file_loaders as FileLoader
-from src.preprocessing.data_loaders.imorphic_loader import extract_imorphics_mask
+import src.utils.file_management.medical_image_io as FileLoader
+from .imorphic_loader import extract_imorphics_mask
+
+# from src.preprocessing.data_loaders import extract_imorphics_mask
 
 class RawDataLoader():
     """
@@ -364,23 +366,3 @@ def validate_data(data, expected_properties:dict, content='mask'):
     return validate_data_properties(actual_properties, expected_properties)
 
 
-
-
-            # elif transform_name == 'combination_method':
-            #     # The script will combine masks from one matrix
-            #     # Note combining data from multiple files occurs elsewhere
-            #     if (transform_args == 'combine_binary_label_dims') or (transform_args == 'add_multi_class_label_dims'):
-            #         for dim in range(np.shape(data)[-1]):
-            #             # Prepare data for combination
-            #             if transform_args == 'combine_binary_label_dims':
-            #                 label_counter = dim + 1  # Increment label for the next mask
-            #                 labeled_data = np.where(data[...,dim] > 0, label_counter, 0)
-            #             elif transform_args == 'add_multi_class_label_dims':
-            #                 labeled_data = np.copy(data[...,dim])
-            #             # Combine data with priority to first labels
-            #             if dim == 0:
-            #                 combined_data = labeled_data
-            #             else:
-            #                 # Conditional addition to avoid overwriting existing labels
-            #                 combined_data = np.where(combined_data == 0, labeled_data, combined_data)
-            #         data = np.copy(combined_data)

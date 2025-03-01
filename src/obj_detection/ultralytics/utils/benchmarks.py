@@ -32,14 +32,21 @@ from pathlib import Path
 import numpy as np
 import torch.cuda
 
-from ultralytics import YOLO
-from ultralytics.cfg import TASK2DATA, TASK2METRIC
-from ultralytics.engine.exporter import export_formats
-from ultralytics.utils import ASSETS, LINUX, LOGGER, MACOS, TQDM, WEIGHTS_DIR
-from ultralytics.utils.checks import IS_PYTHON_3_12, check_requirements, check_yolo
-from ultralytics.utils.files import file_size
-from ultralytics.utils.torch_utils import select_device
+# from ultralytics import YOLO
+# from ultralytics.cfg import TASK2DATA, TASK2METRIC
+# from ultralytics.engine.exporter import export_formats
+# from ultralytics.utils import ASSETS, LINUX, LOGGER, MACOS, TQDM, WEIGHTS_DIR
+# from ultralytics.utils.checks import IS_PYTHON_3_12, check_requirements, check_yolo
+# from ultralytics.utils.files import file_size
+# from ultralytics.utils.torch_utils import select_device
 
+from .. import YOLO
+from ..cfg import TASK2DATA, TASK2METRIC
+from ..engine.exporter import export_formats
+from ..utils import ASSETS, LINUX, LOGGER, MACOS, TQDM, WEIGHTS_DIR
+from ..utils.checks import IS_PYTHON_3_12, check_requirements, check_yolo
+from ..utils.files import file_size
+from ..utils.torch_utils import select_device
 
 def benchmark(
     model=WEIGHTS_DIR / "yolov8n.pt", data=None, imgsz=160, half=False, int8=False, device="cpu", verbose=False

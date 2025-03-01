@@ -2,9 +2,11 @@
 
 import cv2
 
-from ultralytics.utils.checks import check_imshow
-from ultralytics.utils.plotting import Annotator
+# from ultralytics.utils.checks import check_imshow
+# from ultralytics.utils.plotting import Annotator
 
+from ..utils.checks import check_imshow
+from ..utils.plotting import Annotator
 
 class AIGym:
     """A class to manage the gym steps of people in a real-time video stream based on their poses."""

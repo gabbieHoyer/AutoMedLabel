@@ -1,8 +1,9 @@
-import argparse
+
 import os
-from tqdm import tqdm
-import pandas as pd
 import pydicom
+import argparse
+import pandas as pd
+from tqdm import tqdm
 
 import pyrootutils
 root = pyrootutils.setup_root(
@@ -12,12 +13,22 @@ root = pyrootutils.setup_root(
     dotenv=True, # load environment variables from .env if exists in root directory
 )
 
-from src.utils.file_management.config_handler import load_dataset_config
-from src.utils.file_management.file_handler import load_json, save_metadata
-from src.utils.file_management.path_info import extract_data_paths, volume_ids_in_dir, volume_id_file_paths_in_dir
-from src.preprocessing.metadata_management.metadata_extractors import generate_subject_metadata, extract_header_info, generate_slice_info_for_subject, summarize_unique_dicom_data
-from src.preprocessing.metadata_management.metadata_split import preprocess_subjects, stratify_and_sample
-
+from src.preprocessing.metadata_management import (
+    generate_subject_metadata,
+    extract_header_info,
+    generate_slice_info_for_subject,
+    summarize_unique_dicom_data,
+    preprocess_subjects,
+    stratify_and_sample,
+)
+from src.utils import (
+    load_dataset_config,
+    load_json,
+    save_metadata,
+    extract_data_paths,
+    volume_ids_in_dir,
+    volume_id_file_paths_in_dir,
+)
 
 def create_metadata_for_statistics(mri_dicom_dir:str, dicom_values:dict, dataset_info:dict, \
                                    columns_to_process=None, force_dicom:bool=False):
@@ -289,7 +300,7 @@ def create_relevant_metadata_with_splits(nifti_image_dir:str, nifti_mask_dir:str
 
     return dataset_metadata
 
-def create_slice_path_metadata(npy_image_dir:str, npy_mask_dir:str, npy_mask256_dir:str, txt_label_dir, dataset_info):
+def create_slice_path_metadata(npy_image_dir:str, npy_mask_dir:str, txt_label_dir, dataset_info):  
     """
     Function to create "slices metadata" for every subject in dataset. "Slices metadata" summarizes 
     file path information for all slices in the subject's volume.
@@ -318,17 +329,10 @@ def create_slice_path_metadata(npy_image_dir:str, npy_mask_dir:str, npy_mask256_
         img_file_paths = volume_id_file_paths_in_dir(npy_image_dir, subject_id)
         img_file_paths = [f for f in img_file_paths if any([f.endswith(ext) for ext in allowed_extensions])]
         mask_file_paths = [f.replace(npy_image_dir, npy_mask_dir) for f in img_file_paths]
-        mask256_file_paths = [f.replace(npy_image_dir, npy_mask256_dir) for f in img_file_paths]
 
         # Verify files exist
         for mask_file in mask_file_paths:
             if not os.path.exists(mask_file) and os.path.isfile(mask_file):
-                print(f"Files for subject {subject_id} not found.")
-                subject_processed[subject_id] = False
-                continue
-
-        for mask256_file in mask256_file_paths:
-            if not os.path.exists(mask256_file) and os.path.isfile(mask256_file):
                 print(f"Files for subject {subject_id} not found.")
                 subject_processed[subject_id] = False
                 continue
@@ -338,7 +342,7 @@ def create_slice_path_metadata(npy_image_dir:str, npy_mask_dir:str, npy_mask256_
         else:
             label_file_paths = None
 
-        subject_dataframes[subject_id] = generate_slice_info_for_subject(img_file_paths, mask_file_paths, mask256_file_paths, label_file_paths, dataset_info)
+        subject_dataframes[subject_id] = generate_slice_info_for_subject(img_file_paths, mask_file_paths, label_file_paths, dataset_info)
         subject_processed[subject_id] = True
     
     return subject_dataframes, subject_processed
@@ -389,14 +393,13 @@ def metadata_creation(config_name, operation):
         }
 
         if cfg.get('preprocessing_cfg').get('yolo_compatible'):
-            txt_label_dir = os.path.join(cfg.get("npy_dir", ""), 'labels_256')
+            txt_label_dir = os.path.join(cfg.get("npy_dir", ""), 'labels') 
         else:
             txt_label_dir = None
 
         subject_dataframes_dict, subject_processed = create_slice_path_metadata(
             os.path.join(cfg.get("npy_dir", ""), 'imgs'),
-            # os.path.join(cfg.get("npy_dir", ""), 'gts'),
-            os.path.join(cfg.get("npy_dir", ""), 'gts_256'),
+            os.path.join(cfg.get("npy_dir", ""), 'gts'),
             txt_label_dir,
             dataset_info,
         )
@@ -421,7 +424,6 @@ def metadata_creation(config_name, operation):
             cfg.get("no_dicom_extension_flag", False),
         )
         
-        save_metadata(dicom_metadata, cfg.get("dicom_metadata_file").replace('.txt','.csv'))
         save_dicom_metadata_summary(complete_dicom_metadata, cfg.get("dicom_metadata_file"))
 
 
