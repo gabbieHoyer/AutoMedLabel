@@ -1,3 +1,15 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# All rights reserved.
+
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
+# Adapted from https://github.com/facebookresearch/segment-anything
+# Adapted from https://github.com/facebookresearch/sam2
+
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+# Adapted from https://github.com/ultralytics/ultralytics
+
+
 from setuptools import setup, find_packages
 
 setup(

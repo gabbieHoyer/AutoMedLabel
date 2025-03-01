@@ -35,6 +35,7 @@ var/
 # ------------------------------------------------------------------------------
 pip-log.txt
 pip-delete-this-directory.txt
+poetry.lock
 
 # ------------------------------------------------------------------------------
 #  Unit test / coverage
@@ -114,3 +115,7 @@ Thumbs.db
 /dev/
 /config/preprocessing/datasets/DHAL.yaml
 /config/finetuning/evaluation/DHAL_yolo.yaml
+/config/obj_detection/datasets/dhal_data.yaml
+/config/obj_detection/experiments/DHAL_shoulder_yolo.yaml
+/config/obj_detection/inference/DHAL_Shoulder.yaml
+/temp/

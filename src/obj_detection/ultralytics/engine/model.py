@@ -131,13 +131,9 @@ class Model(nn.Module):
             self.task = task
             return
 
-        # import pdb; pdb.set_trace()
-
         # Load or create new YOLO model
         model = checks.check_model_file_from_stem(model)  # add suffix, i.e. yolov8n -> yolov8n.pt
         
-        # import pdb; pdb.set_trace()
-
         if Path(model).suffix in (".yaml", ".yml"):
             self._new(model, task=task, verbose=verbose)
         else:
