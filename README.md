@@ -43,25 +43,11 @@ This codebase presents a wide-ranging framework for validating foundation models
 
 ## Getting Started with Datasets, Finetuning, and Evaluation Strategies
 
-For detailed instructions and advanced usage, please refer to the documentation in the [docs/](./docs) folder.
+For detailed instructions on preparing datasets, finetuning models, and evaluating performance, please refer to the documentation in the [docs/](./docs) folder. In particular, check out the [Pipeline Details](./docs/pipeline_details/) section for an in-depth overview of the data preprocessing pipeline. For a concrete example of how to preprocess datasets for scalable use, see the example script: [scripts/build_dataset.sh](./scripts/build_dataset.sh).
 
 ## Usage
 
-You can run a pipeline using one of two methods:
-
-1. **Directly from the source** (lowest common denominator):
-   ```bash
-   python src/main.py [COMMAND] [CONFIG_NAME]
-   ```
-
-2. **As an installed package**(if using Option 2 above):
-   ```bash
-   automedlabel [COMMAND] [CONFIG_NAME]
-   ```
-   or
-   ```bash
-   python -m src.main [COMMAND] [CONFIG_NAME]
-   ```
+After installing AutoMedLabel (see Installation above), run a pipeline by specifying one of the available commands followed by your YAML configuration file name (without the `.yaml` extension).
 
 Available commands include:
 
@@ -78,16 +64,19 @@ Available commands include:
 
 ```bash
 # Run a finetuning experiment using a config named 'my_experiment.yaml'
-python src/main.py finetune my_experiment
+python -m src.main.py finetune my_experiment
 
 # Or, if installed as a package:
 automedlabel finetune my_experiment
 
 # Evaluate a model on a config named 'eval_config.yaml'
-python src/main.py eval eval_config
+python -m src.main.py eval eval_config
+
+# Evaluate detection-to-segmentation on 'eval_det2seg.yaml'
+python -m src.main eval_det2seg eval_det2seg
 
 # Train an object detection model using 'det_training.yaml'
-python src/main.py train_det det_training
+python -m src.main.py train_det det_training
 ```
 Each subcommand loads and processes the specified configuration file from your `config/` directory (or wherever you store your `.yaml` configs). Please see the [docs/](./docs) folder for more details on configuring each pipeline.
 
