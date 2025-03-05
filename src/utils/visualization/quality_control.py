@@ -244,28 +244,54 @@ class AutolabelVisualizer:
     """
 
     @staticmethod
-    def plot_complete_prediction_overlay(image, pred_mask, mask_labels, image_name, model_save_path, image_clim=None):
+    def plot_complete_prediction_overlay(image, pred_mask, mask_labels, image_name, model_save_path, image_clim=None, callback=None):
         """Formerly: visualize_full_pred"""
         if image.shape[0] == 3:
             image = np.transpose(image, (1, 2, 0))
-        fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-        ax[0].imshow(image, cmap='gray', clim=image_clim)
+
+        # Desired height for each subplot
+        base_height = 5  # adjust as needed
+        # Compute the aspect ratio of the input image
+        height, width = image.shape[:2]
+        aspect_ratio = width / height
+        
+        # Optionally, if image is nearly square, force subplot to be square.
+        if 0.95 <= aspect_ratio <= 1.05:
+            subplot_width = base_height
+        else:
+            subplot_width = base_height * aspect_ratio
+        
+        # Total figure size for two subplots side-by-side
+        figsize = (2 * subplot_width, base_height)
+        
+        fig, ax = plt.subplots(1, 2, figsize=figsize)
+        
+        if image_clim is not None:
+            ax[0].imshow(image, cmap='gray', norm=image_clim) #clim=image_clim)
+        else:
+            ax[0].imshow(image, cmap='gray')
+        # ax[0].imshow(image, cmap='gray', clim=image_clim)
         ax[0].set_title('Original Image')
         ax[0].axis('off')
         if image_clim is not None:
-            ax[1].imshow(image, cmap='gray', clim=image_clim)
+            ax[1].imshow(image, cmap='gray', norm=image_clim) #clim=image_clim)
         else:
             ax[1].imshow(image, cmap='gray')
+        # ax[1].imshow(image, cmap='gray', clim=image_clim)
         colored_pred_mask = map_labels_to_colors(pred_mask, mask_labels)
         ax[1].imshow(colored_pred_mask, alpha=0.5)
         ax[1].set_title('Prediction Overlay')
         ax[1].axis('off')
-        # Add colorbar (assume add_colorbar is defined elsewhere)
-        # e.g., add_colorbar(fig, ax, mask_labels)
-        figure_file_path = os.path.join(model_save_path, "QC", f"{image_name}_full_pred.png")
-        os.makedirs(os.path.dirname(figure_file_path), exist_ok=True)
-        plt.savefig(figure_file_path)
-        plt.close(fig)
+       
+        if callback is not None:
+            plt.suptitle(f"{image_name}", y=0.95)  # Change y as needed)
+            callback("plot_full", fig=fig, image_name=image_name)
+            plt.close(fig)
+        else:
+            figure_file_path = os.path.join(model_save_path, "label_QC", f"{image_name}_pred.png")
+            os.makedirs(os.path.dirname(figure_file_path), exist_ok=True)
+            plt.savefig(figure_file_path)
+            plt.close(fig)
 
     @staticmethod
     def plot_raw_input_image(image, image_name, model_save_path):
@@ -282,19 +308,19 @@ class AutolabelVisualizer:
         plt.close(fig)
 
     @staticmethod
-    def plot_prediction_and_binary_overlay(image, pred_mask, binary_pred, boxes, image_name, model_save_path, image_clim=None):
+    def plot_prediction_and_binary_overlay(image, pred_mask, binary_pred, boxes, image_name, model_save_path, image_clim=None, callback=None):
         """Formerly: visualize_pred"""
         if image.shape[0] == 3:
             image = np.transpose(image, (1, 2, 0))
         fig, ax = plt.subplots(1, 3, figsize=(10, 5))
-        ax[0].imshow(image, cmap='gray', clim=image_clim)
+        ax[0].imshow(image, cmap='gray', norm=image_clim) #clim=image_clim)
         ax[0].set_title('Original Image')
         ax[0].axis('off')
-        ax[1].imshow(image, cmap='gray', clim=image_clim)
+        ax[1].imshow(image, cmap='gray', norm=image_clim) #clim=image_clim)
         ax[1].imshow(pred_mask, alpha=0.5)
         ax[1].set_title('Prediction Overlay')
         ax[1].axis('off')
-        ax[2].imshow(image, cmap='gray', clim=image_clim)
+        ax[2].imshow(image, cmap='gray', norm=image_clim) #clim=image_clim)
         ax[2].imshow(binary_pred, alpha=0.5)
         ax[2].set_title('Binary Prediction Overlay')
         ax[2].axis('off')
@@ -306,8 +332,14 @@ class AutolabelVisualizer:
             rect = patches.Rectangle((box[0], box[1]), box[2]-box[0], box[3]-box[1],
                                      linewidth=1, edgecolor='r', facecolor='none')
             ax[0].add_patch(rect)
-        figure_file_path = os.path.join(model_save_path, "label_QC", f"{image_name}_pred.png")
-        os.makedirs(os.path.dirname(figure_file_path), exist_ok=True)
-        plt.savefig(figure_file_path)
-        plt.close(fig)
+        
+        if callback is not None:
+            plt.suptitle(f"{image_name}", y=0.95)  # Change y as needed)
+            callback("plot_pred", fig=fig, image_name=image_name)
+            plt.close(fig)
+        else:
+            figure_file_path = os.path.join(model_save_path, "label_QC", f"{image_name}_pred.png")
+            os.makedirs(os.path.dirname(figure_file_path), exist_ok=True)
+            plt.savefig(figure_file_path)
+            plt.close(fig)
 

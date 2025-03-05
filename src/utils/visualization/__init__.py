@@ -1,5 +1,5 @@
 from .quality_control import QualityControlVisualizer as QCV, AutolabelVisualizer as ALV
-from .helpers import set_image_clim
+from .helpers import set_image_clim, set_image_norm, compute_image_clim_log, compute_clamped_percentiles
 from .training_plots import (
     plot_losses, plot_combined_losses, 
     plot_metrics, save_losses, save_metrics

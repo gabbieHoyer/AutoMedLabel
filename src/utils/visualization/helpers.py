@@ -19,6 +19,30 @@ def set_image_clim(image):
     else:
         return [np.min(image[:]),np.max(image[:])]
     
+def set_image_norm(image):
+    low = np.percentile(image, 2)
+    high = np.percentile(image, 98)
+    return Normalize(vmin=low, vmax=high)
+
+def compute_image_clim_log(image, p_low=2, p_high=98):
+    log_img = np.log1p(np.clip(image, a_min=0, a_max=None))  # log(1 + x) to avoid log(0)
+    low, high = np.percentile(log_img, [p_low, p_high])
+    return Normalize(vmin=low, vmax=high)
+
+def compute_clamped_percentiles(image, p_low=2, p_high=98, min_range=50, max_range=2000):
+    flat = image.flatten()
+    low, high = np.percentile(flat, [p_low, p_high])
+    actual_range = high - low
+    if actual_range < min_range:
+        mid = (high + low) / 2
+        low = mid - min_range/2
+        high = mid + min_range/2
+    elif actual_range > max_range:
+        mid = (high + low) / 2
+        low = mid - max_range/2
+        high = mid + max_range/2
+    return Normalize(vmin=low, vmax=high)
+    
 def map_labels_to_colors(pred_mask, mask_labels):
     # Define a colormap that can provide a distinct color for each class
     color_map = plt.get_cmap('rainbow', len(mask_labels) - 1)  # Exclude background

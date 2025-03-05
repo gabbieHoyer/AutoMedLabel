@@ -17,7 +17,7 @@ setup(
     version="0.1.0",
     description="A framework for evaluating foundation models in musculoskeletal MRI",
     author="Gabrielle Hoyer",
-    author_email="youremail@example.com",
+    author_email="gabbie.hoyer@ucsf.edu",
     url="https://github.com/gabbieHoyer/AutoMedLabel",
     packages=find_packages(where="src"),
     package_dir={"": "src"},

@@ -1,11 +1,11 @@
 
 # In src/utils/__init__.py
 
-from .experiment_utils import determine_run_directory
+from .experiment_utils import determine_run_directory, in_notebook
 from .post_processing import resize_prediction, refine_autolabel_mask, refine_evaluation_mask
 
 # # Import everything from visualization via its package __init__.py
-from .visualization import QCV, ALV, set_image_clim, plot_losses, plot_combined_losses, plot_metrics, save_losses, save_metrics
+from .visualization import QCV, ALV, set_image_clim, set_image_norm, compute_image_clim_log, compute_clamped_percentiles, plot_losses, plot_combined_losses, plot_metrics, save_losses, save_metrics
 from .file_management import (
     process_kwargs,
     apply_overrides,

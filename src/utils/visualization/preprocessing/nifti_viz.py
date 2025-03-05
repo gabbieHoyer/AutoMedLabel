@@ -95,7 +95,7 @@ class NiftiFigureInfo():
 
         return save_dir, fname_no_ext
 
-def visualize_nifti(image_dir:str, mask_dir:str, output_type:str, num_figs:int, slice_selection:str='any', output_dir:str=None, overwrite_flag:bool=False, labels_dict:dict={}, clim=None):
+def visualize_nifti(image_dir:str, mask_dir:str, output_type:str, num_figs:int, slice_selection:str='any', output_dir:str=None, overwrite_flag:bool=False, labels_dict:dict={}, clim=None, callback=None):
     """
     Create and save figures of image volumes with segmentation overlays as either a image with subplots of slices, 
     or a gif that cycles through slices.
@@ -109,7 +109,6 @@ def visualize_nifti(image_dir:str, mask_dir:str, output_type:str, num_figs:int, 
     - output_type: Specifies which figures to generate. Options include: '2D_overlay', 'gif', or ['2D_overlay', 'gif']
     - overwrite_flag: True or False. Whether to save figure if file already exists.
     """
-
     FigDataFns = NiftiFigureInfo(slice_selection)
 
     selected_pairs = FigDataFns.select_files(image_dir, mask_dir, num_figs)
@@ -124,20 +123,25 @@ def visualize_nifti(image_dir:str, mask_dir:str, output_type:str, num_figs:int, 
             os.makedirs(save_dir, exist_ok=True)
 
         if '2D_overlay' in output_type:
-            # Set up the path for saving the overlay plot
-            plot_savepath = os.path.join(save_dir, f"{fname_no_ext}_overlay.png")
+            # Only set plot_savepath if output_dir is provided
+            if output_dir:
+                plot_savepath = os.path.join(save_dir, f"{fname_no_ext}_overlay.png")
+            else:
+                plot_savepath = None
             
             # Check whether to overwrite existing data
-            if not os.path.isfile(plot_savepath) or overwrite_flag == True:
-                # Generate and save the overlay plot with label dictionary support
-                plot_segmentation_overlay(vol= image[slices,:,:], 
-                                        seg= mask[slices,:,:], 
-                                        save_path=plot_savepath, 
-                                        seg_clim=clim, 
-                                        cmap='rainbow', 
-                                        title=fname_no_ext, 
-                                        labels_dict=labels_dict,
-                                        ) 
+            # if not os.path.isfile(plot_savepath) or overwrite_flag == True:
+            # Generate and save the overlay plot with label dictionary support
+            fig = plot_segmentation_overlay(vol= image[slices,:,:], 
+                                    seg= mask[slices,:,:], 
+                                    save_path=plot_savepath, 
+                                    seg_clim=clim, 
+                                    cmap='rainbow', 
+                                    title=fname_no_ext, 
+                                    labels_dict=labels_dict,
+                                    ) 
+            print('returning fig from visualize_nifti')
+            return fig 
 
         if 'gif' in output_type:
             # Set up the directory and filename for the GIF
@@ -152,10 +156,7 @@ def visualize_nifti(image_dir:str, mask_dir:str, output_type:str, num_figs:int, 
                         save_path=gif_filepath, 
                         cmap='rainbow', 
                         )
-
-        #print(labels_dict)
-    return
-
+    return None
 
 def nifti_visualization(config_name):
     

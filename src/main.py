@@ -9,7 +9,7 @@ from src.finetuning.finetune_evaluate_det2seg import finetune_evaluate_det2seg
 from src.obj_detection.train_obj_det import train_obj_det
 from src.obj_detection.val_obj_det import validate_obj_det
 from src.obj_detection.predict_obj_det import predict_obj_det
-from src.obj_detection.autolabel import autoLabel
+from src.obj_detection.autolabel import run_autolabel #autoLabel
 
 # Note: We do NOT do GPU setup or config loading here.
 # Those modules will handle their own setup when invoked.
@@ -49,6 +49,7 @@ def main():
     # Autolabel pipeline
     autolabel_parser = subparsers.add_parser("autolabel", help="Run autolabel pipeline")
     autolabel_parser.add_argument("config", help="YAML config file for autolabel inference")
+    autolabel_parser.add_argument("--interactive", action="store_true", help="Run in interactive mode")
 
     args = parser.parse_args()
 
@@ -67,7 +68,7 @@ def main():
     elif args.command == "predict_det":
         predict_obj_det(args.config)
     elif args.command == "autolabel":
-        autoLabel(args.config)
+        run_autolabel(args.config, interactive=args.interactive)
     else:
         parser.print_help()
 

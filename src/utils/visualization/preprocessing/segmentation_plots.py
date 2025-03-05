@@ -96,8 +96,9 @@ def plot_segmentation_overlay(vol, seg, save_path:str=None, cols:int=6, scale:in
     if save_path:
         plt.savefig(save_path, bbox_inches='tight', dpi=300)
         plt.close(fig)
-        return
+        return None
     else:
+        print('returning fig from plot_segmentation_overlay')
         return fig
 
 def create_segmentation_overlay_gif(image_volume, segmentation, save_path, cmap='rainbow'):

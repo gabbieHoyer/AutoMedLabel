@@ -1,8 +1,6 @@
 # src/evaluation/mri_acquisition_analysis.py
 import os
 import pandas as pd
-import statsmodels.formula.api as smf
-from statsmodels.tools.tools import add_constant
 
 from src.evaluation.data_processing import (
     load_base_data, select_columns, replace_bbox_shift, drop_duplicates,

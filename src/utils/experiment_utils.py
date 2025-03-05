@@ -34,3 +34,20 @@ def determine_run_directory(base_dir, task_name, group_name=None):
     os.makedirs(full_run_path, exist_ok=True)
     
     return full_run_path
+
+def in_notebook():
+    """Return True if running inside a Jupyter notebook, False otherwise."""
+    try:
+        from IPython import get_ipython
+        shell = get_ipython().__class__.__name__
+        # If shell is ZMQInteractiveShell, then it's likely a Jupyter notebook or qtconsole.
+        if shell == 'ZMQInteractiveShell':
+            return True
+        elif shell == 'TerminalInteractiveShell':
+            return False
+        # Other shell types: 'SpyderShell', etc.
+        return False
+    except ImportError:
+        return False  # Probably standard Python interpreter
+    except AttributeError:
+        return False  # get_ipython() is None or shell is None

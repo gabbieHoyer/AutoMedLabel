@@ -118,4 +118,5 @@ Thumbs.db
 /config/obj_detection/datasets/dhal_data.yaml
 /config/obj_detection/experiments/DHAL_shoulder_yolo.yaml
 /config/obj_detection/inference/DHAL_Shoulder.yaml
+/config/obj_detection/inference/Knee.yaml
 /temp/
