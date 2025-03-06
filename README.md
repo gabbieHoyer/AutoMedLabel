@@ -41,6 +41,10 @@ This codebase presents a wide-ranging framework for validating foundation models
     
 *Choose the option that best fits your workflow. For development and quick testing, Option 1 is simple and fast. For a more integrated user experience, Option 2 offers a dedicated command-line entry point.*
 
+## Tested Environments
+
+All code components were tested on Red Hat Enterprise Linux 9.5 with kernel 5.14.0-503.22.1.el9_5.x86_64 and Slurm 23.02.7. Single-GPU tests were performed on various GPUs, including TitanX GPUs (12GB VRAM), which proved sufficient for finetuning, evaluation, autolabel, detection training, and statistical analysis. Multi-GPU training was carried out on HPC nodes featuring Tesla V100 or A100 GPUs (32GB VRAM each) for faster processing, all managed through PyTorch’s Distributed Data Parallel.
+
 ## Getting Started with Datasets, Finetuning, and Evaluation Strategies
 
 For detailed instructions on preparing datasets, finetuning models, and evaluating performance, please refer to the documentation in the [docs/](./docs) folder. In particular, check out the [Pipeline Details](./docs/pipeline_details/) section for an in-depth overview of the data preprocessing pipeline. For a concrete example of how to preprocess datasets for scalable use, see the example script: [scripts/build_dataset.sh](./scripts/build_dataset.sh).

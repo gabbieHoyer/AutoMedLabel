@@ -114,6 +114,7 @@ Thumbs.db
 # quick dev tests:
 /dev/
 /config/preprocessing/datasets/DHAL.yaml
+/config/preprocessing/datasets/DHAL_1024.yaml
 /config/finetuning/evaluation/DHAL_yolo.yaml
 /config/finetuning/experiments/DHAL.yaml
 /config/obj_detection/datasets/dhal_data.yaml
