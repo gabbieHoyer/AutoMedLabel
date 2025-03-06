@@ -47,7 +47,7 @@ For detailed instructions on preparing datasets, finetuning models, and evaluati
 
 Additionally, explore the interactive examples in the [demos/](./demos) folder to see how to run the AutoLabel pipeline, Biomarker analyses, etc.
 
-For detailed study analyses and extended statistical evaluations (including MRI acquisition mixed-modeling and biomarker comparisons), please refer to the [src/evaluation/README.md](./src/evaluation/README.md).
+For detailed study analyses and extended statistical evaluations (including MRI acquisition mixed-modeling and biomarker comparisons), please refer to the `README.md` found in [src/evaluation](./src/evaluation/).
 
 ## Usage
 
