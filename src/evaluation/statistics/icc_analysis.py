@@ -54,7 +54,11 @@ def perform_icc_analysis(gt_df, pred_df, labels, subject_col='Subject', save_pat
     for label in labels:
         data = prepare_icc_data(gt_df, pred_df, label, subject_col)
         icc = pg.intraclass_corr(data=data, targets=subject_col, raters='Rater', ratings='Score')
-        print(icc)
+
+        # icc_filtered = icc[icc['Type'] == 'ICC3k']
+        # print(f"Results for label {label}:")
+        # print(icc_filtered.to_string(index=False))
+
         icc['CI95%'] = icc['CI95%'].apply(lambda ci: [round(ci[0], ci_decimals), round(ci[1], ci_decimals)])
         icc_results.append({'Label': label, 'ICC': icc})
 
@@ -142,7 +146,7 @@ def calculate_icc_mixed_model(data, subject_col, rater_col, score_col):
         print(f"Failed to fit mixed model for {score_col}: {e}")
         return np.nan
 
-def bootstrap_icc_mixed_model(gt_df, pred_df, labels, subject_col='Subject', n_bootstraps=10000, save_path='.', file_name='bootstrap_ICC_results.csv', two_sided=False):
+def bootstrap_icc_mixed_model(gt_df, pred_df, labels, subject_col='Subject', n_bootstraps=1000, save_path='.', file_name='bootstrap_ICC_results.csv', two_sided=False):  #n_bootstraps=10000
     """
     Perform bootstrapped ICC analysis using a linear mixed-effects model on ground truth and prediction dataframes.
     
@@ -211,7 +215,7 @@ def bootstrap_icc_mixed_model(gt_df, pred_df, labels, subject_col='Subject', n_b
             ci_formatted = np.nan
             p_value = np.nan
 
-        bootstrap_results.append({
+        result = {
             'Label': label,
             'Mean_ICC': mean_icc,
             'Median_ICC': median_icc,
@@ -221,7 +225,10 @@ def bootstrap_icc_mixed_model(gt_df, pred_df, labels, subject_col='Subject', n_b
             'p_value': f"{p_value:.6f}",
             'n_bootstraps': len(icc_bootstrap_values),
             'n_subjects': n_subjects
-        })
+        }
+        bootstrap_results.append(result)
+        # Print the result for this label
+        # print(f"Results for label {label}: {result}")
 
     bootstrap_results_df = pd.DataFrame(bootstrap_results)
     output_file = os.path.join(save_path, file_name)

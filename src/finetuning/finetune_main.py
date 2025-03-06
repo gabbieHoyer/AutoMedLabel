@@ -7,14 +7,7 @@ import torch
 from torch import nn
 import torch.distributed as dist
 
-import pyrootutils
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git"],
-    pythonpath=True,
-    dotenv=True,
-)
-from src.utils import process_kwargs, load_experiment, summarize_config, determine_run_directory
+from src.utils import process_kwargs, load_experiment, summarize_config, get_project_root, determine_run_directory
 from src.finetuning import (
     FinetuningTrainer,
     FinetuningDataModule,
@@ -24,6 +17,7 @@ from src.finetuning import (
     log_info,
     GPUSetup,
 )
+root = get_project_root()
 # Retrieve a logger for the module
 logger = logging.getLogger(__name__)
 

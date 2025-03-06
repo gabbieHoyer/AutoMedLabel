@@ -34,7 +34,7 @@ def _finalize_and_save_plot(fig, base_filename, save_path, dpi, show=False):
     plt.tight_layout(pad=2.0)
     plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
     sanitized_name = _sanitize_filename(base_filename)
-    for ext in ['png', 'svg']:
+    for ext in ['png']: #, 'svg']:
         fig.savefig(os.path.join(save_path, f"{sanitized_name}.{ext}"), format=ext, dpi=dpi, bbox_inches='tight')
     if show:
         plt.show()
@@ -222,11 +222,11 @@ def plot_gp_regression_subject_level(df_gt, df_pred, columns, spearman_results_d
             unique = dict(zip(labels, handles))
             ax.legend(unique.values(), unique.keys(), loc='lower right')
         
-        _finalize_and_save_plot(fig, f'{col}_regression_comparison_gp', save_path, dpi, show=False)
+        _finalize_and_save_plot(fig, f'{col}_regression_comparison_gp', save_path, dpi, show=True)
         print(f"Regression comparison plot generated for '{col}' using Gaussian Process Regression.")
 
 
-def plot_bland_altman_multiple_nonparametric_subject_level(df_pred, df_gt, columns, subject_column='SubjectID', save_path='.', dataset_name=None, biomarker=None, units=None, confidence=0.95, show_legend=False):
+def plot_bland_altman_multiple_nonparametric_subject_level(df_pred, df_gt, columns, subject_column='SubjectID', n_bootstraps=1000, save_path='.', dataset_name=None, biomarker=None, units=None, confidence=0.95, show_legend=False):
     os.makedirs(save_path, exist_ok=True)
 
     for col in columns:
@@ -250,12 +250,12 @@ def plot_bland_altman_multiple_nonparametric_subject_level(df_pred, df_gt, colum
         lower_limit = np.percentile(diff, 2.5)
         upper_limit = np.percentile(diff, 97.5)
 
-        boot_iterations = 10000
+        boot_iterations = n_bootstraps #10000
         boot_median = []
         boot_lower = []
         boot_upper = []
         np.random.seed(0)
-        print(np.min(np.abs(diff)))  # For debugging
+        # print(np.min(np.abs(diff)))  # For debugging
 
         for _ in range(boot_iterations):
             sample = np.random.choice(diff, size=len(diff), replace=True)
@@ -304,7 +304,7 @@ def plot_bland_altman_multiple_nonparametric_subject_level(df_pred, df_gt, colum
         ax.text(xloc, upper_limit - offset, f"{upper_limit:.2f}", ha="right", va="top", transform=trans, fontsize=12)
         
         plt.grid(False)
-        _finalize_and_save_plot(fig, f'{col}_bland_altman_nonparametric', save_path, 300, show=False)
+        _finalize_and_save_plot(fig, f'{col}_bland_altman_nonparametric', save_path, 300, show=True)
         print(f"Bland-Altman plot generated for '{col}'.")
 
 

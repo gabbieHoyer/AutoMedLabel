@@ -2,13 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import pyrootutils
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git"],
-    pythonpath=True,
-    dotenv=True,
-)
+from src.utils import get_project_root
+root = get_project_root()
+
 from src.sam2.utils.transforms import SAM2Transforms
 
 class finetunedSAM2(nn.Module):

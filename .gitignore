@@ -115,8 +115,12 @@ Thumbs.db
 /dev/
 /config/preprocessing/datasets/DHAL.yaml
 /config/finetuning/evaluation/DHAL_yolo.yaml
+/config/finetuning/experiments/DHAL.yaml
 /config/obj_detection/datasets/dhal_data.yaml
+/config/obj_detection/datasets/tbrecon_data.yaml
 /config/obj_detection/experiments/DHAL_shoulder_yolo.yaml
+/config/obj_detection/experiments/TBrecon_yolo.yaml
 /config/obj_detection/inference/DHAL_Shoulder.yaml
 /config/obj_detection/inference/Knee.yaml
+/scripts/train_yolo.sh
 /temp/

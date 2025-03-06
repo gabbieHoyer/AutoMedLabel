@@ -1,7 +1,7 @@
 
 # In src/utils/__init__.py
 
-from .experiment_utils import determine_run_directory, in_notebook
+from .experiment_utils import get_project_root, determine_run_directory, in_notebook
 from .post_processing import resize_prediction, refine_autolabel_mask, refine_evaluation_mask
 
 # # Import everything from visualization via its package __init__.py

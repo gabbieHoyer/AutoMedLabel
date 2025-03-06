@@ -9,13 +9,9 @@ from torch.optim.lr_scheduler import (
     ExponentialLR
 )
 
-import pyrootutils
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git"],
-    pythonpath=True,
-    dotenv=True,
-)
+from src.utils import get_project_root
+root = get_project_root()
+
 logger = logging.getLogger(__name__)
 
 # ---------------------- Select Segmentation Base Model ---------------------- #

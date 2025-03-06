@@ -45,7 +45,9 @@ This codebase presents a wide-ranging framework for validating foundation models
 
 For detailed instructions on preparing datasets, finetuning models, and evaluating performance, please refer to the documentation in the [docs/](./docs) folder. In particular, check out the [Pipeline Details](./docs/pipeline_details/) section for an in-depth overview of the data preprocessing pipeline. For a concrete example of how to preprocess datasets for scalable use, see the example script: [scripts/build_dataset.sh](./scripts/build_dataset.sh).
 
-Additionally, explore the interactive examples in the [demos/](./demos) folder to see how to run the AutoLabel pipeline (e.g., using the `--interactive` flag).
+Additionally, explore the interactive examples in the [demos/](./demos) folder to see how to run the AutoLabel pipeline, Biomarker analyses, etc.
+
+For detailed study analyses and extended statistical evaluations (including MRI acquisition mixed-modeling and biomarker comparisons), please refer to the [src/evaluation/README.md](./src/evaluation/README.md).
 
 ## Usage
 

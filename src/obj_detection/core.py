@@ -3,13 +3,9 @@ import os
 import yaml
 from string import Template
 
-import pyrootutils
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git"],
-    pythonpath=True,
-    dotenv=True,
-)
+from src.utils import get_project_root
+root = get_project_root()
+
 from src.obj_detection.ultralytics import YOLO, RTDETR, NAS
 
 def load_model(config: dict):

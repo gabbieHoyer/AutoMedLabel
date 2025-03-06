@@ -1,16 +1,9 @@
 import os
 import argparse
 
-import pyrootutils
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git"],
-    pythonpath=True,
-    dotenv=True,
-)
-
 from src.obj_detection.core import load_model
-from src.utils import load_det_config
+from src.utils import load_det_config, get_project_root
+root = get_project_root()
 
 def validate_obj_det_impl(config):
     ModelClass = load_model(config)

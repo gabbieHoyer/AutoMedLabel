@@ -2,17 +2,21 @@
 
 import os
 import pandas as pd
+from os.path import join
 
 from src.evaluation.statistics import (
-    remove_brackets_and_convert,
-    compute_shapiro_wilk, compute_levenes_test,
-    compute_spearman_correlation_subject_level,
+    remove_brackets_and_convert, icc_dict_to_dataframe,
+    compute_shapiro_wilk, compute_levenes_test, compute_spearman_correlation_subject_level,
     perform_icc_analysis, extract_full_icc_info,
     bootstrap_icc_mixed_model, extract_full_icc_info_nonpar,
     compute_regression_results,
     plot_bland_altman_multiple, plot_regression_comparison,
-    plot_gp_regression_subject_level, plot_bland_altman_multiple_nonparametric_subject_level
+    plot_gp_regression_subject_level, plot_bland_altman_multiple_nonparametric_subject_level,
+    console_rule, console_print, print_df_as_table
 )
+
+from src.utils import get_project_root
+root = get_project_root()
 
 class AnalysisPipeline:
     def __init__(self, config):
@@ -46,6 +50,7 @@ class AnalysisPipeline:
 class ParametricAnalysis(AnalysisPipeline):
     def run(self):
         # Statistical Tests
+        console_rule("Shapiro-Wilk Test:")
         shapiro_results_df = compute_shapiro_wilk(
             self.df_ground_truth,
             self.df_prediction,
@@ -54,8 +59,9 @@ class ParametricAnalysis(AnalysisPipeline):
             save_path=self.output_dir,
             file_name='shapiro_results.csv'
         )
-        print("Shapiro-Wilk test completed.")
+        print_df_as_table(shapiro_results_df, title="Shapiro-Wilk Results", max_width=20)
 
+        console_rule("Levene Test:")
         levene_results_df = compute_levenes_test(
             self.df_ground_truth,
             self.df_prediction,
@@ -64,9 +70,10 @@ class ParametricAnalysis(AnalysisPipeline):
             save_path=self.output_dir,
             file_name='levene_results.csv'
         )
-        print("Levene test completed.")
+        print_df_as_table(levene_results_df, title="Levene Test Results", max_width=20)
 
         # ICC Analysis
+        console_rule("ICC Analysis:")
         icc_results_df = perform_icc_analysis(
             self.df_ground_truth,
             self.df_prediction,
@@ -75,11 +82,11 @@ class ParametricAnalysis(AnalysisPipeline):
             save_path=self.output_dir,
             file_name='icc_results.csv'
         )
-        print("ICC analysis completed.")
-
         icc_values = extract_full_icc_info(icc_results_df, icc_type='ICC3')
+        print_df_as_table(icc_dict_to_dataframe(icc_values), title="ICC Results", max_width=20)
 
         # Regression Analysis
+        console_rule("Regression Analysis:")
         regression_results_df = compute_regression_results(
             df_gt=self.df_ground_truth,
             df_pred=self.df_prediction,
@@ -88,9 +95,10 @@ class ParametricAnalysis(AnalysisPipeline):
             save_path=self.output_dir,
             file_name='regression_results.csv'
         )
-        print("Regression analysis completed.")
+        print_df_as_table(regression_results_df, title="Regression Results", max_width=20)
 
         # Plotting
+        console_rule("Generate Bland-Altman Plots:")
         plot_bland_altman_multiple(
             df_pred=self.df_prediction,
             df_gt=self.df_ground_truth,
@@ -102,8 +110,9 @@ class ParametricAnalysis(AnalysisPipeline):
             biomarker=self.biomarker,
             units=self.config.get('units', None)
         )
-        print("Bland-Altman plots generated.")
+        print("Bland-Altman Complete.")
 
+        console_rule("Generate Regression Plots:")
         plot_regression_comparison(
             df_gt=self.df_ground_truth,
             df_pred=self.df_prediction,
@@ -117,11 +126,16 @@ class ParametricAnalysis(AnalysisPipeline):
             biomarker=self.biomarker,
             units=self.config.get('units', None)
         )
-        print("Regression comparison plots generated.")
+        print("Regression Complete.")
 
 class NonParametricAnalysis(AnalysisPipeline):
+    def __init__(self, config):
+        super().__init__(config)
+        self.n_bootstraps = config['n_bootstraps']  # or use config.get('n_bootstraps', default_value)
+
     def run(self):
-        # Statistical Tests: Spearman's Rank Correlation
+        # Statistical Tests: 
+        console_rule("Spearman's Rank Correlation:")
         spearman_results_df = compute_spearman_correlation_subject_level(
             self.df_ground_truth,
             self.df_prediction,
@@ -130,28 +144,31 @@ class NonParametricAnalysis(AnalysisPipeline):
             save_path=self.output_dir,
             file_name='spearman_results.csv'
         )
-        print("Spearman's rank correlation completed.")
+        print_df_as_table(spearman_results_df, title="Spearman's Rank Correlation", max_width=20)
 
         # ICC Analysis: Bootstrap approach
+        console_rule("Bootstrap ICC Analysis:")
         icc_results_df = bootstrap_icc_mixed_model(
             self.df_ground_truth,
             self.df_prediction,
             self.config['columns'],
             subject_col=self.subject_column,
+            n_bootstraps=self.n_bootstraps,
             save_path=self.output_dir,
             file_name='icc_results_median.csv'
         )
-        print("Bootstrap ICC analysis completed.")
-
         icc_values = extract_full_icc_info_nonpar(icc_results_df)
+        print_df_as_table(icc_results_df, title="Bootstrap ICC Results", max_width=20)
 
-        # Plotting: Non-Parametric Bland-Altman
+        # Plotting:
+        console_rule("Non-Parametric Bland-Altman Analysis:")
         plot_bland_altman_multiple_nonparametric_subject_level(
             df_pred=self.df_prediction,
             df_gt=self.df_ground_truth,
             columns=self.config['columns'],
             subject_column=self.subject_column,
-            save_path=os.path.join(self.output_dir, 'bland_altman_nonparametric_10k'),
+            n_bootstraps=self.n_bootstraps,
+            save_path=os.path.join(self.output_dir, f'bland_altman_nonparametric_{self.n_bootstraps}'),
             dataset_name=self.dataset_name,
             biomarker=self.biomarker,
             units=self.config.get('units', None)
@@ -159,6 +176,7 @@ class NonParametricAnalysis(AnalysisPipeline):
         print("Non-parametric Bland-Altman plots generated.")
 
         # Plotting: Gaussian Process Regression Comparison
+        console_rule("Gaussian Process Regression Analysis:")
         gp_save_path = os.path.join(self.output_dir, 'regression_comparisons_gp_median')
         plot_gp_regression_subject_level(
             df_gt=self.df_ground_truth,
@@ -190,13 +208,13 @@ if __name__ == '__main__':
         {
             'dataset_name': 'Knee_3D_DESS_Research_Anatomical_86',
             'biomarker': r'$\bar{x}$ Cartilage Thickness',
-            'gt_slice_path': '/data/mskprojects/mskSAM/users/ghoyer/mskSAM_stat/biomarker_metrics/OAI_Knee_cart_thickness/cartilagethicknessmetric_gt_slice_volume.csv',
-            'gt_subject_path': '/data/mskprojects/mskSAM/users/ghoyer/mskSAM_stat/biomarker_metrics/OAI_Knee_cart_thickness/cartilagethicknessmetric_gt_volume.csv',
-            'pred_slice_path': '/data/mskprojects/mskSAM/users/ghoyer/mskSAM_stat/biomarker_metrics/OAI_Knee_cart_thickness/cartilagethicknessmetric_pred_slice_volume.csv',
-            'pred_subject_path': '/data/mskprojects/mskSAM/users/ghoyer/mskSAM_stat/biomarker_metrics/OAI_Knee_cart_thickness/cartilagethicknessmetric_pred_volume.csv',
+            'gt_slice_path': join(root, 'demos', 'demo_data', 'OAI_Knee_cart_thickness', 'cartilagethicknessmetric_gt_slice_volume.csv'),
+            'gt_subject_path': join(root, 'demos', 'demo_data', 'OAI_Knee_cart_thickness', 'cartilagethicknessmetric_gt_volume.csv'),
+            'pred_slice_path': join(root, 'demos', 'demo_data', 'OAI_Knee_cart_thickness', 'cartilagethicknessmetric_pred_slice_volume.csv'),
+            'pred_subject_path': join(root, 'demos', 'demo_data', 'OAI_Knee_cart_thickness', 'cartilagethicknessmetric_pred_volume.csv'),
             'columns': ['femoral cartilage', 'lateral tibial cartilage', 'medial tibial cartilage', 'patellar cartilage'],
             'subject_column': 'Subject',
-            'output_dir': '/data/mskprojects/mskSAM/users/ghoyer/backup_repo/AutoMedLabel/work_dir/evaluation/stats/OAI_Knee_cart_thickness/subject',
+            'output_dir': join(root, 'work_dir', 'evaluation', 'stats', 'OAI_Knee_cart_thickness', 'subject'),
             'dot_color': '#4BB98A',
             'move_text': True,
             'clean_data': True,
@@ -209,13 +227,14 @@ if __name__ == '__main__':
         {
             'dataset_name': 'Knee_2D_MAPSS-echo1_Research_Compositional_39',
             'biomarker': r'$\bar{x}$ $T_1\rho$',
-            'gt_slice_path': '/data/mskprojects/mskSAM/users/ghoyer/mskSAM_stat/biomarker_metrics/AFACL_T1rho_T2_Mapss/t1rhometric_gt_slice_volume.csv',
-            'gt_subject_path': '/data/mskprojects/mskSAM/users/ghoyer/mskSAM_stat/biomarker_metrics/AFACL_T1rho_T2_Mapss/t1rhometric_gt_volume.csv',
-            'pred_slice_path': '/data/mskprojects/mskSAM/users/ghoyer/mskSAM_stat/biomarker_metrics/AFACL_T1rho_T2_Mapss/t1rhometric_pred_slice_volume.csv',
-            'pred_subject_path': '/data/mskprojects/mskSAM/users/ghoyer/mskSAM_stat/biomarker_metrics/AFACL_T1rho_T2_Mapss/t1rhometric_pred_volume.csv',
+            'gt_slice_path': join(root, 'demos', 'demo_data', 'Knee_T1rho_T2_Mapss', 't1rhometric_gt_slice_volume.csv'),
+            'gt_subject_path': join(root, 'demos', 'demo_data', 'Knee_T1rho_T2_Mapss', 't1rhometric_gt_volume.csv'),
+            'pred_slice_path': join(root, 'demos', 'demo_data', 'Knee_T1rho_T2_Mapss', 't1rhometric_pred_slice_volume.csv'),
+            'pred_subject_path': join(root, 'demos', 'demo_data', 'Knee_T1rho_T2_Mapss', 't1rhometric_pred_volume.csv'),
             'columns': ['medial femoral', 'lateral femoral', 'lateral tibial', 'medial tibial', 'trochlear', 'patellar'],
             'subject_column': 'Subject',
-            'output_dir': '/data/mskprojects/mskSAM/users/ghoyer/backup_repo/AutoMedLabel/work_dir/evaluation/stats/AFACL_T1rho_T2_Mapss/T1Rho/subject_non_parametric',
+            'n_bootstraps':1000,
+            'output_dir': join(root, 'work_dir', 'evaluation', 'stats', 'Knee_T1rho_T2_Mapss', 'T1Rho', 'subject_non_parametric'),
             'dot_color': '#a347d1',
             'move_text': False,
             'clean_data': True,

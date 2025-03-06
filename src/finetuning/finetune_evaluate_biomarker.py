@@ -5,17 +5,10 @@ import argparse
 import torch
 import torch.distributed as dist
 
-import pyrootutils
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git"],
-    pythonpath=True,
-    dotenv=True,
-)
-from src.utils import determine_run_directory, load_evaluation, summarize_config
+from src.utils import get_project_root, determine_run_directory, load_evaluation, summarize_config
 from src.finetuning import GPUSetup, log_info, CustomMetricTester, BiomarkerEvaluationDataModule, load_segmentation_model
 
-# Retrieve a logger for the module
+root = get_project_root()
 logger = logging.getLogger(__name__)
 
 def datamodule(cfg, run_path=None):

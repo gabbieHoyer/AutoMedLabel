@@ -6,16 +6,11 @@ import pandas as pd
 from collections import Counter
 from typing import List, Dict, Optional, Any
 
-import pyrootutils
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git"],
-    pythonpath=True,
-    dotenv=True,
-)
+from src.utils import get_project_root
 import src.finetuning.utils.gpu_setup as GPUSetup
 from src.preprocessing.metadata_management.metadata_split import extract_numeric_value
 
+root = get_project_root()
 logger = logging.getLogger(__name__)
 
 def extract_paths_and_count_slices(subjects, parquet_base_folder, sampling_rate=1, additional_paths=None):
@@ -318,35 +313,3 @@ def save_dataset_summary(summaries:List[Dict[str,Any]], summary_file_path:str, m
 
     return True
     
-# def extract_paths_and_count_slices(subjects, parquet_base_folder, sampling_rate=1, additional_paths=None):
-#     """Extracts image and mask paths for given subjects from Parquet files, with optional downsampling and additional paths."""
-    
-#     if additional_paths is None:
-#         additional_paths = []
-    
-#     subject_ids = []
-#     paths = {'img_paths': [], 'gt_paths': [], 'root_paths': []}
-#     for path in additional_paths:
-#         paths[path] = []
-    
-#     total_slices = 0
-#     sampled_slice_counts = 0
-    
-#     for subject_id in subjects:
-#         parquet_file = os.path.join(parquet_base_folder, f"{subject_id}.parquet")
-#         df = pd.read_parquet(parquet_file)
-#         if sampling_rate > 1:
-#             # Downsampling: select slices based on the sampling rate
-#             sampled_df = df.iloc[::sampling_rate, :]
-#         else:
-#             sampled_df = df
-#         paths['img_paths'].extend(sampled_df['npy_image_path'].tolist())
-#         # paths['gt_paths'].extend(sampled_df['npy_mask_path'].tolist())
-#         paths['gt_paths'].extend(sampled_df['npy256_mask_path'].tolist())
-#         paths['root_paths'].extend(sampled_df['npy_base_dir'].tolist())
-#         for path in additional_paths:
-#             paths[path].extend(sampled_df[path].tolist())
-#         total_slices += len(df)
-#         sampled_slice_counts += len(sampled_df)
-#         subject_ids.append(subject_id)
-#     return paths, sampled_slice_counts, subject_ids

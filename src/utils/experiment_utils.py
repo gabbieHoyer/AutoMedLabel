@@ -1,6 +1,15 @@
 # src/utils/experiment_utils.py
 import os
+import pyrootutils
 
+
+def get_project_root():
+    return pyrootutils.setup_root(
+        search_from=__file__,
+        indicator=[".git"],
+        pythonpath=True,
+        dotenv=True,
+    )
 # ------- FUNCTION TO DETERMINE EXPERIMENT RUN OUTPUT DIRECTORY ------- #
 
 def determine_run_directory(base_dir, task_name, group_name=None):
