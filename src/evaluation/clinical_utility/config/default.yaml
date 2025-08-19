@@ -1,0 +1,42 @@
+
+tag: '' #dev_run
+seed: 42
+
+data:
+  csv_path: /data/msk_infocommons/Users/ghoyer/shoulder/PrecisionShoulderAI/knee_inference/TBrecon_data/tb_biomet_label_demo_df_clean_ml.csv
+  out_dir: /data/msk_infocommons/Users/ghoyer/shoulder/PrecisionShoulderAI/knee_inference/TBrecon_triage_analysis_0708/output
+
+thresholds:
+  stage_a_spec: 0.90
+  stage_b_to_c_spec: 0.85
+  # stage_b_to_c_spec: 0.90
+
+model:
+  xgb:
+    n_estimators: 300          # change here to 250 for the legacy run
+    max_depth: 3
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+
+stage_a_plot_all: False
+
+stage_c_tasks:
+  p1:
+    femur_anom:
+      feats: [tissuevolumemetricinference_femur_z,
+              cartilagethicknessmetricinference_femoral cartilage_z]
+    tibia_anom:
+      feats: [tissuevolumemetricinference_tibia_z,
+              cartilagethicknessmetricinference_tibial cartilage_z]
+    patella_anom:
+      feats: [tissuevolumemetricinference_patella_z,
+              cartilagethicknessmetricinference_patellar cartilage_z]
+  p2:
+    femur_bone:   {feats: [tissuevolumemetricinference_femur_z]}
+    tibia_bone:   {feats: [tissuevolumemetricinference_tibia_z]}
+    patella_bone: {feats: [tissuevolumemetricinference_patella_z]}
+    femur_cart:   {feats: [cartilagethicknessmetricinference_femoral cartilage_z]}
+    tibia_cart:   {feats: [cartilagethicknessmetricinference_tibial cartilage_z]}
+    patella_cart: {feats: [cartilagethicknessmetricinference_patellar cartilage_z]}
+

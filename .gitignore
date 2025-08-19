@@ -125,3 +125,7 @@ Thumbs.db
 /config/obj_detection/inference/Knee.yaml
 /scripts/train_yolo.sh
 /temp/
+
+
+# --------------------------------
+/src/biomedparse/

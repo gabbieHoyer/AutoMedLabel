@@ -1,10 +1,6 @@
 # AutoMedLabel
 
-AutoMedLabel is a modular, reproducible pipeline developed to support our study:  
-**Scalable Evaluation Framework for Foundation Models in Musculoskeletal MRI Bridging Computational Innovation with Clinical Utility**  
-[Preprint on arXiv](https://arxiv.org/abs/2501.13376)
-
-This codebase presents a wide-ranging framework for validating foundation models within a clinical environment, focusing on musculoskeletal MRI. It includes finetuning, evaluation, object detection, and autolabeling, serving as both a reproducible research template and a scalable experimentation platform. The approach centers on determining each model’s capacity to provide benefits in clinical practice, guided by strategies that demonstrate compatibility with existing research and medical workflows while addressing user needs.
+AutoMedLabel is an MSK MRI codebase for training and testing prompt‑based foundation segmentation models. It supports fine‑tuning, evaluation, object detection, and fully automatic labeling, and it computes MRI biomarkers for downstream use. The repo also includes two clinical demo pipelines, described in our manuscript: a knee triage cascade that screens routine exams, and a 48 month landmark model that predicts knee replacement and incident osteoarthritis from serial biomarkers.
 
 ## Installation
 
@@ -52,6 +48,8 @@ For detailed instructions on preparing datasets, finetuning models, and evaluati
 Additionally, explore the interactive examples in the [demos/](./demos) folder to see how to run the AutoLabel pipeline, Biomarker analyses, etc.
 
 For detailed study analyses and extended statistical evaluations (including MRI acquisition mixed-modeling and biomarker comparisons), please refer to the `README.md` found in [src/evaluation](./src/evaluation/).
+
+See the clinical pipelines in [src/evaluation/clinical_utility](./src/evaluation/clinical_utility).
 
 ## Usage
 
@@ -106,12 +104,12 @@ Gabrielle Hoyer: (https://gabbiehoyer.github.io/)
 
 ## Publication
 For more details on this work, refer to our preprint:
-Scalable Evaluation Framework for Foundation Models in Musculoskeletal MRI Bridging Computational Innovation with Clinical Utility (https://arxiv.org/abs/2501.13376)
+Clinical Utility of Foundation Segmentation Models in Musculoskeletal MRI: Biomarker Fidelity and Predictive Outcomes (https://arxiv.org/abs/2501.13376)
 
 ## Reference
 ```bibtex
 @misc{hoyer2025scalableevaluationframeworkfoundation,
-      title={Scalable Evaluation Framework for Foundation Models in Musculoskeletal MRI Bridging Computational Innovation with Clinical Utility}, 
+      title={Clinical Utility of Foundation Segmentation Models in Musculoskeletal MRI: Biomarker Fidelity and Predictive Outcomes}, 
       author={Gabrielle Hoyer and Michelle W Tong and Rupsa Bhattacharjee and Valentina Pedoia and Sharmila Majumdar},
       year={2025},
       eprint={2501.13376},
